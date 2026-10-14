@@ -2,7 +2,7 @@
 
 This crate is responsible for producing:
 
-- a `nez-linux-sandbox` standalone executable for Linux that is bundled with the Node.js version of the Nez-Code
+- a `nez-linux-sandbox` standalone executable for Linux that is bundled with the Node.js version of Nez-Code
 - a lib crate that exposes the business logic of the executable as `run_main()` so that
   - the `nez-exec` CLI can check if its arg0 is `nez-linux-sandbox` and, if so, execute as if it were `nez-linux-sandbox`
   - this should also be true of the `nez` multitool CLI

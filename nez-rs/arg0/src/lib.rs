@@ -165,7 +165,7 @@ fn prepare_path_env_var_with_aliases(
     }
 }
 
-/// While we want to deploy the Nez-Code as a single executable for simplicity,
+/// While we want to deploy Nez-Code as a single executable for simplicity,
 /// we also want to expose some of its functionality as distinct CLIs, so we use
 /// the "arg0 trick" to determine which CLI to dispatch. This effectively allows
 /// us to simulate deploying multiple executables as a single binary on Mac and

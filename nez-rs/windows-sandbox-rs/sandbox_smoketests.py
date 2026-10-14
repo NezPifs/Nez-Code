@@ -1,5 +1,5 @@
 # sandbox_smoketests.py
-# Run a suite of smoke tests against the Windows sandbox via the Nez-Code
+# Run a suite of smoke tests against the Windows sandbox via Nez-Code
 # Requires: Python 3.8+ on Windows. No pip requirements.
 
 import os
@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 
 
 def _resolve_nez_cmd() -> List[str]:
-    """Resolve the Nez-Code to invoke `nez sandbox windows`.
+    """Resolve Nez-Code to invoke `nez sandbox windows`.
 
     Prefer local builds (debug first), then fall back to PATH.
     Returns the argv prefix to run Nez.

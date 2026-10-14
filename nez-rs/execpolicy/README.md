@@ -45,7 +45,7 @@ host_executable(
 
 ## CLI
 
-- From the Nez-Code, run `nez execpolicy check` subcommand with one or more policy files (for example `src/default.rules`) to check a command:
+- From Nez-Code, run `nez execpolicy check` subcommand with one or more policy files (for example `src/default.rules`) to check a command:
 
 ```bash
 nez execpolicy check --rules path/to/policy.rules git status
