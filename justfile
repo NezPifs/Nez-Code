@@ -1,205 +1,50 @@
 set working-directory := "nez-rs"
 set positional-arguments
-export NEZ_REPO_ROOT := justfile_directory()
-export JUST_SHELL := justfile_directory() / "scripts/just-shell.py"
-set shell := ["python3", "-c", 'import os, runpy; runpy.run_path(os.environ["JUST_SHELL"], run_name="__main__")']
-set windows-shell := ["python", "-c", 'import os, runpy; runpy.run_path(os.environ["JUST_SHELL"], run_name="__main__")']
 
-rust_min_stack := "8388608" # 8 MiB
 python := if os_family() == "windows" { "python" } else { "python3" }
 
-# Display help
+# List recipes
 help:
     just -l
 
-# `nez`
-alias c := nez
+# Run `nez` from source
 nez *args:
-    cargo run --bin nez -- {args}
+    cargo run --bin nez -- "$@"
 
-# `nez exec`
+# Run `nez exec` from source
 exec *args:
-    cargo run --bin nez -- exec {args}
+    cargo run --bin nez -- exec "$@"
 
-# Start `nez exec-server` and run nez-tui.
-[no-cd]
-[positional-arguments]
-[unix]
-tui-with-exec-server *args:
-    {{ justfile_directory() }}/scripts/run_tui_with_exec_server.sh "$@"
-
-# Run the CLI version of the file-search crate.
-file-search *args:
-    cargo run --bin nez-file-search -- {args}
-
-# Run the standalone code-mode host from source.
-code-mode-host *args:
-    cargo run --bin nez-code-mode-host -- {args}
-
-# Assemble a local Nez package.
-[no-cd]
-assemble-nez-package *args:
-    {{ python }} {{ justfile_directory() }}/scripts/build_nez_package.py {args}
-
-# Build the CLI and run the app-server test client
-app-server-test-client *args:
-    cargo build -p nez-cli
-    cargo run -p nez-app-server-test-client -- --nez-bin ./target/debug/nez {args}
-
-# Format the justfile, Rust, Bazel/Starlark, Python SDK code, and Python scripts.
+# Format Rust code
 fmt:
-    @{{ python }} ../scripts/format.py
+    cargo fmt --all
 
-# Check formatting without modifying files.
+# Check formatting without modifying files
 fmt-check:
-    @{{ python }} ../scripts/format.py --check
+    cargo fmt --all -- --check
 
-fix *args:
-    cargo clippy --fix --tests --allow-dirty {args}
-
+# Lint the whole workspace the same way CI does
 clippy *args:
-    cargo clippy --tests {args}
+    cargo clippy --workspace --all-targets "$@" -- -D warnings
 
-[unix]
-install:
-    rustup show active-toolchain
-    cargo fetch
-
-[windows]
-install:
-    #!powershell.exe -File
-    $pwsh = Get-Command pwsh.exe -ErrorAction SilentlyContinue
-    if (-not $pwsh) {
-        winget install --exact --id Microsoft.PowerShell --source winget --accept-package-agreements --accept-source-agreements
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    }
-    rustup show active-toolchain
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    cargo fetch
-    exit $LASTEXITCODE
-
-# Run nextest with --no-fail-fast so all tests are run.
-#
-# Run `cargo install --locked cargo-nextest` if you don't have it installed.
-# Prefer this for routine local runs. Workspace crate features are banned, so
-# there should be no need to add `--all-features`.
-[unix]
+# Run tests; pass crate selectors such as `-p nez-api` to narrow the run
 test *args:
-    RUST_MIN_STACK={{ rust_min_stack }} NEXTEST_PROFILE=local cargo nextest run --no-fail-fast "$@"
+    cargo test "$@"
 
-[windows]
-test *args:
-    $env:RUST_MIN_STACK = "{{ rust_min_stack }}"; $env:NEXTEST_PROFILE = "local"; cargo nextest run --no-fail-fast @($args | Select-Object -Skip 1)
+# Run the tests CI runs
+test-ci:
+    ../scripts/ci-test.sh
 
-# Run from the repository root so scripts that resolve paths from `cwd` see
-# the same layout they use in GitHub Actions.
+# Run the CLI tool sandbox against a debug build
+sandbox:
+    cargo build --bin nez
+    {{ python }} ../scripts/cli-tool-sandbox.py --nez target/debug/nez
+
+# Run the dashboard tests
 [no-cd]
-test-github-scripts:
-    {{ python }} -m unittest discover -s {{ justfile_directory() }}/.github/scripts -p 'test_*.py'
+dashboard-test:
+    QT_QPA_PLATFORM=offscreen {{ python }} -m unittest discover -s dashboard -p "test_*.py" -v
 
-# Run explicit workspace benchmark targets.
-bench *args:
-    cargo bench --workspace --bench '*' {args}
-
-# Run benchmark targets once to ensure they start successfully.
-bench-smoke:
-    just bench -- --test
-
-# Run Bazel-backed end-to-end macrobenchmarks with optimized binaries.
-bench-e2e:
-    # Keep measured binaries comparable to production-style optimized builds.
-    bazel test --compilation_mode=opt --cache_test_results=no --test_output=streamed //nez-rs:e2e-benchmarks
-
-# Run Bazel-backed end-to-end macrobenchmarks once per case with release-like
-# Rust cfg paths but fastbuild codegen.
-bench-e2e-smoke:
-    # Avoid optimizer cost because smoke runs only check that benchmarks work.
-    # Compile target Rust code through the same release-only cfg paths as opt.
-    # Compile exec-platform Rust tools through those release-only cfg paths too.
-    bazel test --compilation_mode=fastbuild --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=no --@rules_rust//rust/settings:extra_exec_rustc_flag=-Cdebug-assertions=no --cache_test_results=no --test_output=streamed --test_arg=--test //nez-rs:e2e-benchmarks
-
-# Build and run Nez from source using Bazel.
-# On Unix, use `[no-cd]` and `--run_under="cd $PWD &&"` to ensure Bazel runs
-# the command in the current working directory.
-[no-cd]
-[unix]
-bazel-nez *args:
-    bazel run //nez-rs/cli:nez --run_under="cd $PWD &&" -- "$@"
-
-[windows]
-bazel-nez *args:
-    bazel run //nez-rs/cli:nez --run_under='cd /d "{{ invocation_directory_native() }}" &&' -- @($args | Select-Object -Skip 1)
-
-# Build and run the standalone code-mode host from source using Bazel.
-[no-cd]
-[unix]
-bazel-code-mode-host *args:
-    bazel run //nez-rs/code-mode-host:nez-code-mode-host --run_under="cd $PWD &&" -- "$@"
-
-[windows]
-bazel-code-mode-host *args:
-    bazel run //nez-rs/code-mode-host:nez-code-mode-host --run_under='cd /d "{{ invocation_directory_native() }}" &&' -- @($args | Select-Object -Skip 1)
-
-[no-cd]
-bazel-lock-update:
-    bazel mod deps --lockfile_mode=update
-
-[no-cd]
-[unix]
-bazel-lock-check:
-    {{ justfile_directory() }}/scripts/check-module-bazel-lock.sh
-
-[windows]
-bazel-lock-check:
-    bazel mod deps --lockfile_mode=error; if ($LASTEXITCODE -ne 0) { Write-Error "Unable to verify MODULE.bazel.lock; see the Bazel error above. If Bazel reports an out-of-date lockfile, run 'just bazel-lock-update' and commit the updated lockfile."; exit 1 }
-
-bazel-test:
-    bazel test --test_tag_filters=-argument-comment-lint //... --keep_going
-
-[no-cd]
-[unix]
-bazel-clippy:
-    bazel_targets="$({{ justfile_directory() }}/scripts/list-bazel-clippy-targets.sh)" && bazel build --config=clippy -- ${bazel_targets}
-
-[no-cd]
-[unix]
-bazel-argument-comment-lint:
-    bazel build --config=argument-comment-lint -- $({{ justfile_directory() }}/tools/argument-comment-lint/list-bazel-targets.sh)
-
-build-for-release:
-    bazel build //nez-rs/cli:release_binaries
-
-# Regenerate the json schema for config.toml from the current config types.
+# Regenerate the json schema for config.toml
 write-config-schema:
     cargo run -p nez-config-schema --bin nez-write-config-schema
-
-# Regenerate app-server protocol schemas and the Python SDK derived from them.
-write-app-server-schema *args:
-    {{ python }} app-server-protocol/scripts/write_schema_fixtures.py {args}
-
-[no-cd]
-write-hooks-schema:
-    cargo run --manifest-path {{ justfile_directory() }}/nez-rs/Cargo.toml -p nez-hooks --bin write_hooks_schema_fixtures
-
-# Run the argument-comment Dylint checks across nez-rs.
-[no-cd]
-[unix]
-argument-comment-lint *args:
-    if [ "$#" -eq 0 ]; then \
-      bazel build --config=argument-comment-lint -- $({{ justfile_directory() }}/tools/argument-comment-lint/list-bazel-targets.sh); \
-    else \
-      {{ justfile_directory() }}/tools/argument-comment-lint/run-prebuilt-linter.py "$@"; \
-    fi
-
-[no-cd]
-argument-comment-lint-from-source *args:
-    {{ python }} {{ justfile_directory() }}/tools/argument-comment-lint/run.py {args}
-
-# Tail logs from the state SQLite database
-[unix]
-log *args:
-    if [ "${1:-}" = "--" ]; then shift; fi; cargo run -p nez-cli --bin logs_client -- "$@"
-
-[windows]
-log *args:
-    $forwarded_args = @($args | Select-Object -Skip 1); if ($forwarded_args.Count -gt 0 -and $forwarded_args[0] -eq "--") { $forwarded_args = @($forwarded_args | Select-Object -Skip 1) }; cargo run -p nez-cli --bin logs_client -- @forwarded_args
