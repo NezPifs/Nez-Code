@@ -1,5 +1,7 @@
-OpenAI Codex
-Copyright 2025 OpenAI
+Nez-Code
+Copyright 2026 NezPifs
+
+Nez-Code is based on and modified from openai/codex (https://github.com/openai/codex, Copyright 2025 OpenAI), licensed under the Apache License, Version 2.0.
 
 This project includes code derived from [Ratatui](https://github.com/ratatui/ratatui), licensed under the MIT license.
 Copyright (c) 2016-2022 Florian Dehau
