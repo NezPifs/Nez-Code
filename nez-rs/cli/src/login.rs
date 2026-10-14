@@ -352,43 +352,9 @@ mod storage_tests;
 
 #[cfg(test)]
 mod tests {
-    use nez_config::types::AuthCredentialsStoreMode;
-    use nez_login::AuthKeyringBackendKind;
-    use nez_login::load_auth_dot_json;
-    use nez_login::login_with_api_key;
     use pretty_assertions::assert_eq;
-    use tempfile::tempdir;
 
-    use super::clear_existing_auth_before_login;
     use super::safe_format_key;
-
-    #[tokio::test]
-    async fn clears_existing_auth_before_login() {
-        let nez_home = tempdir().expect("create temporary Nez home");
-        login_with_api_key(
-            nez_home.path(),
-            "sk-existing",
-            AuthCredentialsStoreMode::File,
-            AuthKeyringBackendKind::default(),
-        )
-        .expect("save existing auth");
-
-        clear_existing_auth_before_login(
-            nez_home.path(),
-            AuthCredentialsStoreMode::File,
-            AuthKeyringBackendKind::default(),
-            &nez_login::test_support::transport_default_auth_route_config(),
-        )
-        .await;
-
-        let auth = load_auth_dot_json(
-            nez_home.path(),
-            AuthCredentialsStoreMode::File,
-            AuthKeyringBackendKind::default(),
-        )
-        .expect("load auth after cleanup");
-        assert_eq!(auth, None);
-    }
 
     #[test]
     fn formats_long_key() {

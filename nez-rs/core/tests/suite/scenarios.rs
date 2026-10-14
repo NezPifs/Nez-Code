@@ -71,7 +71,6 @@ use nez_protocol::items::TurnItem;
 use nez_protocol::models::ImageReference;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::CodeModeToolMessages;
-use nez_protocol::openai_models::ReasoningEffort;
 use nez_protocol::openai_models::ToolMessage;
 use nez_protocol::openai_models::ToolMode;
 use nez_protocol::protocol::EnvironmentConfigState;
