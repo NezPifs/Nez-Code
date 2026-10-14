@@ -96,8 +96,7 @@ Options:
           Human-readable environment name
 
       --use-agent-identity-auth
-          Use Agent Identity auth from NEZ_ACCESS_TOKEN for remote
-          registration
+          Use Agent Identity auth from NEZ_ACCESS_TOKEN for remote registration
 
       --aws-sigv4
           Sign Direct registration and WebSocket handshake requests with AWS

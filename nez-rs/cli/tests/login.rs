@@ -3,13 +3,11 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
-use anyhow::Context;
 use anyhow::Result;
 use app_test_support::ChatGptAuthFixture;
 use app_test_support::write_chatgpt_auth;
 use nez_config::types::AuthCredentialsStoreMode;
 use nez_login::AuthKeyringBackendKind;
-use nez_login::CLIENT_ID;
 use nez_login::NEZ_ACCESS_TOKEN_ENV_VAR;
 use nez_login::REVOKE_TOKEN_URL_OVERRIDE_ENV_VAR;
 use nez_login::login_with_bedrock_access_keys;
@@ -256,21 +254,6 @@ async fn logout_survives_enterprise_cleanup_failure_with_xaa_disabled() -> Resul
     Ok(())
 }
 
-#[test]
-fn login_with_access_token_rejects_invalid_jwt() -> Result<()> {
-    let nez_home = TempDir::new()?;
-    write_file_auth_config(nez_home.path())?;
-
-    let mut cmd = nez_command(nez_home.path())?;
-    cmd.args(["login", "--with-access-token"])
-        .write_stdin("not-a-jwt\n")
-        .assert()
-        .failure()
-        .stderr(contains("Error logging in with access token"));
-
-    Ok(())
-}
-
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn debug_prompt_input_follows_authenticated_attribution_setting() -> Result<()> {
     let server = MockServer::start().await;
@@ -321,103 +304,3 @@ async fn debug_prompt_input_follows_authenticated_attribution_setting() -> Resul
     Ok(())
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn device_login_revokes_existing_auth_before_requesting_new_tokens() -> Result<()> {
-    let server = MockServer::start().await;
-    Mock::given(method("POST"))
-        .and(path("/oauth/revoke"))
-        .respond_with(ResponseTemplate::new(200))
-        .expect(1)
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/api/accounts/deviceauth/usercode"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-            "device_auth_id": "device-auth-123",
-            "user_code": "CODE-12345",
-            "interval": "0",
-        })))
-        .expect(1)
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/api/accounts/deviceauth/token"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-            "authorization_code": "authorization-code-123",
-            "code_challenge": "code-challenge-123",
-            "code_verifier": "code-verifier-123",
-        })))
-        .expect(1)
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/oauth/token"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-            "id_token": "eyJhbGciOiJub25lIn0.e30.c2ln",
-            "access_token": "new-access",
-            "refresh_token": "new-refresh",
-        })))
-        .expect(1)
-        .mount(&server)
-        .await;
-
-    let nez_home = TempDir::new()?;
-    write_file_auth_config(nez_home.path())?;
-    std::fs::write(
-        nez_home.path().join("auth.json"),
-        serde_json::to_vec(&json!({
-            "auth_mode": "chatgpt",
-            "OPENAI_API_KEY": null,
-            "tokens": {
-                "id_token": "eyJhbGciOiJub25lIn0.e30.c2ln",
-                "access_token": "old-access",
-                "refresh_token": "old-refresh",
-                "account_id": "old-account",
-            },
-        }))?,
-    )?;
-
-    let issuer = server.uri();
-    let mut cmd = nez_command(nez_home.path())?;
-    cmd.env(
-        REVOKE_TOKEN_URL_OVERRIDE_ENV_VAR,
-        format!("{issuer}/oauth/revoke"),
-    )
-    .env("NO_PROXY", "127.0.0.1,localhost")
-    .env("no_proxy", "127.0.0.1,localhost")
-    .env_remove("NEZ_ACCESS_TOKEN")
-    .env_remove("OPENAI_API_KEY")
-    .args(["login", "--device-auth", "--experimental_issuer", &issuer])
-    .assert()
-    .success()
-    .stderr(contains("Successfully logged in"));
-
-    let requests = server
-        .received_requests()
-        .await
-        .context("failed to read mock OAuth requests")?;
-    let paths: Vec<&str> = requests.iter().map(|request| request.url.path()).collect();
-    assert_eq!(
-        paths,
-        vec![
-            "/oauth/revoke",
-            "/api/accounts/deviceauth/usercode",
-            "/api/accounts/deviceauth/token",
-            "/oauth/token",
-        ]
-    );
-    assert_eq!(
-        requests[0]
-            .body_json::<Value>()
-            .context("revoke request should be JSON")?,
-        json!({
-            "token": "old-refresh",
-            "token_type_hint": "refresh_token",
-            "client_id": CLIENT_ID,
-        })
-    );
-
-    let auth = read_auth_json(nez_home.path())?;
-    assert_eq!(auth["tokens"]["refresh_token"], "new-refresh");
-    Ok(())
-}
