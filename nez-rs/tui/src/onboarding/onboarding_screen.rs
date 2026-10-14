@@ -10,6 +10,10 @@
 //! editing a non-empty API-key field, while control/alt chords remain available
 //! as explicit exit shortcuts.
 
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
+use crossterm::event::KeyEventKind;
+use crossterm::event::KeyModifiers;
 use nez_app_server_client::AppServerEvent;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_protocol::ClientRequest;
@@ -18,10 +22,6 @@ use nez_app_server_protocol::RequestId;
 use nez_app_server_protocol::ServerNotification;
 use nez_exec_server::LOCAL_FS;
 use nez_git_utils::resolve_root_git_project_for_trust;
-use crossterm::event::KeyCode;
-use crossterm::event::KeyEvent;
-use crossterm::event::KeyEventKind;
-use crossterm::event::KeyModifiers;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::prelude::Widget;

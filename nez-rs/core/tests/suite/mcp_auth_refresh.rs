@@ -1,29 +1,29 @@
 #![allow(clippy::unwrap_used)]
 
 use anyhow::Result;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
 use nez_config::McpServerTransportConfig;
 use nez_core::config::ConfigBuilder;
 use nez_core::config::Constrained;
 use nez_core::plugins_manager_for_config;
 use nez_exec_server_test_support::environment_manager_without_environments;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::ExternalAuth;
 use nez_login::ExternalAuthFuture;
 use nez_login::ExternalAuthRefreshContext;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
-use nez_mcp::NezAppsToolsCache;
+use nez_login::NezAuth;
 use nez_mcp::EffectiveMcpServer;
 use nez_mcp::McpRuntime;
 use nez_mcp::McpRuntimeContext;
 use nez_mcp::McpRuntimeInput;
 use nez_mcp::McpStartupPolicy;
 use nez_mcp::McpToolCatalogCache;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
+use nez_mcp::NezAppsToolsCache;
 use nez_protocol::mcp::ClientMcpExtensions;
 use nez_protocol::protocol::AskForApproval;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

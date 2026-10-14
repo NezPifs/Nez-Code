@@ -8,6 +8,7 @@ use std::sync::MutexGuard;
 use std::sync::PoisonError;
 use std::time::Duration;
 
+use futures::future::BoxFuture;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::HttpClient;
 use nez_exec_server::HttpHeader;
@@ -15,7 +16,6 @@ use nez_exec_server::HttpRedirectPolicy;
 use nez_exec_server::HttpRequestParams;
 use nez_exec_server::HttpRequestResponse;
 use nez_exec_server::HttpResponseBodyStream;
-use futures::future::BoxFuture;
 use tokio::sync::OwnedRwLockReadGuard;
 use tokio::sync::RwLock;
 use tokio::sync::Semaphore;

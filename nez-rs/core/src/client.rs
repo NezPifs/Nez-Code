@@ -84,6 +84,12 @@ use nez_otel::current_span_w3c_trace_context;
 use nez_protocol::ResponseItemId;
 use nez_protocol::auth::AuthMode;
 
+use eventsource_stream::Event;
+use eventsource_stream::EventStreamError;
+use futures::StreamExt;
+use http::HeaderMap as ApiHeaderMap;
+use http::HeaderValue;
+use http::StatusCode;
 use nez_protocol::ThreadId;
 use nez_protocol::config_types::ReasoningSummary as ReasoningSummaryConfig;
 use nez_protocol::config_types::Verbosity as VerbosityConfig;
@@ -102,12 +108,6 @@ use nez_rollout_trace::InferenceTraceContext;
 use nez_tools::ToolSpec;
 use nez_tools::create_tools_json_for_responses_lite;
 use nez_tools::create_tools_raw_json_for_responses_api;
-use eventsource_stream::Event;
-use eventsource_stream::EventStreamError;
-use futures::StreamExt;
-use http::HeaderMap as ApiHeaderMap;
-use http::HeaderValue;
-use http::StatusCode;
 use std::time::Duration;
 use std::time::Instant;
 use tokio::sync::mpsc;
@@ -173,8 +173,7 @@ const X_NEZ_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY: &str =
 const WS_REQUEST_HEADER_RESPONSES_LITE_CLIENT_METADATA_KEY: &str =
     "ws_request_header_x_openai_internal_nez_responses_lite";
 const RESPONSES_WEBSOCKETS_V2_BETA_HEADER_VALUE: &str = "responses_websockets=2026-02-06";
-const X_OPENAI_INTERNAL_NEZ_RESPONSES_LITE_HEADER: &str =
-    "x-openai-internal-nez-responses-lite";
+const X_OPENAI_INTERNAL_NEZ_RESPONSES_LITE_HEADER: &str = "x-openai-internal-nez-responses-lite";
 const REALTIME_CALLS_ENDPOINT: &str = "/realtime/calls";
 const MEMORIES_SUMMARIZE_ENDPOINT: &str = "/memories/trace_summarize";
 #[cfg(test)]

@@ -8,8 +8,7 @@ use tokio::process::Command;
 const NEZ_BUNDLE_IDENTIFIER: &str = "com.openai.nez";
 const OPENAI_APPLE_TEAM_IDENTIFIER: &str = "2DC432GLL2";
 const NEZ_DMG_URL_ARM64: &str = "https://persistent.oaistatic.com/nez-app-prod/Nez.dmg";
-const NEZ_DMG_URL_X64: &str =
-    "https://persistent.oaistatic.com/nez-app-prod/Nez-latest-x64.dmg";
+const NEZ_DMG_URL_X64: &str = "https://persistent.oaistatic.com/nez-app-prod/Nez-latest-x64.dmg";
 
 pub async fn run_mac_app_open_or_install(
     workspace: PathBuf,
@@ -351,8 +350,8 @@ fn parse_hdiutil_attach_mount_point(output: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::nez_new_thread_url;
     use super::find_existing_nez_app_path;
+    use super::nez_new_thread_url;
     use super::open_nez_app;
     use super::parse_hdiutil_attach_mount_point;
     use super::verify_nez_app_bundle;

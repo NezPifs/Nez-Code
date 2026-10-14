@@ -210,8 +210,7 @@ fn default_owned_screen_entry_paints_before_sync_ends_and_exit_clears_inline_dra
     first_frame.process(&terminal.output[..end]);
     let first_contents = first_frame.screen().contents();
     ensure!(
-        first_contents.contains("Nez-Code")
-            && first_contents.contains("Ask Nez to do anything"),
+        first_contents.contains("Nez-Code") && first_contents.contains("Ask Nez to do anything"),
         "owned-screen synchronization ended before its first complete loading frame:\n{first_contents}"
     );
     let composer_row = first_contents
@@ -288,16 +287,10 @@ pub(super) struct PtyNez {
 }
 
 impl PtyNez {
-    pub(super) fn start(
-        repo_root: &Path,
-        nez_home: TempDir,
-        extra_args: &[&str],
-    ) -> Result<Self> {
+    pub(super) fn start(repo_root: &Path, nez_home: TempDir, extra_args: &[&str]) -> Result<Self> {
         let nez = nez_utils_cargo_bin::cargo_bin("nez-tui")
             .or_else(|_| nez_utils_cargo_bin::cargo_bin("nez"))?;
-        Self::start_binary(
-            &nez, repo_root, nez_home, extra_args, /*editor*/ None,
-        )
+        Self::start_binary(&nez, repo_root, nez_home, extra_args, /*editor*/ None)
     }
 
     /// Include the CLI dispatch futures when testing production stack headroom.
@@ -308,9 +301,7 @@ impl PtyNez {
     ) -> Result<Self> {
         let nez = nez_utils_cargo_bin::cargo_bin("nez")
             .context("build nez-cli and set CARGO_BIN_EXE_nez to its executable")?;
-        Self::start_binary(
-            &nez, repo_root, nez_home, extra_args, /*editor*/ None,
-        )
+        Self::start_binary(&nez, repo_root, nez_home, extra_args, /*editor*/ None)
     }
 
     fn start_binary(
@@ -589,13 +580,7 @@ fn no_daemon_skips_startup_and_discovery() -> Result<()> {
         terminal.read_output(Duration::from_millis(/*millis*/ 200))?;
         terminal.write_input(b"\r")?;
         terminal.wait_for_screen("Model:")?;
-        ensure!(
-            !terminal
-                ._nez_home
-                .path()
-                .join("app-server-daemon")
-                .exists()
-        );
+        ensure!(!terminal._nez_home.path().join("app-server-daemon").exists());
         if let Some(listener) = listener {
             assert_eq!(
                 listener.accept().unwrap_err().kind(),

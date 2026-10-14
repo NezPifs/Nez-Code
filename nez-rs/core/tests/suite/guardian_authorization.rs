@@ -2,6 +2,16 @@
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::TurnInputRequest;
 use nez_core::config::Constrained;
 use nez_core::context::ContextualUserFragment;
@@ -22,16 +32,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::request_user_input::RequestUserInputAnswer;
 use nez_protocol::request_user_input::RequestUserInputResponse;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -188,9 +188,7 @@ async fn guardian_revalidates_owning_session_before_allow(
         .await?;
     }
     assert_eq!(
-        GuardianContextMode::from_history(
-            test.nez.conversation_history_snapshot().await.as_ref()
-        ),
+        GuardianContextMode::from_history(test.nez.conversation_history_snapshot().await.as_ref()),
         review_mode,
     );
     test.nez

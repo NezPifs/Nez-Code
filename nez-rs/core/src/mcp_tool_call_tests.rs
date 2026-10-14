@@ -15,6 +15,13 @@ use crate::state::ActiveTurn;
 use crate::test_support::models_manager_with_provider;
 use crate::tools::hook_names::HookToolName;
 use crate::turn_metadata::ExecutionMetadata;
+use core_test_support::hooks::trusted_config_layer_stack;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
 use nez_app_server_protocol as app_server_protocol;
 use nez_config::CONFIG_TOML_FILE;
 use nez_config::config_toml::ConfigToml;
@@ -42,13 +49,6 @@ use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::TurnEnvironmentSelection;
 use nez_utils_path_uri::PathUri;
-use core_test_support::hooks::trusted_config_layer_stack;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -1717,9 +1717,7 @@ async fn nez_apps_auth_elicitation_granular_mcp_disabled_returns_original_result
 #[test_case::test_case(SessionSource::SubAgent(SubAgentSource::Review); "subagent")]
 #[test_case::test_case(SessionSource::Internal(InternalSessionSource::Guardian); "guardian")]
 #[tokio::test]
-async fn nez_apps_auth_elicitation_enabled_by_default_requests_elicitation(
-    source: SessionSource,
-) {
+async fn nez_apps_auth_elicitation_enabled_by_default_requests_elicitation(source: SessionSource) {
     let (session, mut turn_context, rx_event) = make_session_and_context_with_rx().await;
     Arc::get_mut(&mut turn_context)
         .expect("single turn context ref")

@@ -1,9 +1,9 @@
 use std::io;
 
+use crossterm::Command;
 use nez_terminal_detection::Multiplexer;
 use nez_terminal_detection::TerminalInfo;
 use nez_terminal_detection::TerminalName;
-use crossterm::Command;
 use pretty_assertions::assert_eq;
 
 use super::ClearTerminalProgramStatus;

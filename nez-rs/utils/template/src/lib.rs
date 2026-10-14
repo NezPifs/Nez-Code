@@ -296,10 +296,7 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(
-            rendered,
-            "Hello, Nez. You are in nez-rs. Nez is repeated."
-        );
+        assert_eq!(rendered, "Hello, Nez. You are in nez-rs. Nez is repeated.");
     }
 
     #[test]
@@ -342,10 +339,7 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(
-            rendered,
-            "literal open: {{, literal close: }}, value: Nez"
-        );
+        assert_eq!(rendered, "literal open: {{, literal close: }}, value: Nez");
     }
 
     #[test]

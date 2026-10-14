@@ -148,9 +148,7 @@ impl PluginStore {
     }
 
     pub fn active_plugin_version(&self, plugin_id: &PluginId) -> Option<String> {
-        nez_core_plugin_common::installed::active_plugin_version(
-            &self.plugin_base_root(plugin_id),
-        )
+        nez_core_plugin_common::installed::active_plugin_version(&self.plugin_base_root(plugin_id))
     }
 
     pub fn active_plugin_root(&self, plugin_id: &PluginId) -> Option<AbsolutePathBuf> {

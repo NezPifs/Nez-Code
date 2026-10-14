@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use chrono::DateTime;
 use chrono::Utc;
+use futures::StreamExt;
 use nez_arg0::Arg0DispatchPaths;
 use nez_core::ThreadManager;
 use nez_core::config::ConfigOverrides;
@@ -42,7 +43,6 @@ use nez_thread_store::ThreadMetadataPatch;
 use nez_thread_store::ThreadPersistenceMetadata;
 use nez_thread_store::ThreadStore;
 use nez_thread_store::UpdateThreadMetadataParams;
-use futures::StreamExt;
 use tokio::sync::Semaphore;
 
 use crate::config_manager::ConfigManager;

@@ -1,15 +1,6 @@
 //! Verifies that root service-tier changes reach existing child turns and future work.
 
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_core::config::AgentRoleConfig;
-use nez_core::config::Config;
-use nez_features::Feature;
-use nez_protocol::config_types::SERVICE_TIER_DEFAULT_REQUEST_VALUE;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ResponseMock;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
@@ -22,6 +13,15 @@ use core_test_support::submit_thread_settings;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
+use nez_core::TurnInputRequest;
+use nez_core::config::AgentRoleConfig;
+use nez_core::config::Config;
+use nez_features::Feature;
+use nez_protocol::config_types::SERVICE_TIER_DEFAULT_REQUEST_VALUE;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;
@@ -307,13 +307,11 @@ async fn root_service_tier_change_updates_existing_subagent(
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn evicted_role_subagent_uses_root_service_tier_after_reload() -> Result<()> {
     let server = start_mock_server().await;
-    let mut builder = test_nez()
-        .with_model("gpt-5.6-sol")
-        .with_config(|config| {
-            config.service_tier = Some("priority".to_string());
-            config.multi_agent_v2.max_concurrent_threads_per_session = 2;
-            configure_priority_role(config);
-        });
+    let mut builder = test_nez().with_model("gpt-5.6-sol").with_config(|config| {
+        config.service_tier = Some("priority".to_string());
+        config.multi_agent_v2.max_concurrent_threads_per_session = 2;
+        configure_priority_role(config);
+    });
     let test = builder.build_with_auto_env(&server).await?;
     let mut created_threads = test.thread_manager.subscribe_thread_created();
 

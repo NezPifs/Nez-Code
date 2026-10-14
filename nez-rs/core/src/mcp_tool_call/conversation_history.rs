@@ -7,8 +7,8 @@ use std::time::Instant;
 
 use anyhow::Context;
 use nez_features::Feature;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::McpBinding;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_tools::FunctionCallError;
 use nez_tools::ResponsesApiNamespace;
 use nez_tools::ResponsesApiNamespaceTool;

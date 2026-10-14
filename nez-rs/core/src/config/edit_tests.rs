@@ -1138,11 +1138,7 @@ fn blocking_replace_mcp_servers_round_trips() {
         },
     );
 
-    apply_blocking(
-        nez_home,
-        &[ConfigEdit::ReplaceMcpServers(servers.clone())],
-    )
-    .expect("persist");
+    apply_blocking(nez_home, &[ConfigEdit::ReplaceMcpServers(servers.clone())]).expect("persist");
 
     let raw = std::fs::read_to_string(nez_home.join(CONFIG_TOML_FILE)).expect("read config");
     let expected = "\
@@ -1689,11 +1685,7 @@ fn replace_mcp_servers_blocking_clears_table_when_empty() {
     )
     .expect("seed");
 
-    apply_blocking(
-        nez_home,
-        &[ConfigEdit::ReplaceMcpServers(BTreeMap::new())],
-    )
-    .expect("persist");
+    apply_blocking(nez_home, &[ConfigEdit::ReplaceMcpServers(BTreeMap::new())]).expect("persist");
 
     let contents = std::fs::read_to_string(nez_home.join(CONFIG_TOML_FILE)).expect("read config");
     assert!(!contents.contains("mcp_servers"));

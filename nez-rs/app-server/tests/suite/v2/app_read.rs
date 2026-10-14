@@ -567,12 +567,7 @@ enabled = false
     )?;
     write_plugin_app(nez_home.path(), "alpha-z", "Alpha Z", "alpha")?;
     write_plugin_app(nez_home.path(), "alpha-a", "Alpha A", "alpha")?;
-    write_plugin_app(
-        nez_home.path(),
-        "disabled",
-        "Disabled Plugin",
-        "unclaimed",
-    )?;
+    write_plugin_app(nez_home.path(), "disabled", "Disabled Plugin", "unclaimed")?;
     write_auth(nez_home.path())?;
 
     let mut mcp = TestAppServer::builder()

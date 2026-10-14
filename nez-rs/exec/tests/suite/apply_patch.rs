@@ -2,7 +2,6 @@
 
 use anyhow::Context;
 use assert_cmd::prelude::*;
-use nez_apply_patch::NEZ_CORE_APPLY_PATCH_ARG1;
 use core_test_support::responses::ev_apply_patch_custom_tool_call;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
@@ -10,6 +9,7 @@ use core_test_support::responses::ev_exec_command_call_with_args;
 use core_test_support::responses::mount_sse_sequence;
 use core_test_support::responses::sse;
 use core_test_support::responses::start_mock_server;
+use nez_apply_patch::NEZ_CORE_APPLY_PATCH_ARG1;
 use pretty_assertions::assert_eq;
 use std::fs;
 use std::process::Command;
@@ -353,14 +353,14 @@ async fn test_apply_patch_freeform_tool() -> anyhow::Result<()> {
 #[cfg(not(target_os = "windows"))]
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn shutdown_flushes_completed_turn_and_file_diff() -> anyhow::Result<()> {
+    use core_test_support::skip_if_no_network;
+    use core_test_support::test_nez_exec::test_nez_exec;
     use nez_login::AuthDotJson;
     use nez_login::AuthKeyringBackendKind;
     use nez_login::TokenData;
     use nez_login::save_auth;
     use nez_login::token_data::IdTokenInfo;
     use nez_protocol::auth::AuthMode;
-    use core_test_support::skip_if_no_network;
-    use core_test_support::test_nez_exec::test_nez_exec;
     use std::sync::Arc;
     use std::sync::atomic::AtomicUsize;
     use std::sync::atomic::Ordering;

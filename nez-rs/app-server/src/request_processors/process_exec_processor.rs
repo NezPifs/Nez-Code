@@ -318,8 +318,7 @@ impl ProcessExecManager {
             )
             .await
         } else if stream_stdin {
-            nez_utils_pty::spawn_pipe_process(program, args, cwd.as_path(), &env, &arg0, &[])
-                .await
+            nez_utils_pty::spawn_pipe_process(program, args, cwd.as_path(), &env, &arg0, &[]).await
         } else {
             nez_utils_pty::spawn_pipe_process_no_stdin(
                 program,

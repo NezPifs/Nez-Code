@@ -12,6 +12,7 @@ use std::task::Context;
 use std::task::Poll;
 use std::time::Duration;
 
+use hyper_util::rt::TokioIo;
 use nez_code_mode::CodeModeSessionCellExecutionLimits;
 use nez_code_mode::CodeModeSessionProvider;
 use nez_code_mode::CodeModeSessionProviderFuture;
@@ -19,7 +20,6 @@ use nez_code_mode::GrpcCodeModeSessionProvider;
 use nez_code_mode::ProcessOwnedCodeModeSessionProvider;
 use nez_protocol::shell_environment::scrub_non_inheritable_env_vars;
 use nez_utils_process::background_command;
-use hyper_util::rt::TokioIo;
 use tokio::io::AsyncBufReadExt;
 use tokio::io::AsyncRead;
 use tokio::io::AsyncWrite;

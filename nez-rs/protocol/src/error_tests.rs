@@ -5,9 +5,9 @@ use chrono::DateTime;
 use chrono::Duration as ChronoDuration;
 use chrono::TimeZone;
 use chrono::Utc;
-use nez_http_client::HttpResponse;
 use http::Response as RawHttpResponse;
 use http::StatusCode;
+use nez_http_client::HttpResponse;
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 
@@ -212,10 +212,7 @@ fn usage_limit_reached_error_formats_rate_limit_reached_types() {
 #[test]
 fn server_overloaded_maps_to_protocol() {
     let err = NezErr::ServerOverloaded;
-    assert_eq!(
-        err.to_nez_protocol_error(),
-        NezErrorInfo::ServerOverloaded
-    );
+    assert_eq!(err.to_nez_protocol_error(), NezErrorInfo::ServerOverloaded);
 }
 
 #[test]

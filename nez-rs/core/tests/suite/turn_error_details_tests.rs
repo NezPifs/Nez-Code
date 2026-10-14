@@ -1,20 +1,20 @@
 //! Verify error hooks retain backend details without changing compaction outcomes.
 
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_extension_api::ExtensionFuture;
 use nez_extension_api::ExtensionRegistryBuilder;
 use nez_extension_api::TurnErrorInput;
 use nez_extension_api::TurnLifecycleContributor;
 use nez_protocol::error::NezErrorDetails;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::RateLimitReachedType;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Arc;

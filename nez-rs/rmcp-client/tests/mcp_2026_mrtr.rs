@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use futures::FutureExt;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_config::types::OAuthCredentialsStoreMode;
 use nez_exec_server::Environment;
@@ -10,7 +11,6 @@ use nez_rmcp_client::ElicitationAction;
 use nez_rmcp_client::ElicitationResponse;
 use nez_rmcp_client::McpProtocolMode;
 use nez_rmcp_client::RmcpClient;
-use futures::FutureExt;
 use pretty_assertions::assert_eq;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::ElicitRequestParams;

@@ -184,9 +184,8 @@ fn exec_server_transport_and_aws_options_require_registration_arguments() {
             "--aws-sigv4",
         ],
     ] {
-        let error =
-            MultitoolCli::try_parse_from(["nez", "exec-server"].into_iter().chain(options))
-                .expect_err("require remote URL and environment ID");
+        let error = MultitoolCli::try_parse_from(["nez", "exec-server"].into_iter().chain(options))
+            .expect_err("require remote URL and environment ID");
         assert_eq!(error.kind(), ErrorKind::MissingRequiredArgument);
     }
 }

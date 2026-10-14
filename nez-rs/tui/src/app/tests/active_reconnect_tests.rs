@@ -412,8 +412,7 @@ async fn reconnect_restores_history_permissions_and_resumes_unsent_input() -> Re
         let notices = history
             .lines()
             .filter(|line| {
-                line.contains("Couldn't confirm whether")
-                    || line.contains("background Nez service")
+                line.contains("Couldn't confirm whether") || line.contains("background Nez service")
             })
             .collect::<Vec<_>>()
             .join("\n");

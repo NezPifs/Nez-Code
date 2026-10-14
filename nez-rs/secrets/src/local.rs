@@ -439,8 +439,8 @@ fn parse_canonical_key(canonical_key: &str) -> Option<SecretListEntry> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nez_keyring_store::tests::MockKeyringStore;
     use keyring::Error as KeyringError;
+    use nez_keyring_store::tests::MockKeyringStore;
     use pretty_assertions::assert_eq;
 
     static MCP_OAUTH_CACHE_TEST_LOCK: Mutex<()> = Mutex::new(());
@@ -585,12 +585,7 @@ mod tests {
                 .exists()
         );
         assert!(!nez_home.path().join("secrets").join("local.age").exists());
-        assert!(
-            nez_home
-                .path()
-                .join("secrets/gateway_oauth.age")
-                .is_file()
-        );
+        assert!(nez_home.path().join("secrets/gateway_oauth.age").is_file());
         // Primary-auth key removal must not make the independent gateway file unreadable.
         keyring
             .delete(

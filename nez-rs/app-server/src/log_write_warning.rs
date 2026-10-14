@@ -12,7 +12,8 @@ use nez_state::LogWriteFailureReporter;
 use crate::outgoing_message::OutgoingMessageSender;
 
 const LOG_WRITE_WARNING_WITH_FEEDBACK: &str = "Nez couldn't save diagnostic logs to its local database. Use /feedback with logs included before closing Nez, or run `nez doctor` for diagnostics.";
-const LOG_WRITE_WARNING_WITHOUT_FEEDBACK: &str = "Nez couldn't save diagnostic logs to its local database. Run `nez doctor` for diagnostics.";
+const LOG_WRITE_WARNING_WITHOUT_FEEDBACK: &str =
+    "Nez couldn't save diagnostic logs to its local database. Run `nez doctor` for diagnostics.";
 
 pub(crate) struct LogWriteWarningReporter {
     feedback: NezFeedback,

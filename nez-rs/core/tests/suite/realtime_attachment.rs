@@ -1,6 +1,12 @@
 //! Exercises attachment races through Core submissions and real sideband sockets.
 
 use anyhow::Result;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::start_mock_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_protocol::protocol::ConversationStartParams;
 use nez_protocol::protocol::ConversationStartTransport;
 use nez_protocol::protocol::ConversationTextParams;
@@ -10,12 +16,6 @@ use nez_protocol::protocol::Op;
 use nez_protocol::protocol::RealtimeConversationVersion;
 use nez_protocol::protocol::RealtimeOutputModality;
 use nez_protocol::protocol::ThreadHistoryMode;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::start_mock_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

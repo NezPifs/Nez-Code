@@ -2,6 +2,10 @@ use std::fs;
 use std::sync::Arc;
 
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_remote;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::LoaderOverrides;
 use nez_core::config::ConfigBuilder;
 use nez_core::config::ConfigOverrides;
@@ -9,10 +13,6 @@ use nez_protocol::protocol::AskForApproval;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::SandboxPolicy;
 use nez_utils_cargo_bin::cargo_bin;
-use core_test_support::responses;
-use core_test_support::skip_if_remote;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 

@@ -1,15 +1,15 @@
 use super::*;
 use crate::app::agents_overview_discovery::list_pinned_threads;
 use crate::app_event::AgentsOverviewAction;
+use core_test_support::responses;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::RequestId;
 use nez_app_server_protocol::ThreadLoadedListParams;
 use nez_app_server_protocol::TurnStartParams;
 use nez_app_server_protocol::TurnStartResponse;
 use nez_model_provider_info::ModelProviderInfo;
-use core_test_support::responses;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
@@ -757,15 +757,13 @@ async fn lifecycle_removes_background_and_current_tasks_without_losing_the_dashb
                     "Current child",
                     Some(&app.config.model_provider_id),
                     /*git_info*/ None,
-                    nez_protocol::protocol::SessionSource::SubAgent(
-                        SubAgentSource::ThreadSpawn {
-                            parent_thread_id: id,
-                            depth: 1,
-                            agent_path: None,
-                            agent_nickname: None,
-                            agent_role: None,
-                        },
-                    ),
+                    nez_protocol::protocol::SessionSource::SubAgent(SubAgentSource::ThreadSpawn {
+                        parent_thread_id: id,
+                        depth: 1,
+                        agent_path: None,
+                        agent_nickname: None,
+                        agent_role: None,
+                    }),
                     nez_protocol::SessionId::from(id),
                     id,
                 )

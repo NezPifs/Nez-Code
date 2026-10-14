@@ -104,11 +104,11 @@ mod tests {
     use super::ApiKeyTurnCost;
     use super::ApiKeyTurnCostStatus;
     use super::Client;
+    use http::HeaderMap;
+    use http::HeaderValue;
     use nez_http_client::HttpClientFactory;
     use nez_http_client::OutboundProxyPolicy;
     use nez_login::NezAuth;
-    use http::HeaderMap;
-    use http::HeaderValue;
     use pretty_assertions::assert_eq;
     use wiremock::Mock;
     use wiremock::MockServer;

@@ -5,6 +5,7 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
+use futures::FutureExt;
 use nez_exec_server::Environment;
 use nez_rmcp_client::Elicitation;
 use nez_rmcp_client::ElicitationAction;
@@ -14,7 +15,6 @@ use nez_rmcp_client::LocalStdioServerLauncher;
 use nez_rmcp_client::McpProtocolMode;
 use nez_rmcp_client::RmcpClient;
 use nez_rmcp_client::StdioServerLauncher;
-use futures::FutureExt;
 use pretty_assertions::assert_eq;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::ElicitRequestParams;

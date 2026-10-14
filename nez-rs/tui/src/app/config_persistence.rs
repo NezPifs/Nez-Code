@@ -1430,12 +1430,12 @@ mod tests {
     use crate::app::test_support::make_test_app;
     use crate::legacy_core::config::edit::ConfigEdit;
     use crate::test_support::PathBufExt;
+    use crossterm::event::KeyCode;
+    use crossterm::event::KeyEvent;
     use nez_config::ConfigLayerEntry;
     use nez_config::ConfigLayerStack;
     use nez_protocol::models::PermissionProfile;
     use nez_protocol::openai_models::ReasoningEffortPreset;
-    use crossterm::event::KeyCode;
-    use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;
     use tempfile::tempdir;
 

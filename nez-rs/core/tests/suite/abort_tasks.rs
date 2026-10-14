@@ -6,11 +6,6 @@ use nez_history::RolloutItem;
 use std::sync::Arc;
 use std::time::Duration;
 
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::SessionSource;
-use nez_protocol::protocol::SubAgentSource;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_function_call;
 use core_test_support::responses::ev_response_created;
@@ -22,6 +17,11 @@ use core_test_support::responses::sse_response;
 use core_test_support::responses::start_mock_server;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::SessionSource;
+use nez_protocol::protocol::SubAgentSource;
+use nez_protocol::user_input::UserInput;
 use regex_lite::Regex;
 use serde_json::json;
 
@@ -52,13 +52,12 @@ async fn interrupt_long_running_tool_emits_turn_aborted() {
     let nez = Arc::clone(&fixture.nez);
 
     // Kick off a turn that triggers the function call.
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "start sleep".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "start sleep".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     // Wait until the exec begins to avoid a race, then interrupt.
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecCommandBegin(_))).await;
@@ -117,8 +116,7 @@ async fn root_turn_suspension_preserves_unfinished_turn_history() {
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnStarted(_))).await;
 
     assert_eq!(
-        nez
-            .suspend_turn_and_shutdown()
+        nez.suspend_turn_and_shutdown()
             .await
             .expect("reject handoff while a descendant remains loaded"),
         SuspendTurnOutcome::HasLiveDescendants,
@@ -136,8 +134,7 @@ async fn root_turn_suspension_preserves_unfinished_turn_history() {
     // A previously admitted descendant no longer blocks handoff once it is stopped
     // and removed; suspension only consults the current live subtree.
     assert_eq!(
-        nez
-            .suspend_turn_and_shutdown()
+        nez.suspend_turn_and_shutdown()
             .await
             .expect("stop and close the old writer"),
         SuspendTurnOutcome::Suspended {
@@ -239,13 +236,12 @@ async fn interrupt_tool_records_history_entries() {
         .unwrap();
     let nez = Arc::clone(&fixture.nez);
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "start history recording".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "start history recording".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecCommandBegin(_))).await;
 
@@ -254,13 +250,12 @@ async fn interrupt_tool_records_history_entries() {
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnAborted(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "follow up".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "follow up".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -332,13 +327,12 @@ async fn interrupt_persists_turn_aborted_marker_in_next_request() {
         .unwrap();
     let nez = Arc::clone(&fixture.nez);
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "start interrupt marker".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "start interrupt marker".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecCommandBegin(_))).await;
 
@@ -347,13 +341,12 @@ async fn interrupt_persists_turn_aborted_marker_in_next_request() {
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnAborted(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "follow up".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "follow up".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 

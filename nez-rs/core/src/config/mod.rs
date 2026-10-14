@@ -7,6 +7,7 @@ use crate::unified_exec::MIN_EMPTY_YIELD_TIME_MS;
 use crate::windows_sandbox::WindowsSandboxLevelExt;
 use crate::windows_sandbox::resolve_windows_sandbox_mode;
 use crate::windows_sandbox::windows_sandbox_level_for_legacy_checks;
+use http::HeaderValue;
 use nez_agent_roles::load_agent_roles;
 use nez_config::CloudConfigBundleLoader;
 use nez_config::ConfigLayerSource;
@@ -134,7 +135,6 @@ use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_absolute_path::AbsolutePathBufGuard;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use http::HeaderValue;
 use rmcp::model::ElicitationCapability;
 use rmcp::model::FormElicitationCapability;
 use rmcp::model::UrlElicitationCapability;
@@ -181,15 +181,6 @@ mod token_budget_startup;
 mod windows_sandbox_config;
 pub use auth_keyring::bootstrap_auth_config;
 pub use auth_keyring::resolve_bootstrap_auth_keyring_backend_kind;
-pub use nez_agent_roles::AgentRoleConfig;
-pub use nez_config::ConfigLoadOptions;
-pub use nez_config::Constrained;
-pub use nez_config::ConstraintError;
-pub use nez_config::ConstraintResult;
-pub use nez_config::LoaderOverrides;
-pub use nez_network_proxy::NetworkProxyAuditMetadata;
-use nez_sandboxing::compatibility_sandbox_policy_for_permission_profile;
-pub use nez_sandboxing::system_bwrap_warning;
 pub use managed_features::ManagedFeatures;
 pub(crate) use metrics::emit_session_start_metrics;
 pub use network_config::EnvironmentNetworkConfigError;
@@ -199,6 +190,15 @@ pub use network_config::project_environment_profile_network;
 pub use network_config::validate_environment_network_policy;
 pub use network_proxy_spec::NetworkProxySpec;
 pub use network_proxy_spec::StartedNetworkProxy;
+pub use nez_agent_roles::AgentRoleConfig;
+pub use nez_config::ConfigLoadOptions;
+pub use nez_config::Constrained;
+pub use nez_config::ConstraintError;
+pub use nez_config::ConstraintResult;
+pub use nez_config::LoaderOverrides;
+pub use nez_network_proxy::NetworkProxyAuditMetadata;
+use nez_sandboxing::compatibility_sandbox_policy_for_permission_profile;
+pub use nez_sandboxing::system_bwrap_warning;
 pub use permission_profile_catalog::PermissionProfileCatalogEntry;
 pub use permission_profile_catalog::permission_profile_catalog;
 use permission_profile_catalog::permission_profile_catalog_from_permissions;
@@ -1928,10 +1928,9 @@ impl Config {
                 ElicitationCapability::default()
             },
             mcp_server_catalog: catalog.build(),
-            connector_snapshot:
-                nez_connectors::ConnectorSnapshot::from_plugin_capability_summaries(
-                    loaded_plugins.capability_summaries(),
-                ),
+            connector_snapshot: nez_connectors::ConnectorSnapshot::from_plugin_capability_summaries(
+                loaded_plugins.capability_summaries(),
+            ),
         }
     }
 
@@ -2021,11 +2020,8 @@ impl Config {
         cli_overrides: Vec<(String, TomlValue)>,
     ) -> std::io::Result<Self> {
         let nez_home = find_nez_home()?;
-        Self::load_default_with_cli_overrides_for_nez_home(
-            nez_home.to_path_buf(),
-            cli_overrides,
-        )
-        .await
+        Self::load_default_with_cli_overrides_for_nez_home(nez_home.to_path_buf(), cli_overrides)
+            .await
     }
 
     /// Load a default configuration for a specific Nez home without reading

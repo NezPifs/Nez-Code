@@ -4,8 +4,7 @@ pub const TOOL_CALL_COUNT_METRIC: &str = "nez.tool.call";
 pub const TOOL_CALL_DURATION_METRIC: &str = "nez.tool.call.duration_ms";
 pub const TOOL_CALL_UNIFIED_EXEC_METRIC: &str = "nez.tool.unified_exec";
 pub const MULTI_AGENT_SPAWN_FAILURE_METRIC: &str = "nez.multi_agent.spawn.failure";
-pub const MULTI_AGENT_SPAWN_PHASE_DURATION_METRIC: &str =
-    "nez.multi_agent.spawn.phase.duration_ms";
+pub const MULTI_AGENT_SPAWN_PHASE_DURATION_METRIC: &str = "nez.multi_agent.spawn.phase.duration_ms";
 pub const ARTIFACT_OPERATION_STARTED_METRIC: &str = "nez.artifact.operation.started";
 pub const ARTIFACT_OPERATION_EXPECTED_OUTPUT_COUNT_METRIC: &str =
     "nez.artifact.operation.expected_output_count";

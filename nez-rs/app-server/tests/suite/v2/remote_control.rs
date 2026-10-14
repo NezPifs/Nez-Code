@@ -13,6 +13,8 @@ use app_test_support::TestAppServer;
 use app_test_support::create_fake_paginated_rollout;
 use app_test_support::to_response;
 use app_test_support::write_chatgpt_auth;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server::AppServerRuntimeOptions;
 use nez_app_server::AppServerTransport;
 use nez_app_server::PluginStartupTasks;
@@ -48,8 +50,6 @@ use nez_state::RemoteControlEnrollmentRecord;
 use nez_state::StateRuntime;
 use nez_utils_cli::CliConfigOverrides;
 use nez_websocket_auth::WebsocketAuthSettings;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serial_test::serial;
 use tempfile::TempDir;
@@ -548,10 +548,7 @@ async fn stdio_eof_releases_thread_writer_with_pending_remote_control_enable() -
     let mut secondary = TestAppServer::builder()
         .with_nez_home(nez_home.path())
         .without_auto_env()
-        .with_env_overrides(&[(
-            "NEZ_SQLITE_HOME",
-            Some(secondary_sqlite_home_path.as_ref()),
-        )])
+        .with_env_overrides(&[("NEZ_SQLITE_HOME", Some(secondary_sqlite_home_path.as_ref()))])
         .build_initialized()
         .await?;
     let resume_id = secondary

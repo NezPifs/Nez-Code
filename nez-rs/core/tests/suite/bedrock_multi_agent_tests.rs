@@ -1,5 +1,8 @@
 //! Verifies default Bedrock catalogs select V2 and expose its collaboration tools.
 
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
 use nez_features::Feature;
 use nez_login::NezAuth;
 use nez_login::auth::BedrockApiKeyAuth;
@@ -7,9 +10,6 @@ use nez_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 use nez_model_provider_info::AMAZON_BEDROCK_RUNTIME_PROVIDER_ID;
 use nez_model_provider_info::built_in_model_providers;
 use nez_protocol::protocol::MultiAgentVersion;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 
 #[test_case::test_case(AMAZON_BEDROCK_PROVIDER_ID, "openai.gpt-5.6-sol"; "mantle")]
@@ -47,10 +47,7 @@ async fn bedrock_catalog_selects_v2_by_default(
 
     test.submit_text_turn("Hello").await?;
 
-    assert_eq!(
-        test.nez.multi_agent_version(),
-        Some(MultiAgentVersion::V2)
-    );
+    assert_eq!(test.nez.multi_agent_version(), Some(MultiAgentVersion::V2));
     let request = mock.single_request();
     for tool in ["spawn_agent", "followup_task"] {
         assert!(

@@ -1,14 +1,6 @@
 //! Request-history coverage for opt-in incremental tools on Responses Lite.
 
 use anyhow::Result;
-use nez_features::Feature;
-use nez_protocol::openai_models::CodeModeToolMessages;
-use nez_protocol::openai_models::IncrementalToolMessages;
-use nez_protocol::openai_models::ToolMessage;
-use nez_protocol::openai_models::ToolMode;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ThreadSettingsOverrides;
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::responses;
@@ -17,6 +9,14 @@ use core_test_support::skip_if_wine_exec;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_mcp_server;
+use nez_features::Feature;
+use nez_protocol::openai_models::CodeModeToolMessages;
+use nez_protocol::openai_models::IncrementalToolMessages;
+use nez_protocol::openai_models::ToolMessage;
+use nez_protocol::openai_models::ToolMode;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ThreadSettingsOverrides;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;

@@ -50,8 +50,7 @@ async fn recent_rollout_items_bound_history_and_preserve_newest_records() -> any
         serde_json::to_vec(item).map(|json| bytes + json.len())
     })?;
     assert!(retained_bytes <= MAX_ROLLOUT_BYTES);
-    let older_item_bytes =
-        serde_json::to_vec(&nez_rollout::parse_rollout_line(&old)?.item)?.len();
+    let older_item_bytes = serde_json::to_vec(&nez_rollout::parse_rollout_line(&old)?.item)?.len();
     assert!(retained_bytes + older_item_bytes > MAX_ROLLOUT_BYTES);
 
     let mut metadata = metadata;

@@ -20,13 +20,13 @@ mod tools;
 mod top_level_tools;
 
 use crate::context::ContextualUserFragment;
+use indexmap::IndexMap;
 use nez_extension_api::PreviousWorldStateSection;
 use nez_extension_api::RenderedWorldStateFragment;
 use nez_extension_api::WorldStateSectionContribution;
 use nez_protocol::models::ContentItem;
 use nez_protocol::models::ContentItemKind;
 use nez_protocol::models::ResponseItem;
-use indexmap::IndexMap;
 use serde::Deserialize;
 use serde::Serialize;
 use serde::de::DeserializeOwned;

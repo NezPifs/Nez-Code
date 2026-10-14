@@ -31,6 +31,10 @@ pub use app::ExitReason;
 pub use app::ResumableThread;
 use app_server_session::AppServerSession;
 use app_server_session::ThreadParamsMode;
+use color_eyre::eyre::WrapErr;
+use crossterm::SynchronizedUpdate;
+use cwd_prompt::CwdPromptAction;
+pub use daemon_startup::uses_wsl_drvfs;
 use nez_app_server_client::AppServerClient;
 use nez_app_server_client::DEFAULT_IN_PROCESS_CHANNEL_CAPACITY;
 use nez_app_server_client::InProcessAppServerClient;
@@ -75,10 +79,6 @@ use nez_utils_absolute_path::canonicalize_existing_preserving_symlinks;
 use nez_utils_home_dir::find_nez_home;
 use nez_utils_oss::ensure_oss_provider_ready;
 use nez_utils_oss::get_default_model_for_oss_provider;
-use color_eyre::eyre::WrapErr;
-use crossterm::SynchronizedUpdate;
-use cwd_prompt::CwdPromptAction;
-pub use daemon_startup::uses_wsl_drvfs;
 pub use session_archive_commands::DeleteConfirmation;
 pub use session_archive_commands::SessionArchiveAction;
 pub use session_archive_commands::SessionArchiveCommandOptions;
@@ -282,8 +282,8 @@ use crate::startup_hooks_review::load_startup_hooks_review_entry;
 use crate::startup_hooks_review::maybe_run_startup_hooks_review;
 use crate::tui::Tui;
 pub use cli::Cli;
-use nez_arg0::Arg0DispatchPaths;
 pub use markdown_render::render_markdown_text;
+use nez_arg0::Arg0DispatchPaths;
 pub use public_widgets::composer_input::ComposerAction;
 pub use public_widgets::composer_input::ComposerInput;
 // (tests access modules directly within the crate)
@@ -1068,10 +1068,10 @@ async fn cloud_config_bundle_for_app_server_target(
     embedded_network_policy: &nez_app_server_client::EmbeddedNetworkPolicy,
 ) -> std::io::Result<CloudConfigBundleLoader> {
     cloud_config_bundle_loader_for_storage(
-        embedded_network_policy
-            .bind_bootstrap_auth(app_server_target.auth_config_for_cloud_loader(
-                bootstrap_auth_config(nez_home, bootstrap_config)?,
-            )),
+        embedded_network_policy.bind_bootstrap_auth(
+            app_server_target
+                .auth_config_for_cloud_loader(bootstrap_auth_config(nez_home, bootstrap_config)?),
+        ),
         /*enable_nez_api_key_env*/ false,
     )
     .await
@@ -3157,8 +3157,7 @@ requires_openai_auth = {requires_openai_auth}
     #[tokio::test]
     async fn default_daemon_auto_connect_probes_socket_only() -> color_eyre::Result<()> {
         let nez_home = TempDir::new()?;
-        let socket_path =
-            nez_app_server_client::app_server_control_socket_path(nez_home.path())?;
+        let socket_path = nez_app_server_client::app_server_control_socket_path(nez_home.path())?;
         #[cfg(windows)]
         {
             let parent = socket_path.as_path().parent().expect("socket parent");
@@ -3997,8 +3996,7 @@ requires_openai_auth = {requires_openai_auth}
         let mut config = build_config(&temp_dir).await?;
         let occupied_sqlite_home = temp_dir.path().join("sqlite-home");
         std::fs::write(&occupied_sqlite_home, "occupied")?;
-        let sqlite =
-            nez_state::SqliteConfig::new_for_testing(occupied_sqlite_home.as_path().abs());
+        let sqlite = nez_state::SqliteConfig::new_for_testing(occupied_sqlite_home.as_path().abs());
         config.sqlite = sqlite.clone();
 
         let err =

@@ -1,5 +1,5 @@
-use nez_core::NezThread;
 use nez_core::NewThread;
+use nez_core::NezThread;
 use nez_core::StartIfIdleSubmission;
 use nez_core::StartThreadOptions;
 use nez_core::ThreadManager;

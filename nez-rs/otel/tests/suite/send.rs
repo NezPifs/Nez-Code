@@ -27,11 +27,7 @@ fn send_builds_payload_with_tags_and_histograms() -> Result<()> {
         /*inc*/ 1,
         &[("model", "gpt-5.1"), ("env", "dev")],
     )?;
-    metrics.histogram(
-        "nez.tool_latency",
-        /*value*/ 25,
-        &[("tool", "shell")],
-    )?;
+    metrics.histogram("nez.tool_latency", /*value*/ 25, &[("tool", "shell")])?;
     metrics.gauge_with_description(
         "nez.active",
         "Number of active Nez operations.",
@@ -64,8 +60,7 @@ fn send_builds_payload_with_tags_and_histograms() -> Result<()> {
     ]);
     assert_eq!(counter_attributes, expected_counter_attributes);
 
-    let (bounds, bucket_counts, sum, count) =
-        histogram_data(&resource_metrics, "nez.tool_latency");
+    let (bounds, bucket_counts, sum, count) = histogram_data(&resource_metrics, "nez.tool_latency");
     assert!(!bounds.is_empty());
     assert_eq!(bucket_counts.iter().sum::<u64>(), 1);
     assert_eq!(sum, 25.0);
@@ -194,11 +189,8 @@ fn context_histograms_preserve_zero_and_family_ranges() -> Result<()> {
 // Ensures defaults merge per line and overrides take precedence.
 #[test]
 fn send_merges_default_tags_per_line() -> Result<()> {
-    let (metrics, exporter) = build_metrics_with_defaults(&[
-        ("service", "nez-cli"),
-        ("env", "prod"),
-        ("region", "us"),
-    ])?;
+    let (metrics, exporter) =
+        build_metrics_with_defaults(&[("service", "nez-cli"), ("env", "prod"), ("region", "us")])?;
 
     metrics.counter(
         "nez.alpha",
@@ -236,8 +228,7 @@ fn send_merges_default_tags_per_line() -> Result<()> {
     ]);
     assert_eq!(alpha_attrs, expected_alpha_attrs);
 
-    let beta_metric =
-        find_metric(&resource_metrics, "nez.beta").expect("nez.beta metric missing");
+    let beta_metric = find_metric(&resource_metrics, "nez.beta").expect("nez.beta metric missing");
     let beta_point = match beta_metric.data() {
         opentelemetry_sdk::metrics::data::AggregatedMetrics::U64(data) => match data {
             opentelemetry_sdk::metrics::data::MetricData::Sum(sum) => {

@@ -10,23 +10,23 @@ use crate::agent::types::AgentMetadata;
 use crate::agent::types::LiveAgent;
 use crate::agent::types::MessageDeliveryMode;
 use crate::agent::types::SpawnAgentOptions;
+use crate::config::Config;
 use crate::nez_thread::GuardianRootSnapshot;
 use crate::nez_thread::ThreadConfigSnapshot;
-use crate::config::Config;
 use crate::rollout_budget::RolloutBudgetReminder;
+use futures::future::BoxFuture;
 use nez_protocol::AgentPath;
 use nez_protocol::SessionId;
 use nez_protocol::ThreadId;
 use nez_protocol::error::Result;
 use nez_protocol::protocol::AgentStatus;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::MultiAgentVersion;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::TokenUsage;
 use nez_protocol::turn_input::TurnStartOptions;
 use nez_protocol::user_input::UserInput;
 use nez_rollout_trace::ThreadTraceContext;
-use futures::future::BoxFuture;
 
 // Keep dynamic dispatch a compile-time property of the contract.
 const _: Option<&dyn AgentControl> = None;
@@ -70,10 +70,8 @@ pub trait AgentControl: Send + Sync {
 
     /// Take queued, non-turn-starting mail in order, without loading the recipient.
     /// This in-memory operation performs no I/O; returning transfers ownership to the caller.
-    fn take_mailbox(
-        &self,
-        agent: ThreadId,
-    ) -> Vec<nez_protocol::protocol::InterAgentCommunication>;
+    fn take_mailbox(&self, agent: ThreadId)
+    -> Vec<nez_protocol::protocol::InterAgentCommunication>;
 
     /// Observe whether unread mail is available. Subscribe before the first read so
     /// arrivals cannot be missed; notifications do not consume mail or start a turn.

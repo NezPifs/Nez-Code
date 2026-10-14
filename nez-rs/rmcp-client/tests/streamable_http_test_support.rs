@@ -19,6 +19,7 @@ use std::time::Duration;
 use std::time::Instant;
 
 use anyhow::Context as _;
+use futures::FutureExt as _;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_config::types::OAuthCredentialsStoreMode;
 use nez_exec_server::Environment;
@@ -31,7 +32,6 @@ use nez_rmcp_client::ElicitationAction;
 use nez_rmcp_client::ElicitationResponse;
 use nez_rmcp_client::RmcpClient;
 use nez_utils_cargo_bin::CargoBinError;
-use futures::FutureExt as _;
 use pretty_assertions::assert_eq;
 use rmcp::model::CallToolResult;
 use rmcp::model::ClientCapabilities;

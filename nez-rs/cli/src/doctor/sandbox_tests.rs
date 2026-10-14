@@ -58,9 +58,7 @@ async fn reports_refresh_failure_after_setup_completed() {
             .expect("create fixture directory");
         std::fs::write(path, contents.to_string()).expect("write sandbox fixture");
     }
-    assert!(nez_windows_sandbox::sandbox_setup_is_complete(
-        home.path()
-    ));
+    assert!(nez_windows_sandbox::sandbox_setup_is_complete(home.path()));
     nez_windows_sandbox::write_setup_error_report(
         home.path(),
         &nez_windows_sandbox::SetupErrorReport {

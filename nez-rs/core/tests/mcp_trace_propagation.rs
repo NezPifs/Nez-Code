@@ -2,6 +2,7 @@
 
 use std::time::Duration;
 
+use futures::FutureExt;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_config::types::OAuthCredentialsStoreMode;
 use nez_exec_server::Environment;
@@ -9,7 +10,6 @@ use nez_rmcp_client::ElicitationAction;
 use nez_rmcp_client::ElicitationResponse;
 use nez_rmcp_client::McpProtocolMode;
 use nez_rmcp_client::RmcpClient;
-use futures::FutureExt;
 use opentelemetry::trace::TracerProvider as _;
 use opentelemetry_sdk::trace::InMemorySpanExporter;
 use opentelemetry_sdk::trace::SdkTracerProvider;

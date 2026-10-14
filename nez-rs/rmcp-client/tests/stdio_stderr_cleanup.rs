@@ -11,11 +11,11 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use anyhow::Result;
+use futures::FutureExt as _;
 use nez_rmcp_client::ElicitationAction;
 use nez_rmcp_client::ElicitationResponse;
 use nez_rmcp_client::LocalStdioServerLauncher;
 use nez_rmcp_client::RmcpClient;
-use futures::FutureExt as _;
 use pretty_assertions::assert_eq;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::Implementation;

@@ -11,6 +11,8 @@ use app_test_support::to_response;
 use app_test_support::write_chatgpt_auth;
 use chrono::Duration as ChronoDuration;
 use chrono::Utc;
+use flate2::Compression;
+use flate2::write::GzEncoder;
 use nez_app_server_protocol::HookMetadata;
 use nez_app_server_protocol::HookTrustStatus;
 use nez_app_server_protocol::HooksListParams;
@@ -38,8 +40,6 @@ use nez_login::AuthKeyringBackendKind;
 use nez_login::login_with_api_key;
 use nez_protocol::config_types::TrustLevel;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use flate2::Compression;
-use flate2::write::GzEncoder;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use test_case::test_case;
@@ -1044,12 +1044,7 @@ remote_plugin = false
 enabled = true
 "#,
     )?;
-    write_installed_plugin_with_version(
-        &nez_home,
-        "sample-marketplace",
-        "sample-plugin",
-        "1.0.0",
-    )?;
+    write_installed_plugin_with_version(&nez_home, "sample-marketplace", "sample-plugin", "1.0.0")?;
 
     let mut mcp = TestAppServer::builder()
         .with_nez_home(nez_home.path())
@@ -1468,10 +1463,7 @@ enabled = false
         marketplace.plugins[1].auth_policy,
         PluginAuthPolicy::OnInstall
     );
-    assert_eq!(
-        marketplace.plugins[2].id,
-        "uninstalled-plugin@nez-curated"
-    );
+    assert_eq!(marketplace.plugins[2].id, "uninstalled-plugin@nez-curated");
     assert_eq!(marketplace.plugins[2].name, "uninstalled-plugin");
     assert_eq!(marketplace.plugins[2].installed, false);
     assert_eq!(marketplace.plugins[2].enabled, false);
@@ -1964,10 +1956,7 @@ enabled = true
 async fn app_server_startup_sync_downloads_remote_installed_plugin_bundles() -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -2032,10 +2021,7 @@ async fn app_server_startup_sync_downloads_remote_installed_plugin_bundles() -> 
 async fn plugin_list_sync_upgrades_and_removes_remote_installed_plugin_bundles() -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -2154,10 +2140,7 @@ async fn plugin_list_includes_remote_marketplaces_when_remote_plugin_enabled(
 ) -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     let config_path = nez_home.path().join("config.toml");
     let config = std::fs::read_to_string(&config_path)?;
     std::fs::write(config_path, format!("{config}\n{plugin_config}\n"))?;
@@ -2478,10 +2461,7 @@ async fn plugin_list_includes_remote_marketplaces_when_remote_plugin_enabled(
 async fn plugin_list_honors_global_remote_catalog_cache_ttl() -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -2535,8 +2515,7 @@ async fn plugin_list_honors_global_remote_catalog_cache_ttl() -> Result<()> {
         None
     );
     wait_for_remote_plugin_request_count(&server, "/ps/plugins/list", /*expected_count*/ 1).await?;
-    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id])
-        .await?;
+    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id]).await?;
 
     server.reset().await;
     mount_remote_plugin_list(&server, "GLOBAL", &refreshed_body).await;
@@ -2565,8 +2544,7 @@ async fn plugin_list_honors_global_remote_catalog_cache_ttl() -> Result<()> {
     );
     sleep(Duration::from_millis(100)).await;
     wait_for_remote_plugin_request_count(&server, "/ps/plugins/list", /*expected_count*/ 0).await?;
-    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id])
-        .await?;
+    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id]).await?;
 
     rewrite_cached_remote_catalog_fetched_at(
         nez_home.path(),
@@ -2641,10 +2619,7 @@ async fn app_server_startup_refreshes_cached_remote_catalog_without_blocking_plu
 -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -2686,8 +2661,7 @@ async fn app_server_startup_refreshes_cached_remote_catalog_without_blocking_plu
         )
         .await??,
     )?;
-    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id])
-        .await?;
+    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id]).await?;
     timeout(DEFAULT_TIMEOUT, app_server.shutdown_gracefully()).await??;
 
     server.reset().await;
@@ -2899,10 +2873,7 @@ async fn app_server_startup_skips_disabled_remote_plugin_catalog_scopes() -> Res
 async fn plugin_list_force_refetch_bypasses_fresh_global_remote_catalog_cache() -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -2945,8 +2916,7 @@ async fn plugin_list_force_refetch_bypasses_fresh_global_remote_catalog_cache() 
         )
         .await??,
     )?;
-    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id])
-        .await?;
+    wait_for_cached_remote_catalog_plugin_ids(nez_home.path(), &[cached_remote_plugin_id]).await?;
 
     server.reset().await;
     mount_delayed_remote_plugin_list(
@@ -3235,10 +3205,7 @@ async fn plugin_list_includes_api_curated_marketplace_for_api_auth_when_remote_p
 -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_openai_api_curated_marketplace(nez_home.path(), &["api-plugin"])?;
     login_with_api_key(
         nez_home.path(),
@@ -3285,8 +3252,7 @@ async fn plugin_list_includes_api_curated_marketplace_for_api_auth_when_remote_p
 }
 
 #[tokio::test]
-async fn plugin_list_includes_api_curated_marketplace_for_bedrock_without_nez_auth() -> Result<()>
-{
+async fn plugin_list_includes_api_curated_marketplace_for_bedrock_without_nez_auth() -> Result<()> {
     let nez_home = TempDir::new()?;
     std::fs::write(
         nez_home.path().join("config.toml"),
@@ -3458,10 +3424,7 @@ async fn plugin_list_does_not_query_openai_curated_remote_collection_by_default(
 async fn plugin_list_vertical_kind_noops_when_remote_plugin_enabled() -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -3511,10 +3474,7 @@ async fn plugin_list_does_not_append_global_remote_when_marketplace_kinds_are_ex
 -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")
@@ -4686,10 +4646,7 @@ async fn assert_disabled_remote_plugin_metadata(
 ) -> Result<()> {
     let nez_home = TempDir::new()?;
     let server = MockServer::start().await;
-    write_remote_plugin_catalog_config(
-        nez_home.path(),
-        &format!("{}/backend-api/", server.uri()),
-    )?;
+    write_remote_plugin_catalog_config(nez_home.path(), &format!("{}/backend-api/", server.uri()))?;
     write_chatgpt_auth(
         nez_home.path(),
         ChatGptAuthFixture::new("chatgpt-token")

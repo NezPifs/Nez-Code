@@ -2301,9 +2301,9 @@ async fn catch_up_skips_invalid_complete_suffixes_and_projects_later_history() {
             .await
             .expect("persist session metadata");
 
-        let pool = nez_state::open_thread_history_db(
-            &nez_state::SqliteConfig::new_for_testing(home.path().abs()),
-        )
+        let pool = nez_state::open_thread_history_db(&nez_state::SqliteConfig::new_for_testing(
+            home.path().abs(),
+        ))
         .await
         .expect("open thread history db");
         let before = projection_state(&pool, thread_id).await;

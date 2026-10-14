@@ -41,8 +41,7 @@ async fn startup_mxc_preference_is_resolved_before_readiness(
         .with_args(&["-c", &format!("features.prefer_mxc={prefer_mxc}")])
         .build_initialized_with_timeout(DEFAULT_READ_TIMEOUT)
         .await?;
-    let mxc_selected =
-        prefer_mxc && !deny_local_binding && nez_sandboxing::windows_mxc_available();
+    let mxc_selected = prefer_mxc && !deny_local_binding && nez_sandboxing::windows_mxc_available();
     let request_id = mcp
         .send_raw_request("windowsSandbox/readiness", /*params*/ None)
         .await?;
@@ -164,10 +163,7 @@ async fn setup_validates_permissions_before_provisioning(
                 "NEZ_WINDOWS_REGISTERED_CORE",
                 Some(if registered_core { "1" } else { "0" }),
             ),
-            (
-                "NEZ_WINDOWS_SANDBOX_PACKAGE_FAMILY",
-                Some(&service_family),
-            ),
+            ("NEZ_WINDOWS_SANDBOX_PACKAGE_FAMILY", Some(&service_family)),
             (
                 nez_protocol::shell_environment::OPENAI_FEDERATION_RULE_ID_ENV_VAR,
                 None,

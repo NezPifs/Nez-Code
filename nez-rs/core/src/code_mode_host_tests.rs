@@ -5,14 +5,14 @@ use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
+#[cfg(unix)]
+use core_test_support::code_mode_host::CodeModeHostRecorder;
 use nez_code_mode::CodeModeSession;
 use nez_code_mode::CodeModeSessionProvider;
 use nez_code_mode::ExecuteRequest;
 use nez_code_mode::FunctionCallOutputContentItem;
 use nez_code_mode::NoopCodeModeSessionDelegate;
 use nez_code_mode::RuntimeResponse;
-#[cfg(unix)]
-use core_test_support::code_mode_host::CodeModeHostRecorder;
 use pretty_assertions::assert_eq;
 use tokio::time::timeout;
 

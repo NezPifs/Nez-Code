@@ -138,12 +138,7 @@ async fn recovery_retains_originator_without_initial_credentials() -> anyhow::Re
         loads,
         vec![
             ("nez_vscode".into(), "pinned".into(), "success".into(), 1),
-            (
-                "nez_vscode".into(),
-                "policy".into(),
-                "not_found".into(),
-                2
-            ),
+            ("nez_vscode".into(), "policy".into(), "not_found".into(), 2),
             ("nez_vscode".into(), "policy".into(), "success".into(), 1),
         ]
     );

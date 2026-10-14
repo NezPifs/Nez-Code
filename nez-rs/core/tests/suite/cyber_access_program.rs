@@ -1,4 +1,10 @@
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::RecoverTurnRequest;
 use nez_core::StartIfIdleSubmission;
 use nez_core::TurnInputRequest;
@@ -12,12 +18,6 @@ use nez_protocol::turn_input::CyberAccessProgram;
 use nez_protocol::user_input::UserInput;
 use nez_rollout::RolloutItem;
 use nez_rollout::RolloutRecorder;
-use core_test_support::responses;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;
@@ -194,9 +194,7 @@ async fn cyber_access_program_omits_spoofed_custom_providers() -> Result<()> {
 #[test_case(NezAuth::create_dummy_chatgpt_auth_for_testing(); "chatgpt")]
 #[test_case(NezAuth::from_api_key("test-api-key"); "api_key")]
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn cyber_access_program_survives_mid_turn_remote_compaction_v2(
-    auth: NezAuth,
-) -> Result<()> {
+async fn cyber_access_program_survives_mid_turn_remote_compaction_v2(auth: NezAuth) -> Result<()> {
     core_test_support::skip_if_no_network!(Ok(()));
     let server = responses::start_mock_server().await;
     let requests = responses::mount_sse_sequence(

@@ -8,6 +8,16 @@ use std::time::SystemTime;
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::NezThread;
 use nez_core::TurnInputRequest;
 use nez_features::Feature;
@@ -21,16 +31,6 @@ use nez_protocol::user_input::UserInput;
 use nez_thread_store::ForkBoundary;
 use nez_thread_store::LoadThreadHistoryParams;
 use nez_thread_store::PrepareForkParams;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use wiremock::MockServer;
 
@@ -137,8 +137,7 @@ async fn compressed_shared_fork_resume_preserves_checkpoint_and_frozen_history()
         .features
         .enable(Feature::LocalThreadStoreCompression)?;
     // Use production feature wiring, rather than manually writing zstd files or calling the worker.
-    let store =
-        nez_core::thread_store_from_config(&config, nez_core::init_state_db(&config).await);
+    let store = nez_core::thread_store_from_config(&config, nez_core::init_state_db(&config).await);
     tokio::time::timeout(Duration::from_secs(30), async {
         loop {
             if paths

@@ -266,11 +266,7 @@ impl PreparedMcpCall {
         meta: &mut Option<JsonValue>,
         state: crate::SandboxState,
     ) -> Result<()> {
-        crate::sandbox_metadata::augment_metadata(
-            meta,
-            state,
-            self.sandbox_nez_executable().await,
-        )
+        crate::sandbox_metadata::augment_metadata(meta, state, self.sandbox_nez_executable().await)
     }
 
     /// Full CLI path usable by a local stdio server. An HTTP endpoint (even on

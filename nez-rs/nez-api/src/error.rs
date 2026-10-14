@@ -1,9 +1,9 @@
 use crate::rate_limits::RateLimitError;
+use http::StatusCode;
 use nez_client::TransportError;
 use nez_http_client::RetryAfter;
 use nez_protocol::error::ResponseIncompleteError;
 use nez_protocol::protocol::MisalignmentErrorDetails;
-use http::StatusCode;
 use serde_json::Value;
 use thiserror::Error;
 

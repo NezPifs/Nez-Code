@@ -3,6 +3,8 @@
 use std::path::Path;
 
 use crate::app_server_session::AppServerSession;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
 use nez_app_server_client::TypedRequestError;
 use nez_app_server_protocol::Thread;
 use nez_app_server_protocol::ThreadHistoryMode;
@@ -10,8 +12,6 @@ use nez_app_server_protocol::ThreadListParams;
 use nez_app_server_protocol::ThreadSortKey;
 use nez_app_server_protocol::ThreadSourceKind;
 use nez_protocol::ThreadId;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
 
 #[derive(Clone, Copy)]
 pub(super) enum SessionCollection {

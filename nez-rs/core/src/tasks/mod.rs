@@ -8,10 +8,10 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
+use futures::future::BoxFuture;
 use nez_diagnostics::Gauge;
 use nez_exec_server::ExecutorCapabilityDiscoveryV2Cache;
 use nez_extension_api::ThreadIdleCause;
-use futures::future::BoxFuture;
 use tokio::select;
 use tokio::sync::Mutex;
 use tokio::sync::Notify;
@@ -25,10 +25,10 @@ use tracing::trace;
 use tracing::trace_span;
 use tracing::warn;
 
-use crate::nez_thread::BackgroundTerminalInfo;
 use crate::config::Config;
 use crate::context::ContextualUserFragment;
 use crate::hook_runtime::run_turn_interrupt_hooks;
+use crate::nez_thread::BackgroundTerminalInfo;
 use crate::session::TurnInput;
 use crate::session::session::Session;
 use crate::session::turn::run_hooks_and_record_inputs;
@@ -59,10 +59,10 @@ use nez_protocol::protocol::TurnCompleteEvent;
 use nez_protocol::protocol::WarningEvent;
 use nez_thread_store::PersistContext;
 
+pub(crate) use compact::CompactTask;
 use nez_features::Feature;
 use nez_protocol::error::NezErrorDetails;
 use nez_protocol::error::Result as NezResult;
-pub(crate) use compact::CompactTask;
 pub(crate) use regular::RegularTask;
 pub(crate) use review::ReviewTask;
 pub(crate) use user_shell::UserShellCommandMode;

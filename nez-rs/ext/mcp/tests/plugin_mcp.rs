@@ -1,4 +1,16 @@
 use anyhow::Context;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::run_test_with_large_stack;
+use core_test_support::test_nez::test_nez;
 use nez_config::AppToolApproval;
 use nez_config::McpServerToolConfig;
 use nez_config::test_support::CloudConfigBundleFixture;
@@ -36,18 +48,6 @@ use nez_protocol::capabilities::SelectedCapabilityRoot;
 use nez_protocol::config_types::WindowsSandboxLevel;
 use nez_protocol::models::PermissionProfileSnapshot;
 use nez_utils_path_uri::PathUri;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::run_test_with_large_stack;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::HashMap;
@@ -328,10 +328,7 @@ async fn selected_root_ownership_retries_errors_and_caches_success() -> TestResu
             // Stable ownership must survive refresh without probing these files again.
             fs::remove_file(&manifest)?;
             fs::create_dir_all(standalone_root.path().join(".nez-plugin"))?;
-            fs::write(
-                standalone_root.path().join(".nez-plugin/plugin.json"),
-                "{",
-            )?;
+            fs::write(standalone_root.path().join(".nez-plugin/plugin.json"), "{")?;
         } else if phase == 5 {
             fs::write(&manifest, r#"{"name":"example"}"#)?;
             fs::write(
@@ -744,8 +741,7 @@ async fn run_cloud_plugin_projection_scenarios() -> anyhow::Result<()> {
             })
             .with_priority(1)
             .mount(&plugin_server).await;
-        let declaration =
-            json!({"url": format!("{}/api/nez/ps/mcp", plugin_mcp.chatgpt_base_url)});
+        let declaration = json!({"url": format!("{}/api/nez/ps/mcp", plugin_mcp.chatgpt_base_url)});
         let cloud = Arc::new(CloudCatalogFixture {
             reply: if cloud_empty {
                 Ok(PluginCatalog::default())

@@ -35,13 +35,13 @@ use anyhow::Result;
 use anyhow::anyhow;
 pub use backend::BackendKind;
 use backend::BackendPaths;
+use managed_install::managed_nez_bin;
+#[cfg(any(unix, windows))]
+use managed_install::managed_nez_version;
 use nez_app_server_protocol::RemoteControlConnectionStatus;
 use nez_app_server_protocol::RemoteControlPairingStartResponse;
 use nez_app_server_transport::app_server_control_socket_path;
 use nez_utils_home_dir::find_nez_home;
-use managed_install::managed_nez_bin;
-#[cfg(any(unix, windows))]
-use managed_install::managed_nez_version;
 use serde::Serialize;
 use settings::DaemonSettings;
 use settings::MAX_SHUTDOWN_GRACE_SECONDS;
@@ -961,8 +961,7 @@ impl Daemon {
         settings: &DaemonSettings,
         managed_nez_bin: &Path,
     ) -> Result<Option<u32>> {
-        let backend =
-            backend::pid_backend(self.backend_paths_with_bin(settings, managed_nez_bin));
+        let backend = backend::pid_backend(self.backend_paths_with_bin(settings, managed_nez_bin));
         backend.start().await
     }
 
@@ -980,8 +979,7 @@ impl Daemon {
             }
             return Ok(false);
         }
-        let Ok(nez_bin) =
-            managed_install::resolved_managed_nez_bin(&self.managed_nez_bin).await
+        let Ok(nez_bin) = managed_install::resolved_managed_nez_bin(&self.managed_nez_bin).await
         else {
             if !self.has_latest_selection_marker() {
                 updater.stop().await?;

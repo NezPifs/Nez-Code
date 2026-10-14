@@ -427,10 +427,7 @@ fn parse_windows_sandbox_wrapper_args(args: Vec<String>) -> Result<WindowsSandbo
 
     let nez_home = nez_home.ok_or_else(|| anyhow!("missing required {NEZ_HOME_FLAG}"))?;
     if !nez_home.is_absolute() {
-        bail!(
-            "{NEZ_HOME_FLAG} must be absolute: {}",
-            nez_home.display()
-        );
+        bail!("{NEZ_HOME_FLAG} must be absolute: {}", nez_home.display());
     }
     let command_cwd = command_cwd.ok_or_else(|| anyhow!("missing required {COMMAND_CWD_FLAG}"))?;
     let private_desktop_name = private_desktop_name

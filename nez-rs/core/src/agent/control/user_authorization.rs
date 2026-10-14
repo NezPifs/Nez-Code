@@ -17,8 +17,6 @@ use std::hash::Hash;
 use std::hash::Hasher;
 
 use super::LocalAgentControl;
-use crate::nez_thread::GuardianRootMessage;
-use crate::nez_thread::GuardianRootSnapshot;
 use crate::compact::is_summary_message;
 use crate::context::ContextualUserFragment;
 use crate::context::GuardianReviewEvidence;
@@ -28,6 +26,8 @@ use crate::context::render_retained_assistant_context;
 use crate::event_mapping::parse_turn_item;
 use crate::guardian::GUARDIAN_MAX_ROOT_MESSAGE_TOKENS;
 use crate::guardian::guardian_truncate_text;
+use crate::nez_thread::GuardianRootMessage;
+use crate::nez_thread::GuardianRootSnapshot;
 use nez_history::ReconciledRetainedContext;
 use nez_history::RetainedContextEntry;
 use nez_history::RetainedContextOrder;
@@ -224,10 +224,7 @@ impl LocalAgentControl {
             })
             .filter_map(|envelope| {
                 let text = root_assistant_text(&envelope.item, &delivered_messages)?;
-                let id = envelope
-                    .item
-                    .id()
-                    .map(nez_protocol::ResponseItemId::as_str);
+                let id = envelope.item.id().map(nez_protocol::ResponseItemId::as_str);
                 let retained = reconciled.ordered_entries().find_map(|(order, entry)| {
                     let RetainedContextEntry::AssistantMessage(message) = entry else {
                         return None;

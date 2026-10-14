@@ -1,4 +1,11 @@
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use http::Method;
+use http::StatusCode;
 use nez_api::ApiError;
 use nez_api::map_api_error;
 use nez_client::RetryOn;
@@ -9,18 +16,11 @@ use nez_http_client::RetryAfter;
 use nez_http_client::TransportError;
 use nez_login::NezAuth;
 use nez_models_manager::bundled_models_response;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::turn_input::TurnInputRequest;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use http::Method;
-use http::StatusCode;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Mutex;
@@ -538,10 +538,7 @@ async fn responses_http_overload_respects_retry_limits(
             match wait_for_event(&test.nez, |_| true).await {
                 EventMsg::Error(error) => {
                     error_events += 1;
-                    assert_eq!(
-                        error.nez_error_info,
-                        Some(NezErrorInfo::ServerOverloaded)
-                    );
+                    assert_eq!(error.nez_error_info, Some(NezErrorInfo::ServerOverloaded));
                     assert_eq!(
                         error.message,
                         "Selected model is at capacity. Please try a different model."
@@ -818,10 +815,7 @@ async fn compact_v2_stream_failure_without_retry_after_exhausts_stream_retries()
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::RateLimitExceeded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::RateLimitExceeded));
                 assert!(error.message.contains("Rate limit exceeded."));
             }
             EventMsg::StreamError(_) => stream_error_events += 1,
@@ -1002,10 +996,7 @@ async fn compact_v2_overload_without_retry_after_exhausts_request_retries() -> R
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::ServerOverloaded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::ServerOverloaded));
                 assert!(
                     error
                         .message
@@ -1173,10 +1164,7 @@ async fn sse_failure_without_retry_after_exhausts_stream_retries(code: &str) -> 
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::RateLimitExceeded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::RateLimitExceeded));
                 assert!(error.message.contains("Rate limit exceeded."));
             }
             EventMsg::StreamError(_) => stream_error_events += 1,
@@ -1303,10 +1291,7 @@ async fn sse_overload_with_retry_after_is_terminal() -> Result<()> {
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::ServerOverloaded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::ServerOverloaded));
                 assert_eq!(
                     error.message,
                     "Selected model is at capacity. Please try a different model."
@@ -1375,10 +1360,7 @@ async fn sse_overload_without_retry_after_is_terminal() -> Result<()> {
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::ServerOverloaded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::ServerOverloaded));
                 assert_eq!(
                     error.message,
                     "Selected model is at capacity. Please try a different model."
@@ -2088,10 +2070,7 @@ async fn websocket_overload_retries_only_while_it_has_retry_after() -> Result<()
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::ServerOverloaded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::ServerOverloaded));
                 assert_eq!(
                     error.message,
                     "Selected model is at capacity. Please try a different model."
@@ -2179,10 +2158,7 @@ async fn websocket_overload_without_retry_after_is_terminal() -> Result<()> {
         match wait_for_event(&test.nez, |_| true).await {
             EventMsg::Error(error) => {
                 error_events += 1;
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::ServerOverloaded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::ServerOverloaded));
                 assert_eq!(
                     error.message,
                     "Selected model is at capacity. Please try a different model."

@@ -18,11 +18,11 @@ use uuid::Uuid;
 
 use crate::AgentThreadId;
 use crate::CodeCellTraceContext;
-use crate::NezTurnId;
 use crate::CompactionId;
 use crate::CompactionTraceContext;
 use crate::InferenceTraceContext;
 use crate::McpCallTraceContext;
+use crate::NezTurnId;
 use crate::RawPayloadKind;
 use crate::RawPayloadRef;
 use crate::RawTraceEventContext;

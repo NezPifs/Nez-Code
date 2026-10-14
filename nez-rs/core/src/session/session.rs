@@ -15,9 +15,9 @@ use crate::environment_selection::ThreadEnvironments;
 use crate::environment_selection::TurnEnvironmentSnapshot;
 use crate::hook_mcp_executor::CoreHookMcpExecutor;
 use crate::mcp_tool_call::McpToolApprovalContext;
+use crate::responses_metadata::CompactionTurnMetadata;
 use crate::responses_metadata::NezResponsesMetadata;
 use crate::responses_metadata::NezResponsesRequestKind;
-use crate::responses_metadata::CompactionTurnMetadata;
 use crate::shell_snapshot::ShellSnapshot;
 use crate::shell_snapshot::SnapshotCredentialBrokerState;
 use crate::state::ActiveTurn;
@@ -75,8 +75,7 @@ pub(crate) struct Session {
     pub(super) features: ManagedFeatures,
     pub(super) isolation: nez_extension_api::SessionIsolation,
     pub(crate) tool_policy: Arc<nez_extension_api::ToolPolicy>,
-    pub(crate) windows_sandbox_proxy_settings_mode:
-        nez_sandboxing::WindowsSandboxProxySettingsMode,
+    pub(crate) windows_sandbox_proxy_settings_mode: nez_sandboxing::WindowsSandboxProxySettingsMode,
     pub(super) multi_agent_version: OnceLock<MultiAgentVersion>,
     /// Owns invalidation and serializes refreshes without blocking captured calls.
     pub(super) mcp_refresh: McpRefresh,
@@ -1705,8 +1704,7 @@ impl Session {
 
             let executed_tool_calls =
                 crate::state::ExecutedToolCalls::new(&config.features, &initial_history);
-            let nez_responses_headers =
-                thread_extension_data.get::<crate::NezResponsesHeaders>();
+            let nez_responses_headers = thread_extension_data.get::<crate::NezResponsesHeaders>();
             // Ephemeral title requests use request-level effort even when managed settings
             // enable overrides. The client-supplied tag selects cache behavior, not permissions.
             let title_request = config.ephemeral

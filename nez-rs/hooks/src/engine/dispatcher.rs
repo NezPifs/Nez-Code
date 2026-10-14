@@ -323,9 +323,7 @@ pub(crate) fn hook_source_label(source: nez_protocol::protocol::HookSource) -> &
         nez_protocol::protocol::HookSource::Plugin => "plugin",
         nez_protocol::protocol::HookSource::CloudRequirements => "cloud_requirements",
         nez_protocol::protocol::HookSource::CloudManagedConfig => "cloud_managed_config",
-        nez_protocol::protocol::HookSource::LegacyManagedConfigFile => {
-            "legacy_managed_config_file"
-        }
+        nez_protocol::protocol::HookSource::LegacyManagedConfigFile => "legacy_managed_config_file",
         nez_protocol::protocol::HookSource::LegacyManagedConfigMdm => "legacy_managed_config_mdm",
         nez_protocol::protocol::HookSource::Unknown => "unknown",
     }

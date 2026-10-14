@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
+use futures::future::BoxFuture;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::HttpClient;
 use nez_exec_server::HttpRequestParams;
 use nez_exec_server::HttpRequestResponse;
 use nez_exec_server::HttpResponseBodyStream;
-use futures::future::BoxFuture;
 
 const OPENAI_DEVELOPER_DOCS_MCP_URL: &str = "https://developers.openai.com/mcp";
 const OPENAI_DEVELOPER_DOCS_MCP_NEZ_URL: &str = "https://developers.openai.com/mcp?source=nez";

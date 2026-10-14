@@ -4,6 +4,7 @@
 use crate::session::session::Session;
 use crate::tools::context::ToolInvocation;
 use crate::tools::registry::CoreToolRuntime;
+use futures::future::BoxFuture;
 use nez_tools::JsonSchema;
 use nez_tools::ResponsesApiNamespace;
 use nez_tools::ResponsesApiNamespaceTool;
@@ -12,7 +13,6 @@ use nez_tools::ToolExposure;
 use nez_tools::ToolName;
 use nez_tools::ToolSearchInfo;
 use nez_tools::ToolSpec;
-use futures::future::BoxFuture;
 use std::sync::Arc;
 
 pub(crate) const MULTI_AGENT_V2_NAMESPACE_DESCRIPTION: &str =

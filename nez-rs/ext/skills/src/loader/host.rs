@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use futures::StreamExt;
 use nez_exec_server::ExecutorFileSystem;
 use nez_exec_server::FileSystemEnvironmentAccessor;
 use nez_exec_server::GetMetadataOptions;
@@ -15,7 +16,6 @@ use nez_utils_path_uri::PathUri;
 use nez_utils_plugins::PluginIdentity;
 use nez_utils_plugins::PluginSkillRoot;
 use nez_utils_plugins::SkillDiscoveryMode;
-use futures::StreamExt;
 use tracing::error;
 
 use super::MAX_QUALIFIED_NAME_LEN;

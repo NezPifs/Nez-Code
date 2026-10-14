@@ -20,9 +20,7 @@ pub(crate) fn request(root: &Path) -> anyhow::Result<CapabilityLocationRequest> 
     Ok(CapabilityLocationRequest {
         nez_home: PathUri::from_host_native_path(root.join("nez"))?,
         user_home: Some(PathUri::from_host_native_path(root.join("home"))?),
-        system_skills_root: Some(PathUri::from_host_native_path(
-            root.join("etc/nez/skills"),
-        )?),
+        system_skills_root: Some(PathUri::from_host_native_path(root.join("etc/nez/skills"))?),
     })
 }
 

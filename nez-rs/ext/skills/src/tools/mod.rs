@@ -21,8 +21,8 @@ use nez_extension_api::ToolName;
 use nez_extension_api::ToolOutput;
 use nez_extension_api::ToolSpec;
 use nez_extension_api::parse_tool_input_schema;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::McpResourceClient;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_otel::SessionTelemetry;
 use nez_otel::SkillInvocationEvent;
 use nez_otel::SkillInvocationType;
@@ -280,9 +280,7 @@ impl SkillToolAuthority {
 
     pub(crate) fn from_authority(authority: &SkillAuthority) -> Option<Self> {
         match &authority.kind {
-            SkillSourceKind::Cloud if authority.id == NEZ_APPS_MCP_SERVER_NAME => {
-                Some(Self::Cloud)
-            }
+            SkillSourceKind::Cloud if authority.id == NEZ_APPS_MCP_SERVER_NAME => Some(Self::Cloud),
             SkillSourceKind::Executor => Some(Self::Executor {
                 id: authority.id.clone(),
             }),

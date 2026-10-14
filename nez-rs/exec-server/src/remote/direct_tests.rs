@@ -5,13 +5,13 @@ use std::time::Duration;
 use std::time::Instant;
 
 use anyhow::Result;
+use http::HeaderMap;
+use http::HeaderValue;
 use nez_api::AuthProvider;
 use nez_http_client::DestinationPolicy;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::NetworkPolicyController;
 use nez_http_client::OutboundProxyPolicy;
-use http::HeaderMap;
-use http::HeaderValue;
 use pretty_assertions::assert_eq;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
@@ -42,10 +42,7 @@ impl AuthProvider for StaticAuthProvider {
         );
     }
 
-    fn apply_auth(
-        &self,
-        mut request: nez_http_client::Request,
-    ) -> nez_api::AuthProviderFuture<'_> {
+    fn apply_auth(&self, mut request: nez_http_client::Request) -> nez_api::AuthProviderFuture<'_> {
         Box::pin(async move {
             if request.method == http::Method::GET {
                 assert_eq!(request.headers.len(), 1);
@@ -64,10 +61,7 @@ struct QueryAuthProvider;
 impl AuthProvider for QueryAuthProvider {
     fn add_auth_headers(&self, _headers: &mut HeaderMap) {}
 
-    fn apply_auth(
-        &self,
-        mut request: nez_http_client::Request,
-    ) -> nez_api::AuthProviderFuture<'_> {
+    fn apply_auth(&self, mut request: nez_http_client::Request) -> nez_api::AuthProviderFuture<'_> {
         Box::pin(async move {
             let mut url = url::Url::parse(&request.url)
                 .map_err(|error| nez_api::AuthError::Build(error.to_string()))?;

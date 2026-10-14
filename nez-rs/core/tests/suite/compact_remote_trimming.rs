@@ -63,8 +63,7 @@ async fn remote_compact_v2_token_estimate_ignores_message_bookkeeping_and_json_e
             "content": [{"type": "input_text", "text": text}],
             "internal_chat_message_metadata_passthrough": metadata,
         });
-        nez
-            .inject_response_items(vec![serde_json::from_value(message.clone())?])
+        nez.inject_response_items(vec![serde_json::from_value(message.clone())?])
             .await?;
         let mock = mount_sse_once(harness.server(), compact_response()).await;
         nez.submit(Op::Compact).await?;

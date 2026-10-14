@@ -1,6 +1,27 @@
 use core_test_support::test_nez::local_requests;
 use std::sync::Arc;
 
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::context_snapshot::SnapshotEntry;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_completed_with_tokens;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_message_item_added;
+use core_test_support::responses::ev_output_text_delta;
+use core_test_support::responses::ev_reasoning_item;
+use core_test_support::responses::ev_reasoning_item_added;
+use core_test_support::responses::ev_response_created;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::StreamingSseServer;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
 use nez_core::NezThread;
 use nez_core::StartIfIdleSubmission;
 use nez_core::StartThreadOptions;
@@ -29,34 +50,13 @@ use nez_protocol::models::PermissionProfile;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::ReasoningEffort;
 use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::InterAgentCommunication;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::turn_input::CyberAccessProgram;
 use nez_protocol::user_input::UserInput;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::context_snapshot::SnapshotEntry;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_completed_with_tokens;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_message_item_added;
-use core_test_support::responses::ev_output_text_delta;
-use core_test_support::responses::ev_reasoning_item;
-use core_test_support::responses::ev_reasoning_item_added;
-use core_test_support::responses::ev_response_created;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::StreamingSseServer;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::from_slice;
@@ -338,13 +338,12 @@ async fn build_nez(server: &StreamingSseServer) -> Arc<NezThread> {
 }
 
 async fn submit_user_input(nez: &NezThread, text: &str) {
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: text.to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit user input");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: text.to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit user input");
 }
 
 async fn submit_danger_full_access_user_turn(test: &TestNez, text: &str) {
@@ -388,25 +387,23 @@ async fn steer_user_input(nez: &NezThread, text: &str) {
 }
 
 async fn enqueue_queue_only_agent_mail(nez: &NezThread, text: &str) {
-    nez
-        .submit(Op::InterAgentCommunication {
-            communication: InterAgentCommunication::new(
-                AgentPath::try_from("/root/worker").expect("worker path should parse"),
-                AgentPath::root(),
-                Vec::new(),
-                text.to_string(),
-                /*trigger_turn*/ false,
-            ),
-            start_options: Default::default(),
-        })
-        .await
-        .expect("submit queue-only agent mail");
+    nez.submit(Op::InterAgentCommunication {
+        communication: InterAgentCommunication::new(
+            AgentPath::try_from("/root/worker").expect("worker path should parse"),
+            AgentPath::root(),
+            Vec::new(),
+            text.to_string(),
+            /*trigger_turn*/ false,
+        ),
+        start_options: Default::default(),
+    })
+    .await
+    .expect("submit queue-only agent mail");
 }
 
 async fn submit_queue_only_agent_mail(nez: &NezThread, text: &str) {
     enqueue_queue_only_agent_mail(nez, text).await;
-    nez
-        .submit(Op::RealtimeConversationListVoices)
+    nez.submit(Op::RealtimeConversationListVoices)
         .await
         .expect("submit list-voices barrier");
     wait_for_event(nez, |event| {
@@ -606,9 +603,7 @@ async fn queue_only_agent_mail_wakes_sleeping_root_with_previous_turn_context(
         .iter()
         .skip(1)
         .map(|request| {
-            serde_json::from_str::<Value>(
-                &request.header("x-nez-turn-metadata").expect("metadata"),
-            )
+            serde_json::from_str::<Value>(&request.header("x-nez-turn-metadata").expect("metadata"))
         })
         .collect::<Result<Vec<_>, _>>()?;
     let root = parent.map_or(turn_id.as_str(), |_| "original-root");
@@ -945,26 +940,24 @@ async fn injected_user_input_triggers_follow_up_request_with_deltas() {
         .unwrap()
         .nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "first prompt".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "first prompt".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |event| {
         matches!(event, EventMsg::AgentMessageContentDelta(_))
     })
     .await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "second prompt".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "second prompt".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     let _ = gate_completed_tx.send(());
 
@@ -1201,13 +1194,11 @@ async fn injected_response_item_reopens_turn_after_final_answer() {
     wait_for_reasoning_item_started(&nez).await;
 
     assert!(
-        nez
-            .inject_if_running(vec![responses::user_message_item(INJECTED_CONTEXT)])
+        nez.inject_if_running(vec![responses::user_message_item(INJECTED_CONTEXT)])
             .await
             .is_ok()
     );
-    nez
-        .inject_response_items(vec![responses::user_message_item(EXTERNAL_CONTEXT)])
+    nez.inject_response_items(vec![responses::user_message_item(EXTERNAL_CONTEXT)])
         .await
         .expect("external context should be injected");
     let _ = gate_completed_tx.send(());
@@ -1400,8 +1391,7 @@ async fn steer_during_stream_retry_skips_backoff() {
         .filter(|text| text == "first prompt" || text == "second prompt")
         .collect::<Vec<_>>();
     assert_eq!(prompts, vec!["first prompt", "second prompt"]);
-    nez
-        .shutdown_and_wait()
+    nez.shutdown_and_wait()
         .await
         .expect("shut down test session");
 }
@@ -1453,18 +1443,17 @@ async fn steers_during_tool_drain_preserve_tool_output_and_each_input() {
 
     steer_user_input(&nez, "second prompt").await;
     steer_user_input(&nez, "third prompt").await;
-    nez
-        .submit(Op::DynamicToolResponse {
-            id: tool_request.call_id,
-            response: DynamicToolResponse {
-                content_items: vec![DynamicToolCallOutputContentItem::InputText {
-                    text: "held tool result".to_string(),
-                }],
-                success: true,
-            },
-        })
-        .await
-        .expect("complete dynamic tool");
+    nez.submit(Op::DynamicToolResponse {
+        id: tool_request.call_id,
+        response: DynamicToolResponse {
+            content_items: vec![DynamicToolCallOutputContentItem::InputText {
+                text: "held tool result".to_string(),
+            }],
+            success: true,
+        },
+    })
+    .await
+    .expect("complete dynamic tool");
     wait_for_event(&nez, |event| {
         assert!(!matches!(
             event,
@@ -1624,18 +1613,17 @@ async fn steers_yield_exec_and_wait_without_stopping_the_cell(instant_interrupt:
     };
     steer_user_input(&nez, "interrupt exec").await;
     if !instant_interrupt {
-        nez
-            .submit(Op::DynamicToolResponse {
-                id: tool_request.call_id,
-                response: DynamicToolResponse {
-                    content_items: vec![DynamicToolCallOutputContentItem::InputText {
-                        text: "released".into(),
-                    }],
-                    success: true,
-                },
-            })
-            .await
-            .expect("release nested tool");
+        nez.submit(Op::DynamicToolResponse {
+            id: tool_request.call_id,
+            response: DynamicToolResponse {
+                content_items: vec![DynamicToolCallOutputContentItem::InputText {
+                    text: "released".into(),
+                }],
+                success: true,
+            },
+        })
+        .await
+        .expect("release nested tool");
         wait_for_turn_complete(&nez).await;
         let request = final_response.single_request().body_json();
         assert!(
@@ -1644,8 +1632,7 @@ async fn steers_yield_exec_and_wait_without_stopping_the_cell(instant_interrupt:
                 .contains("background result")
         );
         assert!(message_input_texts(&request, "user").contains(&"interrupt exec".to_string()));
-        nez
-            .shutdown_and_wait()
+        nez.shutdown_and_wait()
             .await
             .expect("shut down test session");
         return;
@@ -1659,18 +1646,17 @@ async fn steers_yield_exec_and_wait_without_stopping_the_cell(instant_interrupt:
         matches!(event, EventMsg::RawResponseItem(raw) if matches!(&raw.item, ResponseItem::FunctionCall { call_id, .. } if call_id == WAIT_TWO_ID))
     })
     .await;
-    nez
-        .submit(Op::DynamicToolResponse {
-            id: tool_request.call_id,
-            response: DynamicToolResponse {
-                content_items: vec![DynamicToolCallOutputContentItem::InputText {
-                    text: "released".into(),
-                }],
-                success: true,
-            },
-        })
-        .await
-        .expect("release nested tool");
+    nez.submit(Op::DynamicToolResponse {
+        id: tool_request.call_id,
+        response: DynamicToolResponse {
+            content_items: vec![DynamicToolCallOutputContentItem::InputText {
+                text: "released".into(),
+            }],
+            success: true,
+        },
+    })
+    .await
+    .expect("release nested tool");
     wait_for_event(&nez, |event| {
         assert!(!matches!(
             event,
@@ -1709,8 +1695,7 @@ async fn steers_yield_exec_and_wait_without_stopping_the_cell(instant_interrupt:
         prompts,
         vec!["start the cell", "interrupt exec", "interrupt wait"]
     );
-    nez
-        .shutdown_and_wait()
+    nez.shutdown_and_wait()
         .await
         .expect("shut down test session");
 }
@@ -1793,8 +1778,7 @@ async fn steer_during_compaction_is_sent_after_compaction() {
     assert!(steer_counts.contains(&1), "steer counts: {steer_counts:?}");
     assert!(steer_counts.iter().all(|count| *count <= 1));
 
-    nez
-        .shutdown_and_wait()
+    nez.shutdown_and_wait()
         .await
         .expect("shut down test session");
     server.shutdown().await;
@@ -1900,18 +1884,17 @@ async fn input_preempts_response_and_yields_running_code_mode_call() {
         .await
         .expect("the old server response should finish or detect the closed client");
 
-    nez
-        .submit(Op::DynamicToolResponse {
-            id: held_tool.call_id,
-            response: DynamicToolResponse {
-                content_items: vec![DynamicToolCallOutputContentItem::InputText {
-                    text: "released".into(),
-                }],
-                success: true,
-            },
-        })
-        .await
-        .expect("release nested tool");
+    nez.submit(Op::DynamicToolResponse {
+        id: held_tool.call_id,
+        response: DynamicToolResponse {
+            content_items: vec![DynamicToolCallOutputContentItem::InputText {
+                text: "released".into(),
+            }],
+            success: true,
+        },
+    })
+    .await
+    .expect("release nested tool");
     release_final_tx
         .send(())
         .expect("finish follow-up response");
@@ -1924,8 +1907,7 @@ async fn input_preempts_response_and_yields_running_code_mode_call() {
         matches!(event, EventMsg::TurnComplete(completed) if completed.error.is_none())
     })
     .await;
-    nez
-        .shutdown_and_wait()
+    nez.shutdown_and_wait()
         .await
         .expect("shut down test session");
     server.shutdown().await;
@@ -2080,17 +2062,15 @@ async fn interrupt_if_no_pending_input_checks_turn_and_queue(
     if matches!(case, ConditionalInterruptCase::AbandonedRequest) {
         let (reply, result) = oneshot::channel();
         drop(result);
-        nez
-            .submit(Op::InterruptIfNoPendingInput { turn_id, reply })
+        nez.submit(Op::InterruptIfNoPendingInput { turn_id, reply })
             .await?;
         // Wait for the abandoned request to be handled before releasing the response.
         let (reply, result) = oneshot::channel();
-        nez
-            .submit(Op::InterruptIfNoPendingInput {
-                turn_id: expected_turn_id.clone(),
-                reply,
-            })
-            .await?;
+        nez.submit(Op::InterruptIfNoPendingInput {
+            turn_id: expected_turn_id.clone(),
+            reply,
+        })
+        .await?;
         assert!(!tokio::time::timeout(std::time::Duration::from_secs(/*secs*/ 10), result).await??);
     }
     let should_abort = matches!(case, ConditionalInterruptCase::CurrentTurn);
@@ -2257,18 +2237,17 @@ async fn terminal_compaction_error_does_not_retry_pending_input(
         PendingInputAfterFailure::Steer => steer_user_input(nez, PENDING_MESSAGE).await,
         PendingInputAfterFailure::QueuedMail => {}
         PendingInputAfterFailure::TriggeringMail => {
-            nez
-                .submit(Op::InterAgentCommunication {
-                    communication: InterAgentCommunication::new(
-                        AgentPath::root().join("worker").expect("valid worker path"),
-                        AgentPath::root(),
-                        Vec::new(),
-                        PENDING_MESSAGE.to_string(),
-                        /*trigger_turn*/ true,
-                    ),
-                    start_options: Default::default(),
-                })
-                .await?;
+            nez.submit(Op::InterAgentCommunication {
+                communication: InterAgentCommunication::new(
+                    AgentPath::root().join("worker").expect("valid worker path"),
+                    AgentPath::root(),
+                    Vec::new(),
+                    PENDING_MESSAGE.to_string(),
+                    /*trigger_turn*/ true,
+                ),
+                start_options: Default::default(),
+            })
+            .await?;
             nez.submit(Op::RealtimeConversationListVoices).await?;
             wait_for_event(nez, |event| {
                 matches!(event, EventMsg::RealtimeConversationListVoicesResponse(_))
@@ -2283,10 +2262,7 @@ async fn terminal_compaction_error_does_not_retry_pending_input(
     wait_for_event(nez, |event| {
         match event {
             EventMsg::Error(error) => {
-                assert_eq!(
-                    error.nez_error_info,
-                    Some(NezErrorInfo::UsageLimitExceeded)
-                );
+                assert_eq!(error.nez_error_info, Some(NezErrorInfo::UsageLimitExceeded));
                 errors.push(error.clone());
             }
             EventMsg::TurnComplete(completed) => {

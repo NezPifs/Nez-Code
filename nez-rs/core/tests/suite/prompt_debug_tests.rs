@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use core_test_support::responses::strip_metadata;
+use core_test_support::responses::strip_response_item_id;
 use nez_core::build_prompt_input;
 use nez_core::config::ConfigBuilder;
 use nez_core::config::ConfigOverrides;
@@ -9,8 +11,6 @@ use nez_home::NezHomeUserInstructionsProvider;
 use nez_protocol::models::ContentItem;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses::strip_metadata;
-use core_test_support::responses::strip_response_item_id;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 

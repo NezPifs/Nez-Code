@@ -433,8 +433,7 @@ async fn remove_stale_remote_plugin_caches(
             if installed_plugin_names.contains(&plugin_name) {
                 continue;
             }
-            if is_remote_plugin_cache_mutation_in_flight(nez_home, marketplace_name, &plugin_name)
-            {
+            if is_remote_plugin_cache_mutation_in_flight(nez_home, marketplace_name, &plugin_name) {
                 continue;
             }
 
@@ -772,11 +771,7 @@ mod tests {
                 .join(PLUGINS_CACHE_DIR)
                 .join(marketplace_name)
                 .join(plugin_name);
-            assert!(
-                plugin_root
-                    .join("1.2.3/.nez-plugin/plugin.json")
-                    .is_file()
-            );
+            assert!(plugin_root.join("1.2.3/.nez-plugin/plugin.json").is_file());
             assert_eq!(
                 serde_json::from_str::<serde_json::Value>(
                     &std::fs::read_to_string(plugin_root.join(".nez-remote-plugin-install.json"))

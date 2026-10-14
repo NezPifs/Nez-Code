@@ -19,10 +19,10 @@ use nez_http_client::NetworkPolicyDenied;
 use nez_login::AuthCredentialsStoreMode;
 use nez_login::AuthKeyringBackendKind;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::ExternalAuth;
 use nez_login::ExternalAuthFuture;
 use nez_login::ExternalAuthRefreshContext;
+use nez_login::NezAuth;
 use nez_protocol::config_types::TrustLevel;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
@@ -185,12 +185,7 @@ async fn startup_reloads_the_callers_selected_project() -> anyhow::Result<()> {
         Arg0DispatchPaths::default(),
         Arc::new(NoopThreadConfigLoader),
     );
-    let _auth = configure(
-        &manager,
-        &mut config,
-        /*enable_nez_api_key_env*/ false,
-    )
-    .await?;
+    let _auth = configure(&manager, &mut config, /*enable_nez_api_key_env*/ false).await?;
     assert_eq!(
         config.cwd.as_path().canonicalize()?,
         selected.canonicalize()?
@@ -198,14 +193,10 @@ async fn startup_reloads_the_callers_selected_project() -> anyhow::Result<()> {
     assert_eq!(config.chatgpt_base_url, selected_url);
 
     std::fs::write(&project_config, "[malformed")?;
-    let error = configure(
-        &manager,
-        &mut config,
-        /*enable_nez_api_key_env*/ false,
-    )
-    .await
-    .err()
-    .ok_or_else(|| anyhow::anyhow!("embedded startup ignored the selected project"))?;
+    let error = configure(&manager, &mut config, /*enable_nez_api_key_env*/ false)
+        .await
+        .err()
+        .ok_or_else(|| anyhow::anyhow!("embedded startup ignored the selected project"))?;
     assert!(
         error
             .to_string()

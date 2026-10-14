@@ -89,8 +89,8 @@ async fn microphone_channel_picker_routes_selection_without_starting_audio() {
         .audio
         .as_mut()
         .unwrap()
-        .microphone_channel = std::num::NonZeroU16::new(/*n*/ 1)
-        .map(nez_config::config_toml::MicrophoneChannels::Single);
+        .microphone_channel =
+        std::num::NonZeroU16::new(/*n*/ 1).map(nez_config::config_toml::MicrophoneChannels::Single);
     chat.open_realtime_settings();
     chat.bottom_pane
         .handle_key_event(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
@@ -142,12 +142,12 @@ async fn microphone_channel_picker_routes_selection_without_starting_audio() {
     });
     assert_eq!(
         selected,
-        Some(Some(
-            nez_config::config_toml::MicrophoneChannels::Multiple(vec![
+        Some(Some(nez_config::config_toml::MicrophoneChannels::Multiple(
+            vec![
                 std::num::NonZeroU16::new(/*n*/ 1).unwrap(),
                 std::num::NonZeroU16::new(/*n*/ 2).unwrap()
-            ])
-        ))
+            ]
+        )))
     );
     // Empty confirmation stays in the picker; Escape discards the edit.
     chat.open_realtime_input_channels(AudioDevice {

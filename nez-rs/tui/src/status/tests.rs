@@ -28,6 +28,7 @@ use chrono::Duration as ChronoDuration;
 use chrono::Local;
 use chrono::TimeZone;
 use chrono::Utc;
+use insta::assert_snapshot;
 use nez_app_server_protocol::AskForApproval;
 use nez_app_server_protocol::CreditsSnapshot;
 use nez_app_server_protocol::RateLimitSnapshot;
@@ -54,7 +55,6 @@ use nez_protocol::permissions::FileSystemSpecialPath;
 use nez_protocol::permissions::NetworkSandboxPolicy;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use insta::assert_snapshot;
 use pretty_assertions::assert_eq;
 use ratatui::prelude::*;
 use std::sync::Arc;
@@ -1724,8 +1724,7 @@ async fn status_snapshot_uses_default_reasoning_when_config_empty() {
         (Some(true), "status_snapshot_local_background_server"),
     ] {
         let remote_connection = is_local_daemon.map(|is_local_daemon| RemoteConnectionStatus {
-            address: "unix:///tmp/nez-home/app-server-control/app-server-control.sock"
-                .to_string(),
+            address: "unix:///tmp/nez-home/app-server-control/app-server-control.sock".to_string(),
             version: "v0.133.0".to_string(),
             is_local_daemon,
             is_managed_daemon: is_local_daemon,

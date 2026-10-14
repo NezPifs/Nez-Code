@@ -1,3 +1,4 @@
+use futures::Stream;
 pub use nez_api::ResponseEvent;
 use nez_protocol::error::Result;
 use nez_protocol::models::BaseInstructions;
@@ -8,7 +9,6 @@ use nez_protocol::models::ImageDetail;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::ModelInfo;
 use nez_tools::ToolSpec;
-use futures::Stream;
 use serde_json::Value;
 use std::pin::Pin;
 use std::sync::Arc;

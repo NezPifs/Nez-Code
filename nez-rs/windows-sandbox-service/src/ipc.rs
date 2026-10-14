@@ -13,14 +13,14 @@ use anyhow::Result;
 use anyhow::bail;
 pub(crate) use authentication::ClientIdentity;
 use authentication::authenticate_client;
+pub(crate) use home::pin_directory;
+pub(crate) use home::pin_existing_ancestors;
 use nez_windows_sandbox::FramedProvisioningMessage;
 use nez_windows_sandbox::PROVISIONING_PROTOCOL_VERSION;
 use nez_windows_sandbox::ProvisioningMessage;
 use nez_windows_sandbox::SandboxProvisioningResponse;
 use nez_windows_sandbox::to_wide;
 use nez_windows_sandbox::write_provisioning_frame;
-pub(crate) use home::pin_directory;
-pub(crate) use home::pin_existing_ancestors;
 pub(crate) use request::ProvisioningRequest;
 pub(crate) use request::ServiceRequest;
 use request::validate_request;
@@ -385,9 +385,7 @@ fn policy_rejection_diagnostic(error: &anyhow::Error) -> String {
         io.map(|io| format!("io={:?} win32={:?}", io.kind(), io.raw_os_error()))
     });
     let detail = detail.unwrap_or_else(|| "cause=unavailable".to_string());
-    format!(
-        "Nez sandbox provisioning was rejected by administrator policy: stage={stage} {detail}"
-    )
+    format!("Nez sandbox provisioning was rejected by administrator policy: stage={stage} {detail}")
 }
 
 fn is_config_parse_error(error: &anyhow::Error) -> bool {

@@ -1,8 +1,8 @@
+use http::StatusCode;
 use nez_api::ApiError;
 use nez_api::TransportError;
 use nez_protocol::error::NezErr;
 use nez_protocol::error::NezErrorDetails;
-use http::StatusCode;
 
 pub(super) const CREDENTIAL_EXPORT_CONFIG_ERROR_PREFIX: &str =
     "AWS credential export configuration error:";

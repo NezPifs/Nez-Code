@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::Result;
+use futures::FutureExt;
+use futures::future::join_all;
 use nez_config::McpServerAuth;
 use nez_config::McpServerConfig;
 use nez_config::McpServerTransportConfig;
@@ -18,8 +20,6 @@ use nez_rmcp_client::determine_streamable_http_auth_status;
 use nez_rmcp_client::determine_streamable_http_auth_status_from_credentials;
 use nez_rmcp_client::discover_streamable_http_oauth;
 use nez_rmcp_client::resolve_mcp_oauth_callback_url;
-use futures::FutureExt;
-use futures::future::join_all;
 use tracing::warn;
 
 use crate::runtime::McpRuntimeContext;

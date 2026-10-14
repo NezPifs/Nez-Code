@@ -456,11 +456,11 @@ mod error_tests;
 mod tests {
     use std::num::NonZeroU64;
 
+    use http::HeaderValue;
     use nez_login::auth::BedrockAccessKeysAuth;
     use nez_login::auth::BedrockApiKeyAuth;
     use nez_model_provider_info::AwsAuthRefreshConfig;
     use nez_protocol::config_types::ModelProviderAuthInfo;
-    use http::HeaderValue;
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -614,13 +614,12 @@ mod tests {
         );
         assert!(!provider.uses_aws_auth_recovery());
 
-        let access_keys_auth_manager = AuthManager::from_auth_for_testing(
-            NezAuth::BedrockAccessKeys(BedrockAccessKeysAuth {
+        let access_keys_auth_manager =
+            AuthManager::from_auth_for_testing(NezAuth::BedrockAccessKeys(BedrockAccessKeysAuth {
                 access_key_id: "managed-access-key-id".to_string(),
                 secret_access_key: "managed-secret-access-key".to_string(),
                 session_token: None,
-            }),
-        );
+            }));
 
         for auth_manager in [auth_manager, access_keys_auth_manager] {
             let configured_profile_provider = AmazonBedrockModelProvider::new(
@@ -726,8 +725,7 @@ mod tests {
             api_key: "managed-bedrock-api-key".to_string(),
             region: "eu-west-1".to_string(),
         };
-        let auth_manager =
-            AuthManager::from_auth_for_testing(NezAuth::BedrockApiKey(managed_auth));
+        let auth_manager = AuthManager::from_auth_for_testing(NezAuth::BedrockApiKey(managed_auth));
         let provider = AmazonBedrockModelProvider::new(
             ModelProviderInfo::create_amazon_bedrock_runtime_provider(/*aws*/ None),
             Some(auth_manager),

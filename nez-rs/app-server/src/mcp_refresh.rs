@@ -1,6 +1,6 @@
 use crate::config_manager::ConfigManager;
-use nez_core::NezThread;
 use nez_core::ConfigRefreshOutcome;
+use nez_core::NezThread;
 use nez_core::ThreadManager;
 use nez_core::config::Config;
 use std::io;

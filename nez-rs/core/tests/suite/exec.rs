@@ -1,5 +1,6 @@
 #![cfg(target_os = "macos")]
 
+use core_test_support::PathExt;
 use nez_core::exec::ExecCapturePolicy;
 use nez_core::exec::ExecParams;
 use nez_core::exec::process_exec_tool_call;
@@ -11,7 +12,6 @@ use nez_protocol::exec_output::ExecToolCallOutput;
 use nez_protocol::models::PermissionProfile;
 use nez_sandboxing::SandboxType;
 use nez_sandboxing::get_platform_sandbox;
-use core_test_support::PathExt;
 use std::collections::HashMap;
 use tempfile::TempDir;
 

@@ -5,6 +5,25 @@ use std::fs;
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::assert_regex_match;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_custom_tool_call_with_namespace;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_response_once;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::strip_response_item_ids_from_json;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::local;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::StartThreadOptions;
 use nez_core::TurnInputRequest;
@@ -26,25 +45,6 @@ use nez_protocol::protocol::AskForApproval;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::assert_regex_match;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_custom_tool_call_with_namespace;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_response_once;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::strip_response_item_ids_from_json;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::local;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -539,11 +539,7 @@ async fn namespaced_custom_tool_call_preserves_namespace_through_dispatch_and_re
         &server,
         sse(vec![
             ev_response_created("resp-5"),
-            ev_custom_tool_call(
-                direct_exec_call_id,
-                nez_code_mode::PUBLIC_TOOL_NAME,
-                input,
-            ),
+            ev_custom_tool_call(direct_exec_call_id, nez_code_mode::PUBLIC_TOOL_NAME, input),
             ev_completed("resp-5"),
         ]),
     )
@@ -787,27 +783,25 @@ async fn exec_command_enforces_glob_deny_read_policy() -> Result<()> {
     skip_if_sandbox!(Ok(()));
 
     let server = start_mock_server().await;
-    let mut builder = test_nez()
-        .with_model("gpt-5.4")
-        .with_config(move |config| {
-            let mut file_system_sandbox_policy = FileSystemSandboxPolicy::default();
-            file_system_sandbox_policy
-                .entries
-                .push(FileSystemSandboxEntry {
-                    path: FileSystemPath::GlobPattern {
-                        pattern: format!("{}/**/*.env", config.cwd.as_path().display()),
-                    },
-                    access: FileSystemAccessMode::Deny,
-                    missing_path_behavior: None,
-                });
-            config
-                .permissions
-                .set_permission_profile(PermissionProfile::from_runtime_permissions(
-                    &file_system_sandbox_policy,
-                    NetworkSandboxPolicy::Restricted,
-                ))
-                .expect("set permission profile");
-        });
+    let mut builder = test_nez().with_model("gpt-5.4").with_config(move |config| {
+        let mut file_system_sandbox_policy = FileSystemSandboxPolicy::default();
+        file_system_sandbox_policy
+            .entries
+            .push(FileSystemSandboxEntry {
+                path: FileSystemPath::GlobPattern {
+                    pattern: format!("{}/**/*.env", config.cwd.as_path().display()),
+                },
+                access: FileSystemAccessMode::Deny,
+                missing_path_behavior: None,
+            });
+        config
+            .permissions
+            .set_permission_profile(PermissionProfile::from_runtime_permissions(
+                &file_system_sandbox_policy,
+                NetworkSandboxPolicy::Restricted,
+            ))
+            .expect("set permission profile");
+    });
     let fixture = builder.build(&server).await?;
 
     let fixture_dir = fixture.workspace_path("glob-deny-read");
@@ -904,16 +898,15 @@ async fn collect_tools(availability: CommandToolAvailability) -> Result<Vec<Stri
 
     let mut builder = match availability {
         CommandToolAvailability::Default => test_nez(),
-        CommandToolAvailability::ManagedUnifiedExecDisabled => test_nez()
-            .with_cloud_config_bundle(
-                CloudConfigBundleFixture::loader_with_enterprise_requirement(
-                    r#"
+        CommandToolAvailability::ManagedUnifiedExecDisabled => test_nez().with_cloud_config_bundle(
+            CloudConfigBundleFixture::loader_with_enterprise_requirement(
+                r#"
 [features]
 unified_exec = false
 shell_tool = true
 "#,
-                ),
             ),
+        ),
         CommandToolAvailability::ShellToolDisabled => test_nez().with_config(|config| {
             config
                 .features

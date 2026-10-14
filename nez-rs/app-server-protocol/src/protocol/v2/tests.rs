@@ -40,11 +40,11 @@ use nez_protocol::permissions::FileSystemSandboxEntry as CoreFileSystemSandboxEn
 use nez_protocol::permissions::FileSystemSpecialPath as CoreFileSystemSpecialPath;
 use nez_protocol::protocol::AgentStatus as CoreAgentStatus;
 use nez_protocol::protocol::AskForApproval as CoreAskForApproval;
-use nez_protocol::protocol::NezErrorInfo as CoreNezErrorInfo;
 use nez_protocol::protocol::ConversationTextRole;
 use nez_protocol::protocol::ExecCommandSource as CoreExecCommandSource;
 use nez_protocol::protocol::GranularApprovalConfig as CoreGranularApprovalConfig;
 use nez_protocol::protocol::NetworkAccess as CoreNetworkAccess;
+use nez_protocol::protocol::NezErrorInfo as CoreNezErrorInfo;
 use nez_protocol::protocol::SubAgentActivityKind as CoreSubAgentActivityKind;
 use nez_protocol::request_permissions::RequestPermissionProfile as CoreRequestPermissionProfile;
 use nez_protocol::user_input::UserInput as CoreUserInput;
@@ -4787,10 +4787,7 @@ fn core_error_info_converts_to_camel_case() {
         (CoreNezErrorInfo::CyberPolicy, json!("cyberPolicy")),
         (CoreNezErrorInfo::BioPolicy, json!("other")),
         (CoreNezErrorInfo::InvalidPrompt, json!("other")),
-        (
-            CoreNezErrorInfo::FlexUnavailable,
-            json!("flexUnavailable"),
-        ),
+        (CoreNezErrorInfo::FlexUnavailable, json!("flexUnavailable")),
         (
             CoreNezErrorInfo::RateLimitExceeded,
             json!("rateLimitExceeded"),

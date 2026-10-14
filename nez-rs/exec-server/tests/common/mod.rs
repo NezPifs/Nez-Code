@@ -6,10 +6,11 @@ use std::process::Command;
 use std::process::Stdio;
 use std::time::Duration;
 
-use nez_exec_server::NEZ_ARG0_EXEC_HELPER_ARG1;
-use nez_exec_server::NEZ_FS_HELPER_ARG1;
+use ctor::ctor;
 use nez_exec_server::ExecServerRuntimeOptions;
 use nez_exec_server::ExecServerTelemetry;
+use nez_exec_server::NEZ_ARG0_EXEC_HELPER_ARG1;
+use nez_exec_server::NEZ_FS_HELPER_ARG1;
 use nez_exec_server::RequestDispatchMode;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
@@ -17,7 +18,6 @@ use nez_sandboxing::landlock::NEZ_LINUX_SANDBOX_ARG0;
 use nez_test_binary_support::TestBinaryDispatchGuard;
 use nez_test_binary_support::TestBinaryDispatchMode;
 use nez_test_binary_support::configure_test_binary_dispatch;
-use ctor::ctor;
 
 pub(crate) mod exec_server;
 
@@ -271,9 +271,9 @@ fn maybe_run_exec_server_from_test_binary(guard: Option<&TestBinaryDispatchGuard
                 &nez_config::NoopThreadConfigLoader,
             )
             .await?;
-            runtime_paths.with_allowed_symlinked_nez_home(
-                nez_config::allowed_symlinked_nez_home(&config, &home),
-            )
+            runtime_paths.with_allowed_symlinked_nez_home(nez_config::allowed_symlinked_nez_home(
+                &config, &home,
+            ))
         };
         nez_exec_server::run_main_with_telemetry(
             &listen_url,

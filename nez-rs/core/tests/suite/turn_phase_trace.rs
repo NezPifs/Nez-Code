@@ -1,6 +1,15 @@
 //! Cross-trace admission links and phase boundaries through a real blocked tool.
 //! Each case uses an isolated process so SQLite workers share its tracing collector.
 
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::RecoverTurnRequest;
 use nez_core::StartIfIdleSubmission;
 use nez_core::StartThreadOptions;
@@ -12,15 +21,6 @@ use nez_protocol::dynamic_tools::DynamicToolSpec;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::Op;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use opentelemetry::KeyValue;
 use opentelemetry::trace::TracerProvider as _;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
@@ -200,10 +200,7 @@ async fn steer_joins_existing_turn_without_extending_sampling(
         }
         Finish::Interrupt => {
             test.nez.submit(Op::Interrupt).await?;
-            wait_for_event(&test.nez, |event| {
-                matches!(event, EventMsg::TurnAborted(_))
-            })
-            .await;
+            wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
             let reply = mount_sse_once(
                 &server,
                 sse(vec![

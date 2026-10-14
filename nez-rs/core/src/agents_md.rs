@@ -20,6 +20,7 @@
 use crate::config::Config;
 use crate::context::UserInstructions as ContextUserInstructions;
 use crate::environment_selection::TurnEnvironmentSnapshot;
+use futures::StreamExt;
 use nez_config::ConfigLayerSource;
 use nez_config::default_project_root_markers;
 use nez_config::merge_toml_values;
@@ -34,7 +35,6 @@ use nez_file_system::find_nearest_ancestor_with_markers;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use futures::StreamExt;
 use std::io;
 use toml::Value as TomlValue;
 use tracing::error;

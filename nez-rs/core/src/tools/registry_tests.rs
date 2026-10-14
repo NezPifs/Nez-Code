@@ -1,10 +1,10 @@
 use super::*;
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
+use futures::future::BoxFuture;
 use nez_protocol::DEFAULT_FUNCTION_NAMESPACE;
 use nez_protocol::models::ResponseItem;
 use nez_utils_output_truncation::TruncationPolicy;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
@@ -360,14 +360,13 @@ fn registry_records_reserved_exec_command_when_a_matching_tool_exists() {
 #[test]
 fn registry_allows_identical_names_in_different_namespaces() {
     let handler = |tool_name| Arc::new(TestHandler { tool_name }) as Arc<dyn CoreToolRuntime>;
-    let mut registry = ToolRegistry::from_tools([handler(nez_tools::ToolName::namespaced(
-        "first", "lookup",
-    ))]);
+    let mut registry =
+        ToolRegistry::from_tools([handler(nez_tools::ToolName::namespaced("first", "lookup"))]);
 
     assert!(
-        registry.register_external(handler(nez_tools::ToolName::namespaced(
-            "second", "lookup",
-        )))
+        registry.register_external(handler(
+            nez_tools::ToolName::namespaced("second", "lookup",)
+        ))
     );
     assert_eq!(registry.first_collision(), None);
 }

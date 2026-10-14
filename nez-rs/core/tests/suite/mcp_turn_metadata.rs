@@ -2,6 +2,29 @@
 #![allow(clippy::unwrap_used)]
 
 use anyhow::Result;
+use core_test_support::PathExt;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::LINK_ID;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_LIST_TOOL;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_NAMESPACE;
+use core_test_support::apps_test_server::recorded_apps_tool_call_by_call_id;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::apps_test_server::search_capable_apps_builder;
+use core_test_support::responses::assert_root_turn;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_config::types::AppToolApproval;
 use nez_core::TurnInputRequest;
@@ -39,29 +62,6 @@ use nez_protocol::request_permissions::RequestPermissionsResponse;
 use nez_protocol::request_user_input::RequestUserInputAnswer;
 use nez_protocol::request_user_input::RequestUserInputResponse;
 use nez_protocol::user_input::UserInput;
-use core_test_support::PathExt;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::LINK_ID;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_LIST_TOOL;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_NAMESPACE;
-use core_test_support::apps_test_server::recorded_apps_tool_call_by_call_id;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::apps_test_server::search_capable_apps_builder;
-use core_test_support::responses::assert_root_turn;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -762,10 +762,7 @@ async fn approved_mcp_tool_call_metadata_records_prior_user_input_request(
     let mcp_turn_metadata = apps_tool_call
         .pointer("/params/_meta/x-nez-turn-metadata")
         .expect("MCP tools/call turn metadata");
-    assert_eq!(
-        mcp_turn_metadata["nez_version"],
-        env!("CARGO_PKG_VERSION")
-    );
+    assert_eq!(mcp_turn_metadata["nez_version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(
         (
             mcp_turn_metadata.get("root_turn_id"),
@@ -1527,9 +1524,7 @@ async fn apps_default_writes_prompts_for_writes_but_not_reads() -> Result<()> {
     let first_turn_id = responses.requests()[2].body_json()["client_metadata"]["turn_id"].clone();
     assert!(first_turn_id.is_string());
     assert_eq!(
-        serde_json::to_value(nez_core::test_support::mcp_attribution_snapshot(
-            &test.nez
-        ))?,
+        serde_json::to_value(nez_core::test_support::mcp_attribution_snapshot(&test.nez))?,
         json!({
             "status": "complete",
             "sources": [{

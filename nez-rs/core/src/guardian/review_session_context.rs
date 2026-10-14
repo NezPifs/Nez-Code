@@ -4,10 +4,10 @@
 use nez_features::Feature;
 use nez_protocol::models::ResponseItem;
 
-use crate::nez_thread::GuardianAuthorizationVersion;
 use crate::config::ManagedFeatures;
 use crate::context::GuardianContextMode;
 use crate::context_manager::ContextManager;
+use crate::nez_thread::GuardianAuthorizationVersion;
 use crate::session::session::Session;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -59,8 +59,7 @@ impl ReviewContextPolicy {
         if matches!(self, Self::Legacy | Self::Independent) {
             return Ok(None);
         }
-        let Some(checkpoint) =
-            nez_history::CompactionCheckpoint::latest(history.annotated_items())
+        let Some(checkpoint) = nez_history::CompactionCheckpoint::latest(history.annotated_items())
         else {
             return Ok(None);
         };

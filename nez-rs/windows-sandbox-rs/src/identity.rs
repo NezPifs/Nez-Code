@@ -138,10 +138,7 @@ fn load_users(nez_home: &Path) -> Result<Option<SandboxUsersFile>> {
         Ok(contents) => contents,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(None),
         Err(err) => {
-            debug_log(
-                &format!("sandbox users read failed: {err}"),
-                Some(nez_home),
-            );
+            debug_log(&format!("sandbox users read failed: {err}"), Some(nez_home));
             return Ok(None);
         }
     };
@@ -280,9 +277,7 @@ pub fn require_logon_sandbox_creds(
     let runtime = crate::setup::current_setup_runtime();
     let needed_read = read_roots_override
         .map(<[PathBuf]>::to_vec)
-        .unwrap_or_else(|| {
-            gather_read_roots(command_cwd, permissions, env_map, nez_home, runtime)
-        });
+        .unwrap_or_else(|| gather_read_roots(command_cwd, permissions, env_map, nez_home, runtime));
     let needed_write = write_roots_override
         .map(<[PathBuf]>::to_vec)
         .unwrap_or_else(|| gather_write_roots_for_permissions(permissions, command_cwd, env_map));

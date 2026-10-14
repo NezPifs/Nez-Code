@@ -5,6 +5,32 @@ use anyhow::Result;
 use chrono::DateTime;
 use chrono::Local;
 use chrono::Utc;
+use core_test_support::fs_wait;
+use core_test_support::responses::assert_parent_turn;
+use core_test_support::responses::assert_root_turn;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_completed_with_tokens;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_models_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::start_websocket_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::local_selections;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
 use nez_config::types::McpServerConfig;
 use nez_config::types::OtelExporterKind;
 use nez_core::SleepFuture;
@@ -53,32 +79,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::ThreadSource;
 use nez_protocol::protocol::TurnAbortReason;
 use nez_protocol::user_input::UserInput;
-use core_test_support::fs_wait;
-use core_test_support::responses::assert_parent_turn;
-use core_test_support::responses::assert_root_turn;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_completed_with_tokens;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_models_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::start_websocket_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::local_selections;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -1979,10 +1979,7 @@ async fn interrupted_guardian_review_across_model_change_does_not_execute_the_co
         nez_protocol::protocol::TurnSettingsUpdateOutcome::Applied
     );
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
     release_review
         .send(())
         .expect("release interrupted review response");
@@ -2466,8 +2463,7 @@ impl nez_extension_api::ApprovalReviewContributor for AttemptCachedApproval {
     fn decide<'a>(
         &'a self,
         _input: &'a nez_extension_api::ApprovalDecisionInput<'_>,
-    ) -> nez_extension_api::ExtensionFuture<'a, Option<nez_extension_api::ApprovalDecision>>
-    {
+    ) -> nez_extension_api::ExtensionFuture<'a, Option<nez_extension_api::ApprovalDecision>> {
         self.0
             .fetch_add(/*val*/ 1, std::sync::atomic::Ordering::SeqCst);
         Box::pin(async { Some(nez_extension_api::ApprovalDecision::Allow) })
@@ -2614,10 +2610,8 @@ async fn cyber_model_guardian_denial_interrupts_turn_immediately(
             .contains("1 consecutive, 1 in the last 50 reviews")
     );
 
-    let aborted = wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    let aborted =
+        wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
     let EventMsg::TurnAborted(aborted) = aborted else {
         unreachable!("wait_for_event returned a non-abort event")
     };
@@ -2886,8 +2880,7 @@ for (let index = 0; index < 6; index++) {{
     let mut active_id = None;
     let mut warning_id = None;
     loop {
-        let event =
-            tokio::time::timeout(Duration::from_secs(60), test.nez.next_event()).await??;
+        let event = tokio::time::timeout(Duration::from_secs(60), test.nez.next_event()).await??;
         match event.msg {
             EventMsg::TurnStarted(_) => active_id = Some(event.id),
             EventMsg::GuardianWarning(warning)

@@ -1,4 +1,13 @@
 use anyhow::Result;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::config::Config;
 use nez_features::Feature;
@@ -12,15 +21,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::MULTI_AGENT_MODE_OPEN_TAG;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -112,18 +112,17 @@ async fn submit_turn(
     prompt: &str,
     effort: Option<ReasoningEffort>,
 ) -> Result<()> {
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: prompt.to_string(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                effort: effort.map(Some),
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: prompt.to_string(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            effort: effort.map(Some),
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     Ok(())
 }

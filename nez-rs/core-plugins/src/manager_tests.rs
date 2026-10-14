@@ -1069,8 +1069,7 @@ plugins = true
 [plugins."counter-sample@test"]
 enabled = true
 "#;
-    let outcome =
-        load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
+    let outcome = load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
 
     assert_eq!(outcome.plugins()[0].error, None);
     assert_eq!(
@@ -1156,8 +1155,7 @@ approval_mode = "approve"
 output_token_limit = 12000
 "#;
 
-    let outcome =
-        load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
+    let outcome = load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
     let server = outcome.plugins()[0]
         .mcp_servers
         .get("sample")
@@ -1840,8 +1838,7 @@ enabled = false
 [plugins."sample@test"]
 enabled = true
 "#;
-    let outcome =
-        load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
+    let outcome = load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
     let skill_path = std::fs::canonicalize(skill_path)
         .expect("skill path should canonicalize")
         .abs();
@@ -1881,8 +1878,7 @@ enabled = false
 [plugins."sample@test"]
 enabled = true
 "#;
-    let outcome =
-        load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
+    let outcome = load_plugins_from_config(config_toml, nez_home.path(), /*auth_mode*/ None).await;
 
     assert!(outcome.plugins()[0].disabled_skill_paths.is_empty());
     assert!(outcome.plugins()[0].has_enabled_skills);
@@ -2315,9 +2311,11 @@ async fn install_plugin_materializes_default_command_skills() {
             )
             .unwrap(),
             AbsolutePathBuf::from_absolute_path_checked(
-                fs::canonicalize(result.installed_path.join(
-                    ".nez-plugin/migrated-command-skills/source-command-summarize/SKILL.md"
-                ))
+                fs::canonicalize(
+                    result.installed_path.join(
+                        ".nez-plugin/migrated-command-skills/source-command-summarize/SKILL.md"
+                    )
+                )
                 .unwrap()
             )
             .unwrap()
@@ -3049,9 +3047,7 @@ enabled = false"#,
 #[tokio::test]
 async fn plugin_defaults_resolve_remote_enablement_and_separate_cache_entries() {
     let nez_home = TempDir::new().unwrap();
-    let cache_root = nez_home
-        .path()
-        .join("plugins/cache/openai-curated-remote");
+    let cache_root = nez_home.path().join("plugins/cache/openai-curated-remote");
     for name in ["sample", "other"] {
         write_plugin(&cache_root, &format!("{name}/local"), name);
         write_file(
@@ -3129,11 +3125,8 @@ async fn plugin_defaults_resolve_remote_enablement_and_separate_cache_entries() 
         );
         restricted_config.remote_plugin_enabled = true;
         assert!(
-            configured_plugins_from_stack(
-                &restricted_config.config_layer_stack,
-                nez_home.path(),
-            )
-            .is_empty()
+            configured_plugins_from_stack(&restricted_config.config_layer_stack, nez_home.path(),)
+                .is_empty()
         );
         let loaded = manager.plugins_for_config(&restricted_config).await;
         let expected = if enabled { vec![sample] } else { Vec::new() };
@@ -3575,8 +3568,7 @@ source = {marketplace_root:?}
 "#
     );
     write_file(&nez_home.path().join(CONFIG_TOML_FILE), &user_config);
-    let config =
-        config_layer_stack_with_requirements(nez_home.path(), &user_config, &requirements);
+    let config = config_layer_stack_with_requirements(nez_home.path(), &user_config, &requirements);
     let outcome = manager
         .install_plugin(
             &config,
@@ -7438,11 +7430,7 @@ async fn reconcile_remote_installed_plugins_reports_cached_state_changes() {
         &nez_home.path().join(CONFIG_TOML_FILE),
         "[features]\nplugins = true\n",
     );
-    write_cached_plugin(
-        nez_home.path(),
-        REMOTE_WORKSPACE_MARKETPLACE_NAME,
-        "linear",
-    );
+    write_cached_plugin(nez_home.path(), REMOTE_WORKSPACE_MARKETPLACE_NAME, "linear");
     let plugin_root = nez_home
         .path()
         .join("plugins/cache/workspace-directory/linear/local");
@@ -7487,9 +7475,7 @@ async fn reconcile_remote_installed_plugins_reports_cached_state_changes() {
         if enabled.is_none() {
             // Fail cleanup before it reaches the bundle; removal hints must survive.
             write_file(
-                &nez_home
-                    .path()
-                    .join("plugins/cache/openai-curated-remote"),
+                &nez_home.path().join("plugins/cache/openai-curated-remote"),
                 "not a directory",
             );
         }

@@ -16,6 +16,7 @@ use anyhow::Context;
 use anyhow::Result;
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
+use futures::future::BoxFuture;
 use nez_exec_server::EnvironmentConnectionState;
 use nez_exec_server::EnvironmentManager;
 use nez_exec_server::EnvironmentReadyInfo;
@@ -36,7 +37,6 @@ use nez_http_client::cache_system_proxy_route_for_test;
 use nez_protocol::capabilities::CapabilityRootLocation;
 use nez_protocol::capabilities::SelectedCapabilityRoot;
 use nez_utils_path_uri::PathUri;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 use relay_support::ENVIRONMENT_ID;
 use relay_support::EXECUTOR_REGISTRATION_ID;
@@ -172,13 +172,9 @@ async fn failed_noise_environment_recovers_and_reconnects_after_ready_report() -
     )?;
     let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel();
     let remote_environment = AbortOnDropHandle::new(tokio::spawn(
-        nez_exec_server::run_remote_environment_until_shutdown(
-            config,
-            runtime_paths,
-            async move {
-                let _ = shutdown_rx.await;
-            },
-        ),
+        nez_exec_server::run_remote_environment_until_shutdown(config, runtime_paths, async move {
+            let _ = shutdown_rx.await;
+        }),
     ));
 
     let environment_websocket = accept_websocket(&listener, "environment").await?;

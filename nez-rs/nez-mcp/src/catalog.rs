@@ -12,8 +12,8 @@ use nez_config::RequirementSource;
 use nez_protocol::mcp_policy::EnvironmentMcpPolicy;
 use nez_utils_path_uri::PathUri;
 
-use crate::NEZ_APPS_MCP_SERVER_NAME;
 use crate::McpProtocolMode;
+use crate::NEZ_APPS_MCP_SERVER_NAME;
 use crate::server::McpCredentialPolicy;
 
 /// Plugin identity retained with an MCP registration for tool attribution.
@@ -536,10 +536,7 @@ impl McpCatalogBuilder {
                             disabled_server_names.insert(name.clone());
                         }
                     }
-                    if matches!(
-                        registration.config.auth,
-                        nez_config::McpServerAuth::EmaAuth
-                    ) {
+                    if matches!(registration.config.auth, nez_config::McpServerAuth::EmaAuth) {
                         let allowed = matches!(&registration.source, McpServerSource::Config)
                             && ema_idp.as_ref().is_some_and(|idp| {
                                 registration.config.resolve_ema_registration(idp).is_ok()

@@ -7,13 +7,13 @@ use nez_protocol::models::PermissionProfile;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 
-use super::NEZ_HOME_FLAG;
-use super::NEZ_WINDOWS_SANDBOX_ARG1;
 use super::COMMAND_CWD_FLAG;
 use super::DENY_READ_PATHS_JSON_FLAG;
 use super::DENY_WRITE_PATHS_JSON_FLAG;
 use super::ENV_JSON_FLAG;
 use super::NETWORK_PROXY_RESTRICTING_SID_FLAG;
+use super::NEZ_HOME_FLAG;
+use super::NEZ_WINDOWS_SANDBOX_ARG1;
 use super::PERMISSION_PROFILE_FLAG;
 use super::PRESERVE_PROXY_SETTINGS_FLAG;
 use super::PRIVATE_DESKTOP_NAME_FLAG;
@@ -40,10 +40,7 @@ fn large_deny_list_uses_environment_without_changing_the_request() {
     let mut env = expected_env.clone();
     crate::environment_transport::encode("must not reach workload", &mut env).unwrap();
     let profile = PermissionProfile::read_only();
-    let command = vec![
-        "nez.exe".to_string(),
-        "--nez-run-as-fs-helper".to_string(),
-    ];
+    let command = vec!["nez.exe".to_string(), "--nez-run-as-fs-helper".to_string()];
     let args = create_windows_sandbox_command_args_for_permission_profile(
         command.clone(),
         &cwd,
@@ -115,10 +112,7 @@ fn windows_wrapper_args_round_trip() {
     ];
 
     let args = create_windows_sandbox_command_args_for_permission_profile(
-        vec![
-            "nez.exe".to_string(),
-            "--nez-run-as-fs-helper".to_string(),
-        ],
+        vec!["nez.exe".to_string(), "--nez-run-as-fs-helper".to_string()],
         &command_cwd,
         workspace_roots.as_slice(),
         &mut env,
@@ -155,10 +149,7 @@ fn windows_wrapper_args_round_trip() {
     let parsed =
         parse_windows_sandbox_wrapper_args(args[1..].to_vec()).expect("parse wrapper args");
 
-    assert_eq!(
-        parsed.command,
-        vec!["nez.exe", "--nez-run-as-fs-helper"]
-    );
+    assert_eq!(parsed.command, vec!["nez.exe", "--nez-run-as-fs-helper"]);
     assert_eq!(parsed.command_cwd, command_cwd);
     assert_eq!(parsed.workspace_roots, workspace_roots);
     assert_eq!(parsed.env_map, env);

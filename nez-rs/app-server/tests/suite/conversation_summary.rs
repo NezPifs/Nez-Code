@@ -3,6 +3,7 @@ use app_test_support::MockResponsesConfig;
 use app_test_support::TestAppServer;
 use app_test_support::create_fake_rollout;
 use app_test_support::rollout_path;
+use core_test_support::test_path_buf;
 use nez_app_server::in_process;
 use nez_app_server::in_process::InProcessStartArgs;
 use nez_app_server_protocol::ClientInfo;
@@ -28,7 +29,6 @@ use nez_thread_store::InMemoryThreadStore;
 use nez_thread_store::ThreadPersistenceMetadata;
 use nez_thread_store::ThreadStore;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use core_test_support::test_path_buf;
 use pretty_assertions::assert_eq;
 use std::path::Path;
 use std::path::PathBuf;
@@ -86,11 +86,7 @@ async fn get_conversation_summary_by_thread_id_reads_rollout() -> Result<()> {
     let thread_id = ThreadId::from_string(&conversation_id)?;
     let expected = expected_summary(
         thread_id,
-        normalized_canonical_path(rollout_path(
-            nez_home.path(),
-            FILENAME_TS,
-            &conversation_id,
-        ))?,
+        normalized_canonical_path(rollout_path(nez_home.path(), FILENAME_TS, &conversation_id))?,
     );
 
     let mut mcp = TestAppServer::builder()
@@ -208,8 +204,7 @@ async fn get_conversation_summary_by_thread_id_reads_pathless_store_thread() -> 
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn get_conversation_summary_by_relative_rollout_path_resolves_from_nez_home() -> Result<()>
-{
+async fn get_conversation_summary_by_relative_rollout_path_resolves_from_nez_home() -> Result<()> {
     let nez_home = TempDir::new()?;
     let conversation_id = create_fake_rollout(
         nez_home.path(),

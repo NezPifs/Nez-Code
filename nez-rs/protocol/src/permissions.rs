@@ -5,14 +5,14 @@ use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 
+use globset::Candidate;
+use globset::GlobBuilder;
+use globset::GlobMatcher;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_absolute_path::canonicalize_preserving_symlinks;
 use nez_utils_path_uri::LegacyAppPathString;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use globset::Candidate;
-use globset::GlobBuilder;
-use globset::GlobMatcher;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
@@ -3632,11 +3632,7 @@ mod tests {
                 .read_only_subpaths
                 .contains(&expected_blocked)
         );
-        assert!(
-            writable_roots[0]
-                .read_only_subpaths
-                .contains(&expected_nez)
-        );
+        assert!(writable_roots[0].read_only_subpaths.contains(&expected_nez));
     }
 
     #[cfg(unix)]
@@ -3706,11 +3702,7 @@ mod tests {
                 .read_only_subpaths
                 .contains(&expected_agents)
         );
-        assert!(
-            writable_roots[0]
-                .read_only_subpaths
-                .contains(&expected_nez)
-        );
+        assert!(writable_roots[0].read_only_subpaths.contains(&expected_nez));
     }
 
     #[cfg(unix)]
@@ -3743,10 +3735,7 @@ mod tests {
 
         let writable_roots = policy.get_writable_roots_with_cwd(cwd.path());
         assert_eq!(writable_roots.len(), 1);
-        assert_eq!(
-            writable_roots[0].read_only_subpaths,
-            vec![expected_dot_nez]
-        );
+        assert_eq!(writable_roots[0].read_only_subpaths, vec![expected_dot_nez]);
         assert!(
             !writable_roots[0]
                 .read_only_subpaths
@@ -3956,11 +3945,7 @@ mod tests {
                 .read_only_subpaths
                 .contains(&expected_blocked)
         );
-        assert!(
-            writable_roots[0]
-                .read_only_subpaths
-                .contains(&expected_nez)
-        );
+        assert!(writable_roots[0].read_only_subpaths.contains(&expected_nez));
     }
 
     #[test]

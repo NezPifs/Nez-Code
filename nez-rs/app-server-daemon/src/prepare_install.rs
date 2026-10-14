@@ -9,8 +9,8 @@ use std::path::PathBuf;
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
-use nez_install_context::NezPackageManifest;
 use nez_install_context::InstallContext;
+use nez_install_context::NezPackageManifest;
 
 use crate::Daemon;
 use crate::install_lock::acquire_install_lock;

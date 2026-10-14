@@ -4,6 +4,16 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use anyhow::Result;
+use core_test_support::ThreadIdle;
+use core_test_support::apps_test_server::HostedMessagingServer;
+use core_test_support::responses;
+use core_test_support::responses::WebSocketConnectionConfig;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::config::Config;
 use nez_core::config::ConfigBuilder;
 use nez_core::config::LoaderOverrides;
@@ -26,10 +36,10 @@ use nez_features::Feature;
 use nez_guardian_context::truncate_text as truncate_entry;
 use nez_history::RolloutItem;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::ExternalAuth;
 use nez_login::ExternalAuthFuture;
 use nez_login::ExternalAuthRefreshContext;
+use nez_login::NezAuth;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_prompts::ResolvedModelMessages;
 use nez_protocol::ResponseItemId;
@@ -57,16 +67,6 @@ use nez_protocol::protocol::ReviewDecision;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::TruncationPolicy;
 use nez_protocol::security_risk::SecurityRiskScore;
-use core_test_support::ThreadIdle;
-use core_test_support::apps_test_server::HostedMessagingServer;
-use core_test_support::responses;
-use core_test_support::responses::WebSocketConnectionConfig;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 
@@ -1002,8 +1002,7 @@ async fn sample_configured_conversation_history_with_delivery(
         builder
     };
     let mut builder = if code_mode {
-        builder
-            .with_code_mode_host_program(nez_utils_cargo_bin::cargo_bin("nez-code-mode-host")?)
+        builder.with_code_mode_host_program(nez_utils_cargo_bin::cargo_bin("nez-code-mode-host")?)
     } else {
         builder
     };
@@ -1080,11 +1079,7 @@ async fn sample_configured_conversation_history_with_delivery(
         arguments: arguments.to_owned(),
     };
     if !conversation_history.is_empty() {
-        Box::pin(
-            test.nez
-                .inject_response_items(conversation_history.clone()),
-        )
-        .await?;
+        Box::pin(test.nez.inject_response_items(conversation_history.clone())).await?;
     }
     let conversation_history = test.nez.conversation_history_snapshot().await;
 

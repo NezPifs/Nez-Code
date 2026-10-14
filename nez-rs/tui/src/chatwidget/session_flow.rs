@@ -77,8 +77,7 @@ impl ChatWidget {
             && session.daybreak_enabled
             && !matches!(display, SessionConfiguredDisplay::SideConversation);
         #[cfg(target_os = "windows")]
-        if self.windows_sandbox_local_server
-            && matches!(self.nez_op_target, NezOpTarget::AppEvent)
+        if self.windows_sandbox_local_server && matches!(self.nez_op_target, NezOpTarget::AppEvent)
         {
             self.windows_sandbox_config = Default::default();
             self.set_windows_sandbox_mode(/*mode*/ None);

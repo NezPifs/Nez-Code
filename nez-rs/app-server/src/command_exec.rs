@@ -202,8 +202,7 @@ impl CommandExecManager {
             let sessions = Arc::clone(&self.sessions);
             tokio::spawn(async move {
                 let _started_network_proxy = started_network_proxy;
-                match nez_core::sandboxing::execute_env(exec_request, /*stdout_stream*/ None)
-                    .await
+                match nez_core::sandboxing::execute_env(exec_request, /*stdout_stream*/ None).await
                 {
                     Ok(output) => {
                         outgoing
@@ -279,8 +278,7 @@ impl CommandExecManager {
             )
             .await
         } else if stream_stdin {
-            nez_utils_pty::spawn_pipe_process(program, args, cwd.as_path(), &env, &arg0, &[])
-                .await
+            nez_utils_pty::spawn_pipe_process(program, args, cwd.as_path(), &env, &arg0, &[]).await
         } else {
             nez_utils_pty::spawn_pipe_process_no_stdin(
                 program,

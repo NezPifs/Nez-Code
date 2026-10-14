@@ -1,11 +1,11 @@
 use anyhow::Result;
-use nez_features::Feature;
-use nez_models_manager::bundled_models_response;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_response_created;
 use core_test_support::responses::sse;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
+use nez_features::Feature;
+use nez_models_manager::bundled_models_response;
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use tokio::io::AsyncReadExt;

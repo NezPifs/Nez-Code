@@ -10,6 +10,8 @@ use crate::store::PLUGINS_CACHE_DIR;
 use crate::store::PluginStore;
 use chrono::DateTime;
 use chrono::Utc;
+use http::Method;
+use http::StatusCode;
 use nez_app_server_protocol::JSONRPCErrorError;
 use nez_app_server_protocol::PluginAuthPolicy;
 use nez_app_server_protocol::PluginAvailability;
@@ -33,8 +35,6 @@ use nez_plugin::PluginId;
 use nez_plugin::app_connector_ids_from_declarations;
 use nez_plugin::prompt_safe_plugin_description;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use http::Method;
-use http::StatusCode;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JsonValue;
@@ -2067,9 +2067,8 @@ async fn fetch_directory_plugins_for_scope_with_cache(
 ) -> Result<DirectoryPluginsFetchOutcome, RemotePluginCatalogError> {
     if cache_mode != RemotePluginCatalogCacheMode::ForceRefetch
         && let Some(nez_home) = nez_home
-        && let Some(cached) = catalog_cache::load_cached_directory_plugins(
-            nez_home, config, auth, scope, collection,
-        )
+        && let Some(cached) =
+            catalog_cache::load_cached_directory_plugins(nez_home, config, auth, scope, collection)
         && (cache_mode == RemotePluginCatalogCacheMode::PreferCache
             || cached.freshness == catalog_cache::RemotePluginCatalogCacheFreshness::Fresh)
     {

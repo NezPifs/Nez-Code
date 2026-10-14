@@ -23,6 +23,8 @@ use std::time::Instant;
 
 use anyhow::Context;
 use anyhow::Result;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_exec_server::EnvironmentInfo;
 use nez_exec_server::ExecParams;
 use nez_exec_server::ExecServerClient;
@@ -34,8 +36,6 @@ use nez_exec_server::ProcessId;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
 use nez_utils_cargo_bin::copy_executable;
-use futures::SinkExt;
-use futures::StreamExt;
 use predicates::prelude::PredicateBooleanExt;
 use predicates::str::contains;
 use pretty_assertions::assert_eq;

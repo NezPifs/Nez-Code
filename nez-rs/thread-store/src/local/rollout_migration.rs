@@ -1325,9 +1325,7 @@ async fn find_rollout_paths(root: &Path) -> ThreadStoreResult<Vec<PathBuf>> {
 
 async fn find_all_rollout_paths(nez_home: &Path) -> ThreadStoreResult<Vec<PathBuf>> {
     let mut paths = find_rollout_paths(&nez_home.join(nez_rollout::SESSIONS_SUBDIR)).await?;
-    paths.extend(
-        find_rollout_paths(&nez_home.join(nez_rollout::ARCHIVED_SESSIONS_SUBDIR)).await?,
-    );
+    paths.extend(find_rollout_paths(&nez_home.join(nez_rollout::ARCHIVED_SESSIONS_SUBDIR)).await?);
     Ok(paths)
 }
 

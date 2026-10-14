@@ -1,21 +1,3 @@
-use nez_core::TurnInputRequest;
-use nez_core::config::Constrained;
-use nez_features::Feature;
-use nez_otel::SessionTelemetry;
-use nez_otel::TelemetryAuthMode;
-use nez_protocol::ThreadId;
-use nez_protocol::ToolName;
-use nez_protocol::approvals::NetworkPolicyAmendment;
-use nez_protocol::approvals::NetworkPolicyRuleAction;
-use nez_protocol::config_types::ServiceTier;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::openai_models::ReasoningEffort;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ReviewDecision;
-use nez_protocol::protocol::SessionSource;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_custom_tool_call;
@@ -35,6 +17,24 @@ use core_test_support::responses::start_mock_server;
 use core_test_support::test_nez::TestNez;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_core::config::Constrained;
+use nez_features::Feature;
+use nez_otel::SessionTelemetry;
+use nez_otel::TelemetryAuthMode;
+use nez_protocol::ThreadId;
+use nez_protocol::ToolName;
+use nez_protocol::approvals::NetworkPolicyAmendment;
+use nez_protocol::approvals::NetworkPolicyRuleAction;
+use nez_protocol::config_types::ServiceTier;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::openai_models::ReasoningEffort;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ReviewDecision;
+use nez_protocol::protocol::SessionSource;
+use nez_protocol::user_input::UserInput;
 use std::sync::Mutex;
 use std::time::Duration;
 use tracing::Level;
@@ -131,13 +131,12 @@ async fn responses_api_emits_api_request_event() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -190,13 +189,12 @@ async fn process_sse_emits_tracing_for_output_item() {
 
     let TestNez { nez, .. } = test_nez().build(&server).await.unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -230,13 +228,12 @@ async fn process_sse_emits_failed_event_on_parse_error() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -271,13 +268,12 @@ async fn process_sse_records_failed_event_when_stream_closes_without_completed()
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -332,13 +328,12 @@ async fn process_sse_failed_event_records_response_error_message() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -391,13 +386,12 @@ async fn process_sse_failed_event_logs_parse_error() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -437,13 +431,12 @@ async fn process_sse_failed_event_logs_missing_error() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -492,13 +485,12 @@ async fn process_sse_failed_event_logs_response_completed_parse_error() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -547,13 +539,12 @@ async fn process_sse_emits_completed_telemetry() {
 
     let TestNez { nez, .. } = test_nez().build(&server).await.unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -627,13 +618,12 @@ async fn turn_and_completed_response_spans_record_token_usage() {
 
     let TestNez { nez, .. } = test;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -711,13 +701,12 @@ async fn handle_responses_span_records_response_kind_and_tool_name() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -799,13 +788,12 @@ async fn record_responses_sets_span_fields_for_response_events() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -882,13 +870,12 @@ async fn handle_response_item_records_tool_result_for_custom_tool_call() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -952,22 +939,19 @@ async fn handle_response_item_records_tool_result_for_function_call() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TokenCount(_))).await;
 
     logs_assert(|lines: &[&str]| {
         let line = lines
             .iter()
-            .find(|line| {
-                line.contains("nez.tool_result") && line.contains("call_id=function-call")
-            })
+            .find(|line| line.contains("nez.tool_result") && line.contains("call_id=function-call"))
             .ok_or_else(|| "missing nez.tool_result event".to_string())?;
 
         if !line.contains("tool_name=nonexistent") {
@@ -1023,13 +1007,12 @@ async fn handle_response_item_records_tool_result_for_exec_command_call() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -1106,8 +1089,7 @@ fn sandbox_outcome_assertion<'a>(
         let line = lines
             .iter()
             .find(|line| {
-                line.contains("nez.sandbox_outcome")
-                    && line.contains(&format!("call_id={call_id}"))
+                line.contains("nez.sandbox_outcome") && line.contains(&format!("call_id={call_id}"))
             })
             .ok_or_else(|| format!("missing nez.sandbox_outcome event for {call_id}"))?;
 
@@ -1263,13 +1245,12 @@ async fn handle_exec_command_autoapprove_from_config_records_tool_decision() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -1312,13 +1293,12 @@ async fn handle_exec_command_user_approved_records_tool_decision() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "approved".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "approved".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     let approval_event =
         wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecApprovalRequest(_))).await;
@@ -1326,14 +1306,13 @@ async fn handle_exec_command_user_approved_records_tool_decision() {
         panic!("expected ExecApprovalRequest event");
     };
 
-    nez
-        .submit(Op::ExecApproval {
-            id: approval.effective_approval_id(),
-            turn_id: None,
-            decision: ReviewDecision::Approved,
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::ExecApproval {
+        id: approval.effective_approval_id(),
+        turn_id: None,
+        decision: ReviewDecision::Approved,
+    })
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TokenCount(_))).await;
 
@@ -1376,13 +1355,12 @@ async fn handle_exec_command_user_approved_for_session_records_tool_decision() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "persist".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "persist".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     let approval_event =
         wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecApprovalRequest(_))).await;
@@ -1390,14 +1368,13 @@ async fn handle_exec_command_user_approved_for_session_records_tool_decision() {
         panic!("expected ExecApprovalRequest event");
     };
 
-    nez
-        .submit(Op::ExecApproval {
-            id: approval.effective_approval_id(),
-            turn_id: None,
-            decision: ReviewDecision::ApprovedForSession,
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::ExecApproval {
+        id: approval.effective_approval_id(),
+        turn_id: None,
+        decision: ReviewDecision::ApprovedForSession,
+    })
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TokenCount(_))).await;
 
@@ -1440,13 +1417,12 @@ async fn handle_exec_command_user_denies_records_tool_decision() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "deny".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "deny".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     let approval_event =
         wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecApprovalRequest(_))).await;
@@ -1454,14 +1430,13 @@ async fn handle_exec_command_user_denies_records_tool_decision() {
         panic!("expected ExecApprovalRequest event");
     };
 
-    nez
-        .submit(Op::ExecApproval {
-            id: approval.effective_approval_id(),
-            turn_id: None,
-            decision: ReviewDecision::denied("rejected by user"),
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::ExecApproval {
+        id: approval.effective_approval_id(),
+        turn_id: None,
+        decision: ReviewDecision::denied("rejected by user"),
+    })
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TokenCount(_))).await;
 

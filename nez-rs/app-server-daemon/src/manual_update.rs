@@ -252,8 +252,7 @@ pub(super) async fn run(
     let current_managed_nez_path = daemon.current_managed_nez_bin()?;
     let installed_version = Some(managed_nez_version(&current_managed_nez_path).await?);
     let updated = previous_release != selected_release(daemon)?.1
-        || !previous_identity
-            .same_contents(&executable_identity(&current_managed_nez_path).await?);
+        || !previous_identity.same_contents(&executable_identity(&current_managed_nez_path).await?);
     let running_version = client::probe(&daemon.socket_path)
         .await
         .ok()

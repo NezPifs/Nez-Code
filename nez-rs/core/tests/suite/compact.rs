@@ -1,5 +1,20 @@
 use anyhow::Result;
 use anyhow::anyhow;
+use core_test_support::PathBufExt;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::hooks::trust_discovered_hooks;
+use core_test_support::responses;
+use core_test_support::responses::ev_reasoning_item;
+use core_test_support::responses::mount_models_once;
+use core_test_support::responses::strip_response_item_ids_from_json;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::test_path_buf;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::TurnInputRequest;
 use nez_core::compact::SUMMARIZATION_PROMPT;
 use nez_core::compact::SUMMARY_PREFIX;
@@ -25,12 +40,12 @@ use nez_protocol::openai_models::ModelServiceTier;
 use nez_protocol::openai_models::ModelsResponse;
 use nez_protocol::openai_models::ReasoningEffort;
 use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::HookEventName;
 use nez_protocol::protocol::HookRunStatus;
 use nez_protocol::protocol::ItemCompletedEvent;
 use nez_protocol::protocol::ItemStartedEvent;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::WarningEvent;
@@ -39,21 +54,6 @@ use nez_protocol::request_user_input::RequestUserInputResponse;
 use nez_protocol::user_input::UserInput;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathBufExt;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::hooks::trust_discovered_hooks;
-use core_test_support::responses;
-use core_test_support::responses::ev_reasoning_item;
-use core_test_support::responses::mount_models_once;
-use core_test_support::responses::strip_response_item_ids_from_json;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::test_path_buf;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use std::path::PathBuf;
 
 use core_test_support::responses::ev_assistant_message;
@@ -573,22 +573,21 @@ async fn summarize_context_three_requests_and_instructions(
     let rollout_path = test.session_configured.rollout_path.expect("rollout path");
 
     // 1) Normal user input – should hit server once.
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![
-            UserInput::Text {
-                text: ORIGINAL_FIRST_PART.into(),
-                text_elements: Vec::new(),
-            },
-            UserInput::Text {
-                text: String::new(),
-                text_elements: Vec::new(),
-            },
-            UserInput::Text {
-                text: "```\nDo not deploy to production. Only inspect the configuration.".into(),
-                text_elements: Vec::new(),
-            },
-        ]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![
+        UserInput::Text {
+            text: ORIGINAL_FIRST_PART.into(),
+            text_elements: Vec::new(),
+        },
+        UserInput::Text {
+            text: String::new(),
+            text_elements: Vec::new(),
+        },
+        UserInput::Text {
+            text: "```\nDo not deploy to production. Only inspect the configuration.".into(),
+            text_elements: Vec::new(),
+        },
+    ]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     // 2) Summarize – second hit should include the summarization prompt.
@@ -601,12 +600,11 @@ async fn summarize_context_three_requests_and_instructions(
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     // 3) Next user input – third hit; history should include only the summary.
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: THIRD_USER_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: THIRD_USER_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     // Inspect the three captured requests.
@@ -820,13 +818,12 @@ async fn manual_pre_compact_block_decision_does_not_block_compaction() {
     let test = builder.build(&server).await.expect("create conversation");
     let nez = test.nez.clone();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello before blocked compact".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit first user turn");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello before blocked compact".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit first user turn");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.expect("trigger compact");
@@ -887,13 +884,12 @@ async fn compact_hooks_respect_matchers_and_post_runs_after_compaction() {
     let test = builder.build(&server).await.expect("create conversation");
     let nez = test.nez.clone();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello before matched compact".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit first user turn");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello before matched compact".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit first user turn");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.expect("trigger compact");
@@ -909,8 +905,7 @@ async fn compact_hooks_respect_matchers_and_post_runs_after_compaction() {
         "auto matcher should not run for manual compaction"
     );
 
-    let hook_inputs =
-        read_hook_inputs(&test.nez_home_path().join("post_compact_manual_log.jsonl"));
+    let hook_inputs = read_hook_inputs(&test.nez_home_path().join("post_compact_manual_log.jsonl"));
     assert_eq!(hook_inputs.len(), 1);
     let input = &hook_inputs[0];
     assert_eq!(input["hook_event_name"], "PostCompact");
@@ -951,13 +946,12 @@ async fn manual_compact_uses_custom_prompt() {
         .expect("create conversation")
         .nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "USER_ONE".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit first user turn");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "USER_ONE".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit first user turn");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.expect("trigger compact");
@@ -1550,13 +1544,12 @@ async fn manual_compact_emits_context_compaction_items() {
     let test = builder.build_with_auto_env(&server).await.unwrap();
     let nez = &test.nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "manual compact".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "manual compact".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
     let compact_turn_id = nez.submit(Op::Compact).await.unwrap();
@@ -2207,33 +2200,30 @@ async fn auto_compact_runs_after_token_limit_hit() {
     });
     let nez = builder.build(&server).await.unwrap().nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: FIRST_AUTO_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: FIRST_AUTO_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: SECOND_AUTO_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: SECOND_AUTO_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: POST_AUTO_USER_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: POST_AUTO_USER_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -2384,13 +2374,12 @@ async fn auto_compact_emits_context_compaction_items() {
     let mut legacy_event = false;
 
     for user in [FIRST_AUTO_MSG, SECOND_AUTO_MSG, POST_AUTO_USER_MSG] {
-        nez
-            .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-                text: user.into(),
-                text_elements: Vec::new(),
-            }]))
-            .await
-            .unwrap();
+        nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+            text: user.into(),
+            text_elements: Vec::new(),
+        }]))
+        .await
+        .unwrap();
 
         loop {
             let event = nez.next_event().await.unwrap();
@@ -2459,31 +2448,28 @@ async fn auto_compact_starts_after_turn_started() {
     });
     let nez = builder.build(&server).await.unwrap().nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: FIRST_AUTO_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: FIRST_AUTO_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: SECOND_AUTO_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: SECOND_AUTO_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: POST_AUTO_USER_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: POST_AUTO_USER_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     let first = wait_for_event_match(&nez, |ev| match ev {
         EventMsg::TurnStarted(_) => Some("turn"),
@@ -4309,31 +4295,28 @@ async fn auto_compact_persists_rollout_entries() {
     let nez = test.nez.clone();
     let session_configured = test.session_configured;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: FIRST_AUTO_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: FIRST_AUTO_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: SECOND_AUTO_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: SECOND_AUTO_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: POST_AUTO_USER_MSG.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: POST_AUTO_USER_MSG.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let expected_settings = nez.thread_settings_snapshot().await;
@@ -4417,13 +4400,12 @@ async fn manual_compact_retries_after_context_window_error() {
     });
     let nez = builder.build(&server).await.unwrap().nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "first turn".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "first turn".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.unwrap();
@@ -4516,13 +4498,12 @@ async fn manual_compact_non_context_failure_retries_then_emits_task_error() {
         .expect("build nez")
         .nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "first turn".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit user input");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "first turn".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit user input");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.expect("trigger compact");
@@ -4606,37 +4587,34 @@ async fn manual_compact_twice_preserves_latest_user_messages() {
     });
     let nez = builder.build(&server).await.unwrap().nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: first_user_message.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: first_user_message.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: second_user_message.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: second_user_message.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     nez.submit(Op::Compact).await.unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: final_user_message.into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: final_user_message.into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let requests = responses_mock.requests();
@@ -4824,13 +4802,12 @@ async fn auto_compact_allows_multiple_attempts_when_interleaved_with_other_turn_
 
     let mut auto_compact_lifecycle_events = Vec::new();
     for user in [MULTI_AUTO_MSG, follow_up_user, final_user] {
-        nez
-            .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-                text: user.into(),
-                text_elements: Vec::new(),
-            }]))
-            .await
-            .unwrap();
+        nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+            text: user.into(),
+            text_elements: Vec::new(),
+        }]))
+        .await
+        .unwrap();
 
         loop {
             let event = nez.next_event().await.unwrap();
@@ -5132,19 +5109,18 @@ async fn snapshot_request_shape_mid_turn_continuation_compaction() {
     let nez = builder.build_with_auto_env(&server).await.unwrap().nez;
     let continuation = r#"{"review_target":"RB._~:-opaque"}"#;
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: FUNCTION_CALL_LIMIT_MSG.into(),
-                text_elements: Vec::new(),
-            }])
-            .with_responses_metadata(Some(std::collections::HashMap::from([(
-                "misalignment_override".to_string(),
-                continuation.to_string(),
-            )]))),
-        )
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: FUNCTION_CALL_LIMIT_MSG.into(),
+            text_elements: Vec::new(),
+        }])
+        .with_responses_metadata(Some(std::collections::HashMap::from([(
+            "misalignment_override".to_string(),
+            continuation.to_string(),
+        )]))),
+    )
+    .await
+    .unwrap();
 
     wait_for_event(&nez, |msg| matches!(msg, EventMsg::TurnComplete(_))).await;
 
@@ -5563,13 +5539,12 @@ async fn auto_compact_accounts_for_encrypted_reasoning(first_response_includes_r
         .into_iter()
         .enumerate()
     {
-        nez
-            .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-                text: user.into(),
-                text_elements: Vec::new(),
-            }]))
-            .await
-            .expect("start user turn");
+        nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+            text: user.into(),
+            text_elements: Vec::new(),
+        }]))
+        .await
+        .expect("start user turn");
         wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
         if idx < 2 {
@@ -5643,13 +5618,12 @@ async fn snapshot_request_shape_pre_turn_compaction_including_incoming_user_mess
         .nez;
 
     for user in ["USER_ONE", "USER_TWO"] {
-        nez
-            .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-                text: user.to_string(),
-                text_elements: Vec::new(),
-            }]))
-            .await
-            .expect("submit user input");
+        nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+            text: user.to_string(),
+            text_elements: Vec::new(),
+        }]))
+        .await
+        .expect("submit user input");
         wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
     }
     core_test_support::submit_thread_settings(
@@ -5665,21 +5639,20 @@ async fn snapshot_request_shape_pre_turn_compaction_including_incoming_user_mess
     .expect("override thread settings");
     let image_url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg=="
         .to_string();
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![
-            UserInput::Image {
-                image: ImageReference::Inline {
-                    image_url: image_url.clone(),
-                },
-                detail: None,
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![
+        UserInput::Image {
+            image: ImageReference::Inline {
+                image_url: image_url.clone(),
             },
-            UserInput::Text {
-                text: "USER_THREE".to_string(),
-                text_elements: Vec::new(),
-            },
-        ]))
-        .await
-        .expect("submit user input");
+            detail: None,
+        },
+        UserInput::Text {
+            text: "USER_THREE".to_string(),
+            text_elements: Vec::new(),
+        },
+    ]))
+    .await
+    .expect("submit user input");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let requests = request_log.requests();
@@ -5861,22 +5834,20 @@ async fn snapshot_request_shape_pre_turn_compaction_context_window_exceeded() {
         .expect("build nez")
         .nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "USER_ONE".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit first user");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "USER_ONE".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit first user");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "USER_TWO".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit second user");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "USER_TWO".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit second user");
     let error_message = wait_for_event_match(&nez, |event| match event {
         EventMsg::Error(err) => Some(err.message.clone()),
         _ => None,
@@ -5938,13 +5909,12 @@ async fn snapshot_request_shape_manual_compact_without_previous_user_messages() 
     nez.submit(Op::Compact).await.expect("run /compact");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "AFTER_MANUAL_EMPTY_COMPACT".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit follow-up user input");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "AFTER_MANUAL_EMPTY_COMPACT".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit follow-up user input");
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let requests = request_log.requests();

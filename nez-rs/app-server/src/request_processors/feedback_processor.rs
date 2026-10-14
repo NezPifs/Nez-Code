@@ -4,9 +4,9 @@ use crate::error_code::OVERLOADED_ERROR_CODE;
 use nez_connectors::ConnectorDirectoryCacheContext;
 use nez_connectors::ConnectorDirectoryCacheKey;
 use nez_connectors::connector_runtime_cache_path;
+use nez_feedback::FeedbackSnapshot;
 use nez_feedback::NEZ_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME;
 use nez_feedback::NEZ_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME;
-use nez_feedback::FeedbackSnapshot;
 #[cfg(target_os = "windows")]
 use nez_feedback::WINDOWS_SANDBOX_LOG_ATTACHMENT_FILENAME;
 use nez_feedback::guardian_review_failures;
@@ -118,10 +118,7 @@ impl FeedbackRequestProcessor {
         {
             tracing::info!(target: "feedback_tags", chatgpt_user_id);
         }
-        if let Some(account_id) = auth
-            .as_ref()
-            .and_then(nez_login::NezAuth::get_account_id)
-        {
+        if let Some(account_id) = auth.as_ref().and_then(nez_login::NezAuth::get_account_id) {
             tracing::info!(target: "feedback_tags", account_id);
         }
         let snapshot = self.feedback.snapshot(conversation_id);
@@ -275,8 +272,7 @@ impl FeedbackRequestProcessor {
             // Cancelling the RPC waiter must not release a still-running upload's slot.
             let _permit = permit;
             if include_logs {
-                extra_attachments
-                    .extend(nez_feedback::daemon_log_attachments(nez_home.as_path()));
+                extra_attachments.extend(nez_feedback::daemon_log_attachments(nez_home.as_path()));
             }
             let tags = (!upload_tags.is_empty()).then_some(&upload_tags);
             runtime_handle.block_on(snapshot.upload_feedback(
@@ -533,11 +529,11 @@ async fn collect_feedback_logs(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nez_protocol::protocol::TurnContextItem;
-    use nez_rollout::RolloutLine;
     use core_test_support::responses::start_mock_server;
     use core_test_support::test_nez::test_nez;
     use http::HeaderMap;
+    use nez_protocol::protocol::TurnContextItem;
+    use nez_rollout::RolloutLine;
     use pretty_assertions::assert_eq;
 
     #[tokio::test]

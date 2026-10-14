@@ -5,6 +5,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 use bytes::Bytes;
+use http::HeaderMap;
+use http::HeaderValue;
+use http::StatusCode;
 use nez_api::ApiError;
 use nez_api::AuthError;
 use nez_api::AuthProvider;
@@ -24,9 +27,6 @@ use nez_protocol::models::ContentItem;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::SubAgentSource;
-use http::HeaderMap;
-use http::HeaderValue;
-use http::StatusCode;
 use pretty_assertions::assert_eq;
 use serde_json::value::RawValue;
 

@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use http::HeaderMap;
 use nez_api::AuthError;
 use nez_api::AuthProvider;
 use nez_api::SharedAuthProvider;
@@ -14,7 +15,6 @@ use nez_aws_auth::AwsRequestToSign;
 use nez_http_client::Request;
 use nez_http_client::RequestBody;
 use nez_http_client::RequestCompression;
-use http::HeaderMap;
 
 /// Creates a SigV4 provider, preferring an explicit profile over the default credential chain.
 pub(super) async fn aws_sigv4_auth_provider(

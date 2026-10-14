@@ -1,12 +1,12 @@
 use crate::keymap::RuntimeKeymap;
 use crate::keymap::keymap_action_id;
 use crate::terminal_hyperlinks::HyperlinkLine;
+use lazy_static::lazy_static;
 use nez_config::types::TuiKeymap;
 use nez_features::FEATURES;
 use nez_features::Feature;
 use nez_features::FeatureSpec;
 use nez_protocol::account::PlanType;
-use lazy_static::lazy_static;
 use rand::Rng;
 use rand::seq::IteratorRandom;
 use std::path::Path;

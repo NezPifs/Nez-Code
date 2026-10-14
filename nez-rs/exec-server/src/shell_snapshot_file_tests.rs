@@ -40,8 +40,7 @@ async fn unnamed_snapshot_preserves_stdin_and_closes_read_only_carrier(
     ];
     let env = HashMap::from([("PATH".to_string(), "/usr/bin:/bin".to_string())]);
     let spawned =
-        nez_utils_pty::spawn_pipe_process(shell, &args, Path::new("/"), &env, &None, &[fd])
-            .await?;
+        nez_utils_pty::spawn_pipe_process(shell, &args, Path::new("/"), &env, &None, &[fd]).await?;
     assert_eq!(unsafe { libc::fcntl(fd, libc::F_GETFD) }, flags);
     drop(reader);
     let nez_utils_pty::SpawnedProcess {

@@ -3,6 +3,16 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::responses;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::config::Constrained;
 use nez_history::RolloutItem;
@@ -16,16 +26,6 @@ use nez_protocol::protocol::ThreadHistoryMode;
 use nez_protocol::protocol::ThreadRolledBackEvent;
 use nez_protocol::turn_input::TurnInput;
 use nez_thread_store::InMemoryThreadStore;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::responses;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

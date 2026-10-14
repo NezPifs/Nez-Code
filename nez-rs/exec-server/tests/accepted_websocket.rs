@@ -11,6 +11,11 @@ use axum::extract::State;
 use axum::extract::WebSocketUpgrade;
 use axum::response::IntoResponse;
 use axum::routing::any;
+use common::exec_server::DisconnectableWebSocketProxy;
+use futures::SinkExt;
+use futures::StreamExt;
+use http::HeaderMap;
+use http::HeaderValue;
 use nez_api::AuthProvider;
 #[cfg(unix)]
 use nez_exec_server::EnvironmentConnectionState;
@@ -46,11 +51,6 @@ use nez_http_client::NetworkPolicy;
 use nez_http_client::NetworkPolicyController;
 use nez_http_client::OutboundProxyPolicy;
 use nez_utils_path_uri::PathUri;
-use common::exec_server::DisconnectableWebSocketProxy;
-use futures::SinkExt;
-use futures::StreamExt;
-use http::HeaderMap;
-use http::HeaderValue;
 use pretty_assertions::assert_eq;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc;
@@ -177,13 +177,9 @@ async fn accepted_websocket_interoperates_and_recovers_with_real_direct_executor
     let runtime_paths = ExecServerRuntimeOptions::new(nez_exe, nez_linux_sandbox_exe)?;
     let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel();
     let executor_task = AbortOnDropHandle::new(tokio::spawn(
-        nez_exec_server::run_remote_environment_until_shutdown(
-            config,
-            runtime_paths,
-            async move {
-                let _ = shutdown_rx.await;
-            },
-        ),
+        nez_exec_server::run_remote_environment_until_shutdown(config, runtime_paths, async move {
+            let _ = shutdown_rx.await;
+        }),
     ));
     let accepted_websocket = timeout(TEST_TIMEOUT, accepted_sockets.recv())
         .await?

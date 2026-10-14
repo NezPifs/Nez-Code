@@ -224,10 +224,7 @@ async fn daemon_startup(command: &str) -> Result<()> {
         env.remove(key);
     }
     env.insert("NEZ_HOME".into(), home.path().display().to_string());
-    env.insert(
-        "NEZ_SQLITE_HOME".into(),
-        home.path().display().to_string(),
-    );
+    env.insert("NEZ_SQLITE_HOME".into(), home.path().display().to_string());
     env.insert("TERM".into(), "xterm-256color".into());
     let mut args = vec!["--no-alt-screen".to_string()];
     let mut steps: VecDeque<(&str, &[u8])> = VecDeque::new();

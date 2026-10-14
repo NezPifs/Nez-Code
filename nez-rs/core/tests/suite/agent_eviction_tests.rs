@@ -3,6 +3,7 @@
 use super::*;
 use crate::suite::settings_commits::COMMITTED_MODEL;
 use crate::suite::settings_commits::PauseAfterCommit;
+use core_test_support::ThreadIdle;
 use nez_core::TurnInputRequest;
 use nez_core::config::Config;
 use nez_extension_api::ExtensionFuture;
@@ -14,7 +15,6 @@ use nez_extension_api::ToolLifecycleFuture;
 use nez_extension_api::ToolStartInput;
 use nez_protocol::protocol::Op;
 use nez_protocol::user_input::UserInput;
-use core_test_support::ThreadIdle;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -187,10 +187,7 @@ async fn queued_mail_and_cancelled_eviction_keep_worker_ownership() -> Result<()
         .await?;
     timeout(Duration::from_secs(10), gate.entered.notified()).await?;
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
 
     let delivery = mount_root_collaboration_call(
         &server,

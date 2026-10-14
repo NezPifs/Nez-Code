@@ -2,6 +2,9 @@
 
 use std::sync::Arc;
 
+use core::time::Duration;
+use core_test_support::load_default_config_for_test;
+use core_test_support::wait_for_event;
 use nez_core::NewThread;
 use nez_history::InitialHistory;
 use nez_history::ResumedHistory;
@@ -17,9 +20,6 @@ use nez_protocol::protocol::TurnContextItem;
 use nez_protocol::protocol::TurnStartedEvent;
 use nez_protocol::protocol::UserMessageEvent;
 use nez_protocol::protocol::WarningEvent;
-use core::time::Duration;
-use core_test_support::load_default_config_for_test;
-use core_test_support::wait_for_event;
 use tempfile::TempDir;
 
 fn resume_history(

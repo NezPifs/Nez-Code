@@ -71,11 +71,11 @@ fn new_startup_decoration_tracks_draft_and_session_action() {
 #[tokio::test]
 async fn configured_welcome_opt_out_disables_blossom_and_clicks() -> anyhow::Result<()> {
     use clap::Parser;
-    use nez_config::LoaderOverrides;
     use crossterm::event::KeyModifiers;
     use crossterm::event::MouseButton;
     use crossterm::event::MouseEvent;
     use crossterm::event::MouseEventKind;
+    use nez_config::LoaderOverrides;
     let nez_home = tempfile::tempdir()?;
     let cli = crate::Cli::try_parse_from(["nez"])?;
     let area = Rect::new(

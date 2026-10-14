@@ -1,5 +1,5 @@
-use nez_utils_absolute_path::AbsolutePathBuf;
 use dirs::home_dir;
+use nez_utils_absolute_path::AbsolutePathBuf;
 use std::path::PathBuf;
 
 /// Returns the path to the Nez configuration directory, which can be
@@ -11,9 +11,7 @@ use std::path::PathBuf;
 /// - If `NEZ_HOME` is not set, this function does not verify that the
 ///   directory exists.
 pub fn find_nez_home() -> std::io::Result<AbsolutePathBuf> {
-    let nez_home_env = std::env::var("NEZ_HOME")
-        .ok()
-        .filter(|val| !val.is_empty());
+    let nez_home_env = std::env::var("NEZ_HOME").ok().filter(|val| !val.is_empty());
     find_nez_home_from_env(nez_home_env.as_deref())
 }
 
@@ -65,8 +63,8 @@ fn find_nez_home_from_env(nez_home_env: Option<&str>) -> std::io::Result<Absolut
 #[cfg(test)]
 mod tests {
     use super::find_nez_home_from_env;
-    use nez_utils_absolute_path::AbsolutePathBuf;
     use dirs::home_dir;
+    use nez_utils_absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use std::fs;
     use std::io::ErrorKind;
@@ -124,8 +122,7 @@ mod tests {
 
     #[test]
     fn find_nez_home_without_env_uses_default_home_dir() {
-        let resolved =
-            find_nez_home_from_env(/*nez_home_env*/ None).expect("default NEZ_HOME");
+        let resolved = find_nez_home_from_env(/*nez_home_env*/ None).expect("default NEZ_HOME");
         let mut expected = home_dir().expect("home dir");
         expected.push(".nez");
         let expected = AbsolutePathBuf::from_absolute_path(expected).expect("absolute home");

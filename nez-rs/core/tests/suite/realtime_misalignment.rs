@@ -2,19 +2,19 @@
 
 use anyhow::Context;
 use anyhow::Result;
-use nez_config::config_toml::RealtimeWsVersion;
-use nez_protocol::protocol::NezErrorInfo;
-use nez_protocol::protocol::ConversationStartParams;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::RealtimeConversationRealtimeEvent;
-use nez_protocol::protocol::RealtimeEvent;
-use nez_protocol::protocol::RealtimeOutputModality;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event_match;
 use futures::SinkExt;
+use nez_config::config_toml::RealtimeWsVersion;
+use nez_protocol::protocol::ConversationStartParams;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezErrorInfo;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::RealtimeConversationRealtimeEvent;
+use nez_protocol::protocol::RealtimeEvent;
+use nez_protocol::protocol::RealtimeOutputModality;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::time::Duration;
@@ -95,8 +95,7 @@ async fn misalignment_retires_late_voice_handoff_before_it_starts_a_turn() -> Re
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,

@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use anyhow::bail;
+use futures::FutureExt;
+use futures::future::BoxFuture;
 use nez_hooks::HookMcpCall;
 use nez_hooks::HookMcpExecutor;
 use nez_hooks::HookMcpOutput;
 use nez_mcp::McpRuntime;
 use nez_protocol::ThreadId;
-use futures::FutureExt;
-use futures::future::BoxFuture;
 use serde_json::Value;
 
 pub(crate) struct CoreHookMcpExecutor {

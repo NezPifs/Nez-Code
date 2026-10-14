@@ -1,5 +1,25 @@
 use anyhow::Result;
 use anyhow::anyhow;
+use core_test_support::PathBufExt;
+use core_test_support::create_directory_symlink;
+use core_test_support::load_default_config_for_test;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_no_remote_env;
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_target_windows;
+use core_test_support::test_nez::RecordingUserInstructionsProvider;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::executor_path_uri;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
 use nez_core::ForkSnapshot;
 use nez_core::StartThreadOptions;
 use nez_core::TurnInputRequest;
@@ -40,26 +60,6 @@ use nez_thread_store::PrepareForkParams;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
 use nez_utils_string::approx_bytes_for_tokens;
-use core_test_support::PathBufExt;
-use core_test_support::create_directory_symlink;
-use core_test_support::load_default_config_for_test;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_no_remote_env;
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_target_windows;
-use core_test_support::test_nez::RecordingUserInstructionsProvider;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::executor_path_uri;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::HashMap;
@@ -316,29 +316,28 @@ fn request_body_contains(request: &wiremock::Request, text: &str) -> bool {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn agents_override_is_preferred_over_agents_md() -> Result<()> {
-    let instructions =
-        agents_instructions(test_nez().with_workspace_setup(|cwd, fs| async move {
-            let agents_md = cwd.join("AGENTS.md");
-            let override_md = cwd.join("AGENTS.override.md");
-            let agents_md_uri = executor_path_uri(&agents_md)?;
-            let override_md_uri = executor_path_uri(&override_md)?;
-            fs.write_file(
-                &agents_md_uri,
-                b"base doc".to_vec(),
-                Default::default(),
-                /*sandbox*/ None,
-            )
-            .await?;
-            fs.write_file(
-                &override_md_uri,
-                b"override doc".to_vec(),
-                Default::default(),
-                /*sandbox*/ None,
-            )
-            .await?;
-            Ok::<(), anyhow::Error>(())
-        }))
+    let instructions = agents_instructions(test_nez().with_workspace_setup(|cwd, fs| async move {
+        let agents_md = cwd.join("AGENTS.md");
+        let override_md = cwd.join("AGENTS.override.md");
+        let agents_md_uri = executor_path_uri(&agents_md)?;
+        let override_md_uri = executor_path_uri(&override_md)?;
+        fs.write_file(
+            &agents_md_uri,
+            b"base doc".to_vec(),
+            Default::default(),
+            /*sandbox*/ None,
+        )
         .await?;
+        fs.write_file(
+            &override_md_uri,
+            b"override doc".to_vec(),
+            Default::default(),
+            /*sandbox*/ None,
+        )
+        .await?;
+        Ok::<(), anyhow::Error>(())
+    }))
+    .await?;
 
     assert!(
         instructions.contains("override doc"),
@@ -800,10 +799,7 @@ async fn restricted_project_without_instructions_starts_successfully() -> Result
     });
     let test = builder.build_with_auto_env(&server).await?;
 
-    assert_eq!(
-        test.nez.instruction_sources().await,
-        Vec::<PathUri>::new()
-    );
+    assert_eq!(test.nez.instruction_sources().await, Vec::<PathUri>::new());
     test.submit_text_turn("continue without project instructions")
         .await?;
     response_mock.single_request();
@@ -1017,10 +1013,7 @@ async fn tightening_environment_read_permissions_invalidates_cached_project_inst
         error.message
     );
 
-    assert_eq!(
-        test.nez.instruction_sources().await,
-        Vec::<PathUri>::new()
-    );
+    assert_eq!(test.nez.instruction_sources().await, Vec::<PathUri>::new());
     assert!(
         response_mock.requests().is_empty(),
         "the denied turn must fail before sending a model request"
@@ -1044,9 +1037,7 @@ async fn loads_user_instructions_without_a_primary_environment() -> Result<()> {
     let global_source =
         write_global_file(home.as_ref(), GLOBAL_AGENTS_FILENAME, GLOBAL_INSTRUCTIONS)?;
     let provider = Arc::new(RecordingUserInstructionsProvider::new(Arc::new(
-        NezHomeUserInstructionsProvider::new(AbsolutePathBuf::try_from(
-            home.path().to_path_buf(),
-        )?),
+        NezHomeUserInstructionsProvider::new(AbsolutePathBuf::try_from(home.path().to_path_buf())?),
     )));
 
     let mut builder = test_nez()
@@ -1947,9 +1938,7 @@ async fn multi_environment_thread_refreshes_global_and_keeps_repository_snapshot
     let global_source =
         write_global_file(home.as_ref(), GLOBAL_AGENTS_FILENAME, GLOBAL_INSTRUCTIONS)?;
     let provider = Arc::new(RecordingUserInstructionsProvider::new(Arc::new(
-        NezHomeUserInstructionsProvider::new(AbsolutePathBuf::try_from(
-            home.path().to_path_buf(),
-        )?),
+        NezHomeUserInstructionsProvider::new(AbsolutePathBuf::try_from(home.path().to_path_buf())?),
     )));
     let local_root = TempDir::new()?;
     let local_source = local_root.path().join(GLOBAL_AGENTS_FILENAME);

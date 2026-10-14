@@ -48,9 +48,10 @@ impl CloudSkillGeneration {
 
     pub(crate) fn is_current(&self) -> bool {
         self.auth_cache_key
-            == self.mcp_resources.as_ref().map(|client| {
-                client.auth_cache_key_for_server(nez_mcp::NEZ_APPS_MCP_SERVER_NAME)
-            })
+            == self
+                .mcp_resources
+                .as_ref()
+                .map(|client| client.auth_cache_key_for_server(nez_mcp::NEZ_APPS_MCP_SERVER_NAME))
     }
 }
 

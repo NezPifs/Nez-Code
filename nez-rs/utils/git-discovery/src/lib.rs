@@ -13,11 +13,11 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-use nez_git_utils::get_git_repo_root;
-use nez_utils_absolute_path::AbsolutePathBuf;
 use futures::FutureExt;
 use futures::future::BoxFuture;
 use futures::future::Shared;
+use nez_git_utils::get_git_repo_root;
+use nez_utils_absolute_path::AbsolutePathBuf;
 use tokio::sync::Notify;
 use tokio::sync::oneshot;
 

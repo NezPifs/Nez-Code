@@ -7,9 +7,9 @@ use std::time::Instant;
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
+use futures::future::join_all;
 use nez_config::McpStartupReadiness;
 use nez_connectors::ConnectorRuntimeFetchSource;
-use futures::future::join_all;
 use tracing::Instrument;
 use tracing::instrument;
 use tracing::trace;
@@ -28,9 +28,9 @@ use crate::client_tool_catalog::ClientToolCatalogRevision;
 use crate::client_tool_catalog::NezAppsToolSnapshot;
 use crate::client_tool_catalog::ToolCatalogSnapshot;
 use crate::mcp::NEZ_APPS_MCP_SERVER_NAME;
-use crate::rmcp_client::NEZ_APPS_REFRESH_DURATION_METRIC;
 use crate::rmcp_client::MCP_TOOLS_LIST_DURATION_METRIC;
 use crate::rmcp_client::ManagedClient;
+use crate::rmcp_client::NEZ_APPS_REFRESH_DURATION_METRIC;
 use crate::rmcp_client::list_tools_for_client_uncached;
 use crate::rmcp_client::prepare_nez_apps_tools_for_model;
 use crate::runtime::emit_duration;
@@ -558,10 +558,7 @@ impl McpConnectionSet {
                 && tool.connector_id == advertised_tool.connector_id
         })?;
         let mut tool_info = if server_name == NEZ_APPS_MCP_SERVER_NAME {
-            prepare_nez_apps_tools_for_model(
-                vec![current_tool.clone()],
-                &self.tool_plugin_context,
-            )
+            prepare_nez_apps_tools_for_model(vec![current_tool.clone()], &self.tool_plugin_context)
         } else {
             crate::rmcp_client::prepare_regular_mcp_tools_for_model(
                 vec![current_tool.clone()],
@@ -694,11 +691,13 @@ impl McpConnectionSet {
             .refresh(
                 || async {
                     let list_start = Instant::now();
-                    let fetch_ticket = managed_client.nez_apps_tools_cache_context.as_ref().map(
-                        |cache_context| {
-                            cache_context.begin_fetch(ConnectorRuntimeFetchSource::HardRefresh)
-                        },
-                    );
+                    let fetch_ticket =
+                        managed_client
+                            .nez_apps_tools_cache_context
+                            .as_ref()
+                            .map(|cache_context| {
+                                cache_context.begin_fetch(ConnectorRuntimeFetchSource::HardRefresh)
+                            });
                     let client_tools = list_tools_for_client_uncached(
                         NEZ_APPS_MCP_SERVER_NAME,
                         /*is_nez_apps_mcp_server*/ true,

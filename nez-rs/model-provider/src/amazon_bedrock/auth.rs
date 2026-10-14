@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use http::HeaderMap;
 use nez_api::AuthError;
 use nez_api::AuthProvider;
 use nez_api::SharedAuthProvider;
@@ -16,7 +17,6 @@ use nez_model_provider_info::ModelProviderAwsAuthInfo;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_protocol::error::NezErr;
 use nez_protocol::error::Result;
-use http::HeaderMap;
 
 use crate::BearerAuthProvider;
 use crate::shared_state::process_shared_state;
@@ -353,11 +353,11 @@ impl AuthProvider for BedrockSigV4AuthProvider {
 mod tests {
     use std::num::NonZeroU64;
 
+    use http::HeaderValue;
     use nez_api::AuthProvider;
     use nez_login::auth::BedrockAccessKeysAuth;
     use nez_login::auth::BedrockApiKeyAuth;
     use nez_model_provider_info::AwsCredentialExportConfig;
-    use http::HeaderValue;
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -392,13 +392,12 @@ mod tests {
                 api_key: "managed-bedrock-api-key".to_string(),
                 region: "us-east-1".to_string(),
             }));
-        let managed_access_keys = AuthManager::from_auth_for_testing(NezAuth::BedrockAccessKeys(
-            BedrockAccessKeysAuth {
+        let managed_access_keys =
+            AuthManager::from_auth_for_testing(NezAuth::BedrockAccessKeys(BedrockAccessKeysAuth {
                 access_key_id: "managed-access-key-id".to_string(),
                 secret_access_key: "managed-secret-access-key".to_string(),
                 session_token: None,
-            },
-        ));
+            }));
         let cases: &[(
             &ModelProviderInfo,
             Option<&AuthManager>,

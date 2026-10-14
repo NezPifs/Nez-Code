@@ -97,8 +97,7 @@ async fn latest_thread_cwd(path: Option<PathBuf>, fallback: PathBuf) -> PathBuf 
     let Some(path) = path else { return fallback };
     let (stop, keep_running) = tokio::sync::oneshot::channel::<()>();
     let result = tokio::task::spawn_blocking(move || {
-        let reader =
-            nez_rollout::open_rollout_seekable_reader(&path, || stop.is_closed()).ok()?;
+        let reader = nez_rollout::open_rollout_seekable_reader(&path, || stop.is_closed()).ok()?;
         let mut scanner = nez_rollout::ReverseJsonlScanner::new(reader).ok()?;
         while let Some(outcome) = scanner.scan_next_rollout_line().ok()? {
             if let nez_rollout::ScanOutcome::Parsed(nez_rollout::RolloutLine {

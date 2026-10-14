@@ -304,12 +304,10 @@ impl McpResourceClient {
         &self,
         params: NezAppsResourceListParams,
     ) -> Result<McpResourcePage> {
-        let params = serde_json::to_value(params)
-            .context("failed to serialize Nez Apps resource params")?;
+        let params =
+            serde_json::to_value(params).context("failed to serialize Nez Apps resource params")?;
         let connections = self.runtime.latest_host_owned_nez_apps_connections()?;
-        let (managed, timeout) = connections
-            .client_by_name(NEZ_APPS_MCP_SERVER_NAME)
-            .await?;
+        let (managed, timeout) = connections.client_by_name(NEZ_APPS_MCP_SERVER_NAME).await?;
         let result = managed
             .client
             .send_custom_request_with_timeout("resources/list", Some(params), timeout)
@@ -355,9 +353,8 @@ impl McpResourceClient {
             .runtime
             .latest_connections_for_event_server(NEZ_APPS_MCP_SERVER_NAME)?;
         let cache_key = McpResourceClientCacheKey(Arc::downgrade(&connections));
-        let (managed, request_timeout) = connections
-            .client_by_name(NEZ_APPS_MCP_SERVER_NAME)
-            .await?;
+        let (managed, request_timeout) =
+            connections.client_by_name(NEZ_APPS_MCP_SERVER_NAME).await?;
         let result = managed
             .client
             .send_custom_request_with_timeout("events/list", /*params*/ None, request_timeout)
@@ -386,9 +383,7 @@ impl McpResourceClient {
         let (connections, cancel_event_streams_on_server_removal) = self
             .runtime
             .latest_connections_for_event_server(NEZ_APPS_MCP_SERVER_NAME)?;
-        let (managed, _) = connections
-            .client_by_name(NEZ_APPS_MCP_SERVER_NAME)
-            .await?;
+        let (managed, _) = connections.client_by_name(NEZ_APPS_MCP_SERVER_NAME).await?;
         McpEventStream::open(
             managed.client,
             cancel_event_streams_on_server_removal,

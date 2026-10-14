@@ -8,12 +8,12 @@ use std::time::Instant;
 
 use axum::extract::ws::Message as AxumWebSocketMessage;
 use axum::extract::ws::WebSocket as AxumWebSocket;
-use nez_exec_server_protocol::JSONRPCMessage;
-use nez_exec_server_protocol::JSONRPCRequest;
 use futures::Sink;
 use futures::SinkExt;
 use futures::Stream;
 use futures::StreamExt;
+use nez_exec_server_protocol::JSONRPCMessage;
+use nez_exec_server_protocol::JSONRPCRequest;
 use tokio::io::AsyncRead;
 use tokio::io::AsyncWrite;
 use tokio::process::Child;
@@ -803,10 +803,10 @@ mod tests {
     use std::task::Context;
     use std::task::Poll;
 
-    use nez_exec_server_protocol::JSONRPCRequest;
-    use nez_exec_server_protocol::RequestId;
     use futures::channel::mpsc as futures_mpsc;
     use futures::task::AtomicWaker;
+    use nez_exec_server_protocol::JSONRPCRequest;
+    use nez_exec_server_protocol::RequestId;
     use pretty_assertions::assert_eq;
     use tokio::net::TcpListener;
     use tokio::time::timeout;

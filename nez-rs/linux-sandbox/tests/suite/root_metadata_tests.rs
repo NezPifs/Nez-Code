@@ -33,8 +33,7 @@ async fn root_metadata_symlinks_cannot_reopen_approved_denials() {
     fs::write(work.join("public/secret"), "outside").unwrap();
     fs::write(private.join("reopened/secret"), "private").unwrap();
     fs::write(private.join("sibling"), "sibling").unwrap();
-    nez_utils_cargo_bin::copy_executable(&nez_linux_sandbox_exe(), &work.join("sandbox"))
-        .unwrap();
+    nez_utils_cargo_bin::copy_executable(&nez_linux_sandbox_exe(), &work.join("sandbox")).unwrap();
 
     let path_entry = |path: &str, access| {
         FileSystemSandboxEntry::new(

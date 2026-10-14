@@ -191,8 +191,8 @@ async fn ensure_goal_output_dir(
     if let Some(output_dir) = output_dir {
         return Ok(output_dir.clone());
     }
-    let nez_home = nez_home
-        .context("App server did not report $NEZ_HOME; cannot materialize goal files")?;
+    let nez_home =
+        nez_home.context("App server did not report $NEZ_HOME; cannot materialize goal files")?;
     let path = nez_home
         .join(GOAL_ATTACHMENT_DIR)
         .join(Uuid::new_v4().to_string());

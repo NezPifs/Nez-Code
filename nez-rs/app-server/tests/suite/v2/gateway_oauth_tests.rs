@@ -51,10 +51,7 @@ delivery = {{ kind = "header", name = "X-Gateway-Authorization" }}
 }
 
 async fn gateway_server(home: &std::path::Path) -> Result<TestAppServer> {
-    let mut server = TestAppServer::builder()
-        .with_nez_home(home)
-        .build()
-        .await?;
+    let mut server = TestAppServer::builder().with_nez_home(home).build().await?;
     server
         .initialize_with_capabilities(
             ClientInfo {

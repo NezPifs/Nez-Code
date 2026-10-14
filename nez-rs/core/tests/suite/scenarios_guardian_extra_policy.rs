@@ -1,6 +1,11 @@
 //! Managed policies and explicit user goals reach Guardian through their distinct trusted sources.
 
 use anyhow::Context;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::config::Constrained;
 use nez_core::context::UserGoalUpdate;
@@ -8,11 +13,6 @@ use nez_prompts::ResolvedModelMessages;
 use nez_protocol::config_types::ApprovalsReviewer;
 use nez_protocol::models::PermissionProfile;
 use nez_protocol::protocol::AskForApproval;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

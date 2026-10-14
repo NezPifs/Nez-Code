@@ -4,6 +4,12 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use futures::future::BoxFuture;
 use nez_agent_message_board_extension::PostMetadata;
 use nez_core::AgentConfigUpdate;
 use nez_core::AgentControl;
@@ -37,12 +43,6 @@ use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::TokenUsage;
 use nez_protocol::user_input::UserInput;
 use nez_rollout_trace::ThreadTraceContext;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 use wiremock::MockServer;
 
@@ -82,8 +82,7 @@ impl AgentControl for TestAgentControl {
             if let Some(id) = self.agents.lock().expect("agents lock").get(target) {
                 return Ok(*id);
             }
-            ThreadId::from_string(target)
-                .map_err(|error| NezErr::InvalidRequest(error.to_string()))
+            ThreadId::from_string(target).map_err(|error| NezErr::InvalidRequest(error.to_string()))
         })
     }
 
@@ -562,10 +561,13 @@ async fn host_mailbox_notifies_waiting_agent_and_delivers_once() -> anyhow::Resu
             text_elements: Vec::new(),
         }]))
         .await?;
-    wait_for_event(&test.nez, |event| matches!(event,
-        EventMsg::ItemStarted(event) if matches!(&event.item,
-            nez_protocol::items::TurnItem::CollabAgentToolCall(call) if call.id == "wait-mail")
-    )).await;
+    wait_for_event(&test.nez, |event| {
+        matches!(event,
+            EventMsg::ItemStarted(event) if matches!(&event.item,
+                nez_protocol::items::TurnItem::CollabAgentToolCall(call) if call.id == "wait-mail")
+        )
+    })
+    .await;
     let next = responses::mount_sse_once(
         &server,
         responses::sse(vec![

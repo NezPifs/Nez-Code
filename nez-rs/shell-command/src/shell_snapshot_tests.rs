@@ -128,9 +128,8 @@ fn snapshot_capture_selects_declarations_and_environment() -> Result<()> {
             )
             .expect("metadata is not a credential");
             for snapshot in [
-                captured.render_script(
-                    &nez_protocol::config_types::ShellEnvironmentPolicy::default(),
-                ),
+                captured
+                    .render_script(&nez_protocol::config_types::ShellEnvironmentPolicy::default()),
                 brokered.script,
             ] {
                 assert!(!snapshot.contains("NEZ_THREAD_ID"), "{shell}: {snapshot}");

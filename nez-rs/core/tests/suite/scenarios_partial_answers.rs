@@ -2,10 +2,10 @@
 
 use super::super::guardian_retained_context::ForkTestLifecycle;
 use super::*;
-use nez_protocol::models::MessagePhase;
-use nez_protocol::protocol::ThreadHistoryMode;
 use core_test_support::ThreadIdle;
 use core_test_support::responses;
+use nez_protocol::models::MessagePhase;
+use nez_protocol::protocol::ThreadHistoryMode;
 use pretty_assertions::assert_eq;
 use test_case::test_case;
 

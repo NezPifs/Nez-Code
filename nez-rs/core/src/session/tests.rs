@@ -34,6 +34,7 @@ use crate::shell_snapshot::ShellSnapshot;
 use crate::test_support::models_manager_with_provider;
 use crate::tools::format_exec_output_str;
 use crate::tools::registry::ToolRegistry;
+use core_test_support::test_nez::TurnInputRequest as ExternalTurnInputRequest;
 use nez_analytics::CompactionImplementation;
 use nez_analytics::CompactionPhase;
 use nez_analytics::CompactionReason;
@@ -51,7 +52,6 @@ use nez_config::types::McpServerConfig;
 use nez_config::types::McpServerTransportConfig;
 use nez_config::types::ToolSuggestDisabledTool;
 use nez_config::types::WindowsSandboxModeToml;
-use core_test_support::test_nez::TurnInputRequest as ExternalTurnInputRequest;
 
 use nez_features::Feature;
 use nez_file_system::FileSystemSandboxContext;
@@ -110,8 +110,8 @@ use std::collections::BTreeMap;
 use tracing::Span;
 
 use crate::connectors::AppInfo;
-use crate::responses_metadata::NezResponsesRequestKind;
 use crate::responses_metadata::CompactionTurnMetadata;
+use crate::responses_metadata::NezResponsesRequestKind;
 use crate::rollout::recorder::RolloutRecorder;
 use crate::session::Submission;
 use crate::state::ActiveTurn;
@@ -128,6 +128,27 @@ use crate::tools::handlers::RequestPermissionsHandler;
 use crate::tools::registry::ToolExecutor;
 use crate::tools::router::ToolCallSource;
 use crate::turn_diff_tracker::TurnDiffTracker;
+use core_test_support::PathBufExt;
+use core_test_support::PathExt;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::responses;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::strip_metadata_from_items;
+use core_test_support::responses::strip_response_item_ids;
+use core_test_support::responses::strip_response_item_ids_from_json;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::local;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_path_buf;
+use core_test_support::tracing::install_test_tracing;
+use core_test_support::wait_for_event;
 use nez_config::config_toml::ConfigToml;
 use nez_config::config_toml::ProjectConfig;
 use nez_config::permissions_toml::FilesystemPermissionToml;
@@ -138,9 +159,9 @@ use nez_config::permissions_toml::PermissionsToml;
 use nez_execpolicy::Decision;
 use nez_execpolicy::NetworkRuleProtocol;
 use nez_execpolicy::Policy;
-use nez_history::NezHarnessMetadata;
 use nez_history::CompactedItem;
 use nez_history::InitialHistory;
+use nez_history::NezHarnessMetadata;
 use nez_history::ResponseItemEnvelope;
 use nez_history::ResumedHistory;
 use nez_history::RolloutItem;
@@ -165,7 +186,6 @@ use nez_protocol::models::ContentItemMetadata;
 use nez_protocol::models::InternalChatMessageMetadataPassthrough;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::ConversationAudioParams;
 use nez_protocol::protocol::CreditsSnapshot;
 use nez_protocol::protocol::GranularApprovalConfig;
@@ -173,6 +193,7 @@ use nez_protocol::protocol::HistoryPosition;
 use nez_protocol::protocol::InterAgentCommunication;
 use nez_protocol::protocol::MultiAgentVersion;
 use nez_protocol::protocol::NetworkApprovalProtocol;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::RateLimitSnapshot;
 use nez_protocol::protocol::RateLimitWindow;
 use nez_protocol::protocol::RealtimeAudioFrame;
@@ -192,27 +213,6 @@ use nez_protocol::protocol::TurnStartedEvent;
 use nez_protocol::protocol::UserMessageEvent;
 use nez_protocol::protocol::W3cTraceContext;
 use nez_rmcp_client::ElicitationAction;
-use core_test_support::PathBufExt;
-use core_test_support::PathExt;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::responses;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::strip_metadata_from_items;
-use core_test_support::responses::strip_response_item_ids;
-use core_test_support::responses::strip_response_item_ids_from_json;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::local;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_path_buf;
-use core_test_support::tracing::install_test_tracing;
-use core_test_support::wait_for_event;
 use opentelemetry::trace::TraceContextExt;
 use opentelemetry::trace::TraceId;
 use opentelemetry_sdk::metrics::InMemoryMetricExporter;
@@ -866,9 +866,7 @@ fn test_model_client_session() -> crate::client::ModelClientSession {
         /*output_token_replay_enabled*/ false,
         /*attestation_provider*/ None,
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
-        nez_model_provider::WorkspaceRoutingContext::new(
-            "https://chatgpt.com/backend-api".into(),
-        ),
+        nez_model_provider::WorkspaceRoutingContext::new("https://chatgpt.com/backend-api".into()),
         Vec::new(),
     )
     .new_session()
@@ -1787,8 +1785,8 @@ async fn reload_user_config_layer_updates_effective_apps_config() {
         .and_then(|table| table.get("apps"))
         .cloned()
         .expect("apps table");
-    let apps = nez_config::types::AppsConfigToml::deserialize(apps_toml)
-        .expect("deserialize apps config");
+    let apps =
+        nez_config::types::AppsConfigToml::deserialize(apps_toml).expect("deserialize apps config");
     let app = apps
         .apps
         .get("calendar")
@@ -2133,8 +2131,8 @@ disabled_tools = [
         .and_then(|table| table.get("apps"))
         .cloned()
         .expect("apps table");
-    let apps = nez_config::types::AppsConfigToml::deserialize(apps_toml)
-        .expect("deserialize apps config");
+    let apps =
+        nez_config::types::AppsConfigToml::deserialize(apps_toml).expect("deserialize apps config");
     let app = apps
         .apps
         .get("calendar")
@@ -2690,12 +2688,11 @@ async fn inter_agent_communication_waits_for_confirmed_delivery_persistence() {
         .is_err()
     );
     // Confirm another send while communication waits for the earlier delivery.
-    let (later, _) =
-        session.record_delivered_assistant_message(nez_history::RetainedUserMessage {
-            message_id: Some("later".to_owned()),
-            text: "Actually, wait.".to_owned(),
-            ..message.clone()
-        });
+    let (later, _) = session.record_delivered_assistant_message(nez_history::RetainedUserMessage {
+        message_id: Some("later".to_owned()),
+        text: "Actually, wait.".to_owned(),
+        ..message.clone()
+    });
     drop(checkpoint);
     recording.await.expect("confirmed delivery persisted");
     communication_task
@@ -4233,10 +4230,7 @@ async fn record_initial_history_assigns_and_persists_id_for_forked_response_item
         persisted_item.id().map(ResponseItemId::as_str),
         Some(live_item_id.as_str())
     );
-    assert_eq!(
-        persisted_item.metadata,
-        Some(NezHarnessMetadata::default())
-    );
+    assert_eq!(persisted_item.metadata, Some(NezHarnessMetadata::default()));
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -10004,8 +9998,7 @@ async fn conflicting_ready_environment_root_ids_keep_first_location() {
     let mut turn_environments = Vec::new();
     for selected_root in &selected_roots {
         let nez_protocol::capabilities::CapabilityRootLocation::Environment {
-            environment_id,
-            ..
+            environment_id, ..
         } = &selected_root.location;
         let mut environment_config = local_environment.config().clone();
         environment_config.selected_capability_roots = vec![selected_root.clone()];

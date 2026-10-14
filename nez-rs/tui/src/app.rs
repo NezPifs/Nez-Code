@@ -92,13 +92,18 @@ use crate::update_action::UpdateAction;
 use crate::version::NEZ_CLI_VERSION;
 use crate::workspace_command::AppServerWorkspaceCommandRunner;
 use crate::workspace_command::WorkspaceCommandRunner;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
+use crossterm::event::KeyEventKind;
+use crossterm::event::KeyModifiers;
 use nez_ansi_escape::ansi_escape_line;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_client::TypedRequestError;
 use nez_app_server_protocol::AddCreditsNudgeCreditType;
 use nez_app_server_protocol::AskForApproval;
 use nez_app_server_protocol::ClientRequest;
-use nez_app_server_protocol::NezErrorInfo as AppServerNezErrorInfo;
 use nez_app_server_protocol::ConfigBatchWriteParams;
 use nez_app_server_protocol::ConfigReadResponse;
 use nez_app_server_protocol::ConfigValueWriteParams;
@@ -113,6 +118,7 @@ use nez_app_server_protocol::McpAuthStatus;
 use nez_app_server_protocol::McpServerStatus;
 use nez_app_server_protocol::McpServerStatusDetail;
 use nez_app_server_protocol::MergeStrategy;
+use nez_app_server_protocol::NezErrorInfo as AppServerNezErrorInfo;
 use nez_app_server_protocol::PluginInstallParams;
 use nez_app_server_protocol::PluginInstallResponse;
 use nez_app_server_protocol::PluginListMarketplaceKind;
@@ -163,12 +169,6 @@ use nez_rollout::StateDbHandle;
 use nez_terminal_detection::user_agent;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_approval_presets::builtin_permission_profile_for_active_permission_profile;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
-use crossterm::event::KeyCode;
-use crossterm::event::KeyEvent;
-use crossterm::event::KeyEventKind;
-use crossterm::event::KeyModifiers;
 use ratatui::layout::Rect;
 use ratatui::layout::Size;
 use ratatui::style::Stylize;
@@ -373,9 +373,7 @@ fn collab_receiver_is_not_found(
 fn default_exec_approval_decisions(
     network_approval_context: Option<&nez_app_server_protocol::NetworkApprovalContext>,
     proposed_execpolicy_amendment: Option<&nez_app_server_protocol::ExecPolicyAmendment>,
-    proposed_network_policy_amendments: Option<
-        &[nez_app_server_protocol::NetworkPolicyAmendment],
-    >,
+    proposed_network_policy_amendments: Option<&[nez_app_server_protocol::NetworkPolicyAmendment]>,
     additional_permissions: Option<&nez_app_server_protocol::AdditionalPermissionProfile>,
 ) -> Vec<nez_app_server_protocol::CommandExecutionApprovalDecision> {
     use nez_app_server_protocol::CommandExecutionApprovalDecision;

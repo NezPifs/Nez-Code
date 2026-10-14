@@ -1,8 +1,8 @@
-use nez_feedback::NEZ_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME;
-use nez_feedback::NEZ_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME;
 use nez_feedback::DOCTOR_REPORT_ATTACHMENT_FILENAME;
 use nez_feedback::FEEDBACK_DIAGNOSTICS_ATTACHMENT_FILENAME;
 use nez_feedback::FeedbackDiagnostics;
+use nez_feedback::NEZ_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME;
+use nez_feedback::NEZ_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME;
 use nez_feedback::WINDOWS_SANDBOX_LOG_ATTACHMENT_FILENAME;
 use ratatui::style::Stylize;
 use ratatui::text::Line;

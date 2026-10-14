@@ -4,6 +4,26 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
 use anyhow::Result;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::apps_enabled_builder;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_websocket_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+use core_test_support::skip_if_target_windows;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::test_nez::environment_config_for_selection;
+use core_test_support::test_nez::test_env;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_mcp_server;
 use nez_config::ConfigLayerEntry;
 use nez_config::ConfigLayerSource;
 use nez_config::ConfigLayerStack;
@@ -91,26 +111,6 @@ use nez_thread_store::LoadThreadHistoryParams;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
 use nez_utils_string::approx_token_count;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::apps_enabled_builder;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_websocket_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-use core_test_support::skip_if_target_windows;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::test_nez::environment_config_for_selection;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::test_env;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_mcp_server;
 use opentelemetry_sdk::metrics::data::AggregatedMetrics;
 use opentelemetry_sdk::metrics::data::MetricData;
 use pretty_assertions::assert_eq;
@@ -789,9 +789,7 @@ async fn agent_plugin_skill_prompt_stays_bounded_without_skills_extension() -> R
     .await;
 
     let nez_home = Arc::new(TempDir::new()?);
-    let plugin_root = nez_home
-        .path()
-        .join("plugins/cache/test/acme.tools/local");
+    let plugin_root = nez_home.path().join("plugins/cache/test/acme.tools/local");
     let skill_dir = plugin_root.join("skills/review");
     std::fs::create_dir_all(&skill_dir)?;
     std::fs::write(
@@ -876,9 +874,7 @@ async fn explicit_skill_prompt_precedes_plugin_instructions() -> Result<()> {
     let skill_path = dunce::canonicalize(skill_dir.join("SKILL.md"))?;
     let (extensions, _) =
         catalog_extensions(SkillCatalog::default(), /*include_host_provider*/ true);
-    let mut builder = test_nez()
-        .with_home(nez_home)
-        .with_extensions(extensions);
+    let mut builder = test_nez().with_home(nez_home).with_extensions(extensions);
     let test = builder.build_with_auto_env(&server).await?;
 
     test.nez

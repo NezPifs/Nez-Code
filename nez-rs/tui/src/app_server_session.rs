@@ -42,6 +42,9 @@ use crate::session_state::ThreadSessionState;
 use crate::status::StatusAccountDisplay;
 use crate::status::plan_type_display_name;
 use crate::terminal_visualization_instructions::with_terminal_visualization_instructions;
+use color_eyre::eyre::ContextCompat;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
 use nez_app_server_client::AppServerClient;
 use nez_app_server_client::AppServerEvent;
 use nez_app_server_client::AppServerPath;
@@ -150,9 +153,6 @@ use nez_protocol::openai_models::ReasoningEffortPreset;
 use nez_protocol::protocol::SubAgentSource;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use color_eyre::eyre::ContextCompat;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -622,10 +622,7 @@ impl AppServerSession {
         Arc::clone(&self.task_search_generation)
     }
 
-    pub(crate) fn nez_home_path(
-        &self,
-        local_nez_home: &AbsolutePathBuf,
-    ) -> Option<AppServerPath> {
+    pub(crate) fn nez_home_path(&self, local_nez_home: &AbsolutePathBuf) -> Option<AppServerPath> {
         self.client.nez_home(local_nez_home)
     }
 
@@ -2051,9 +2048,7 @@ fn sandbox_mode_from_permission_profile(
     cwd: &std::path::Path,
 ) -> Option<nez_app_server_protocol::SandboxMode> {
     match permission_profile {
-        PermissionProfile::Disabled => {
-            Some(nez_app_server_protocol::SandboxMode::DangerFullAccess)
-        }
+        PermissionProfile::Disabled => Some(nez_app_server_protocol::SandboxMode::DangerFullAccess),
         PermissionProfile::External { .. } => None,
         PermissionProfile::Managed { .. } => {
             let file_system_policy = permission_profile.file_system_sandbox_policy();

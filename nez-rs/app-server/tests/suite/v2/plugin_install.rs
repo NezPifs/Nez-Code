@@ -22,6 +22,9 @@ use axum::http::Uri;
 use axum::http::header::AUTHORIZATION;
 use axum::routing::get;
 use axum::routing::post;
+use core_test_support::stdio_server_bin;
+use flate2::Compression;
+use flate2::write::GzEncoder;
 use nez_app_server_protocol::AppInfo;
 use nez_app_server_protocol::AppSummary;
 use nez_app_server_protocol::AppsListParams;
@@ -44,9 +47,6 @@ use nez_http_client::HttpClientBuilder;
 use nez_rmcp_client::McpOAuthCallbackMode;
 use nez_rmcp_client::resolve_mcp_oauth_callback_url;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use core_test_support::stdio_server_bin;
-use flate2::Compression;
-use flate2::write::GzEncoder;
 use pretty_assertions::assert_eq;
 use rmcp::handler::server::ServerHandler;
 use rmcp::model::JsonObject;
@@ -1572,12 +1572,11 @@ async fn plugin_install_skips_mcp_oauth_for_unowned_environment() -> Result<()> 
         nez_home.path().join("config.toml"),
         "[features]\nplugins = true\n",
     )?;
-    let mut executor =
-        tokio::process::Command::new(nez_utils_cargo_bin::cargo_bin("exec-server")?)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::piped())
-            .kill_on_drop(true)
-            .spawn()?;
+    let mut executor = tokio::process::Command::new(nez_utils_cargo_bin::cargo_bin("exec-server")?)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::piped())
+        .kill_on_drop(true)
+        .spawn()?;
     let executor_stdout = executor
         .stdout
         .take()
@@ -2230,10 +2229,7 @@ async fn plugin_install_skips_remote_mcp_oauth_disabled_by_requirements() -> Res
     )
     .await;
     configure_remote_plugin_with_apps_test(nez_home.path(), &server)?;
-    std::fs::write(
-        nez_home.path().join("requirements.toml"),
-        "[mcp_servers]\n",
-    )?;
+    std::fs::write(nez_home.path().join("requirements.toml"), "[mcp_servers]\n")?;
     mount_remote_plugin_detail(&server, REMOTE_PLUGIN_ID, "1.2.3", Some(&bundle_url)).await;
     mount_empty_remote_installed_plugins(&server).await;
     mount_remote_plugin_install_with_apps_needing_auth(&server, REMOTE_PLUGIN_ID, &["alpha"]).await;
@@ -2843,10 +2839,7 @@ async fn wait_for_plugin_analytics_payload(
             };
             for request in requests.iter().filter(|request| {
                 request.method == "POST"
-                    && request
-                        .url
-                        .path()
-                        .ends_with("/nez/analytics-events/events")
+                    && request.url.path().ends_with("/nez/analytics-events/events")
             }) {
                 let mut payload: serde_json::Value = serde_json::from_slice(&request.body)
                     .map_err(|err| anyhow::anyhow!("invalid analytics payload: {err}"))?;

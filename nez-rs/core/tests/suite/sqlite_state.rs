@@ -1,4 +1,20 @@
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::ev_web_search_call_done;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::stdio_server_bin;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
 use nez_config::types::McpServerConfig;
 use nez_config::types::McpServerTransportConfig;
 use nez_core::StartThreadOptions;
@@ -30,22 +46,6 @@ use nez_protocol::protocol::UserMessageEvent;
 use nez_protocol::user_input::UserInput;
 use nez_thread_store::ThreadMetadataPatch;
 use nez_web_search_extension::install as install_web_search_extension;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::ev_web_search_call_done;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::stdio_server_bin;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::HashMap;
@@ -172,9 +172,7 @@ async fn thread_creator_survives_resume_and_forks_use_current_auth() -> Result<(
         .await;
         let fork_path = fork.thread.rollout_path().expect("fork rollout");
         fork.thread.shutdown_and_wait().await?;
-        let meta = nez_rollout::read_session_meta_line(&fork_path)
-            .await?
-            .meta;
+        let meta = nez_rollout::read_session_meta_line(&fork_path).await?.meta;
         let stored = fork
             .thread
             .state_db()

@@ -17,13 +17,13 @@ use crate::agent::api::AgentControl;
 use crate::agent::control::AgentControlInit;
 use crate::agents_md_manager::SessionInstructions;
 use crate::attestation::AttestationProvider;
-use crate::nez_thread::NezThread;
 use crate::config::Config;
 use crate::config::ThreadStoreConfig;
 use crate::current_time::TimeProvider;
 use crate::environment_selection::TurnEnvironmentSnapshot;
 use crate::environment_selection::default_thread_environment_requests;
 use crate::mcp::McpManager;
+use crate::nez_thread::NezThread;
 use crate::rollout::truncation;
 use crate::session::ForkPersistence;
 use crate::session::GitEnrichmentPolicy;
@@ -37,6 +37,9 @@ use crate::session::startup::SessionStartupGuard;
 use crate::tasks::InterruptedTurnHistoryMarker;
 use crate::tasks::interrupted_turn_history_marker;
 use crate::thread_startup_metadata::ThreadStartupMetadata;
+use futures::StreamExt;
+use futures::future::BoxFuture;
+use futures::stream::FuturesUnordered;
 use nez_agent_graph_store::AgentGraphStore;
 use nez_agent_graph_store::LocalAgentGraphStore;
 use nez_agent_message_board_extension::LocalAgentMessageBoard;
@@ -111,9 +114,6 @@ use nez_thread_store::ThreadStoreError;
 use nez_thread_store::UpdateThreadMetadataParams;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_git_discovery::GitRootDiscovery;
-use futures::StreamExt;
-use futures::future::BoxFuture;
-use futures::stream::FuturesUnordered;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::future::Future;
@@ -451,10 +451,8 @@ pub fn build_models_manager(
     auth_manager: Arc<AuthManager>,
 ) -> SharedModelsManager {
     let provider = create_model_provider(config.model_provider.clone(), Some(auth_manager));
-    let manager = provider.models_manager(
-        config.nez_home.to_path_buf(),
-        config.model_catalog.clone(),
-    );
+    let manager =
+        provider.models_manager(config.nez_home.to_path_buf(), config.model_catalog.clone());
     manager.set_api_key_model_discovery_enabled(
         config.features.enabled(Feature::ApiKeyModelDiscovery),
     );
@@ -698,10 +696,8 @@ impl ThreadManager {
         provider: ModelProviderInfo,
     ) -> Self {
         set_thread_manager_test_mode_for_tests(/*enabled*/ true);
-        let nez_home = std::env::temp_dir().join(format!(
-            "nez-thread-manager-test-{}",
-            uuid::Uuid::new_v4()
-        ));
+        let nez_home =
+            std::env::temp_dir().join(format!("nez-thread-manager-test-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&nez_home)
             .unwrap_or_else(|err| panic!("temp nez home dir create failed: {err}"));
         let mut manager = Self::with_models_provider_and_home_for_tests(
@@ -1003,9 +999,7 @@ impl ThreadManager {
             })
             .await
             .map_err(|err| match err {
-                ThreadStoreError::ThreadNotFound { thread_id } => {
-                    NezErr::ThreadNotFound(thread_id)
-                }
+                ThreadStoreError::ThreadNotFound { thread_id } => NezErr::ThreadNotFound(thread_id),
                 err => thread_store_metadata_update_error(thread_id, err),
             })?;
         match updated {
@@ -1780,9 +1774,7 @@ impl ThreadManagerState {
             .load_latest_model_context(params)
             .await
             .map_err(|err| match err {
-                ThreadStoreError::ThreadNotFound { thread_id } => {
-                    NezErr::ThreadNotFound(thread_id)
-                }
+                ThreadStoreError::ThreadNotFound { thread_id } => NezErr::ThreadNotFound(thread_id),
                 err => NezErr::Fatal(format!(
                     "failed to load model context for thread {thread_id}: {err}"
                 )),

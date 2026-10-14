@@ -1188,11 +1188,7 @@ impl App {
                             name == "nez-tui"
                         }
                     }) {
-                    current_executable.with_file_name(if cfg!(windows) {
-                        "nez.exe"
-                    } else {
-                        "nez"
-                    })
+                    current_executable.with_file_name(if cfg!(windows) { "nez.exe" } else { "nez" })
                 } else {
                     current_executable
                 };

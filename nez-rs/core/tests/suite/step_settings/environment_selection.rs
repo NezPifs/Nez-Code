@@ -1,6 +1,8 @@
 //! Active settings keep environment selection and model changes scoped to the running turn.
 
 use super::*;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::environment_config_for_selection;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_exec_server::CreateDirectoryOptions;
 use nez_extension_api::ExtensionDataInit;
@@ -11,8 +13,6 @@ use nez_protocol::models::PermissionProfileSnapshot;
 use nez_protocol::protocol::EnvironmentConfigState;
 use nez_protocol::protocol::TurnEnvironmentRequests;
 use nez_protocol::protocol::TurnEnvironmentSelection;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::environment_config_for_selection;
 use pretty_assertions::assert_eq;
 use test_case::test_case;
 
@@ -439,12 +439,9 @@ async fn active_updates_check_known_permissions_from_the_running_turn() -> Resul
         },
     )
     .await?;
-    test.nez
-        .environment_ready(&secondary, unrestricted)
-        .await?;
+    test.nez.environment_ready(&secondary, unrestricted).await?;
     // Its permissions are known even though the executor hasn't connected yet.
-    let without_selection =
-        submit_turn_settings(&test.nez, &paused.turn_id, current_model).await?;
+    let without_selection = submit_turn_settings(&test.nez, &paused.turn_id, current_model).await?;
     assert_eq!(
         without_selection,
         TurnSettingsUpdateOutcome::Rejected { reason }

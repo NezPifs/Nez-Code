@@ -149,14 +149,12 @@ fn marketplace_plugin_source_to_info(source: MarketplacePluginSource) -> PluginS
 fn load_shared_plugin_ids_by_local_path(
     config: &Config,
 ) -> Result<std::collections::BTreeMap<AbsolutePathBuf, String>, JSONRPCErrorError> {
-    nez_core_plugins::remote::load_plugin_share_remote_ids_by_local_path(
-        config.nez_home.as_path(),
-    )
-    .map_err(|err| {
-        internal_error(format!(
-            "failed to load plugin share local path mapping: {err}"
-        ))
-    })
+    nez_core_plugins::remote::load_plugin_share_remote_ids_by_local_path(config.nez_home.as_path())
+        .map_err(|err| {
+            internal_error(format!(
+                "failed to load plugin share local path mapping: {err}"
+            ))
+        })
 }
 
 fn remote_plugin_service_config(config: &Config) -> RemotePluginServiceConfig {
@@ -358,23 +356,21 @@ fn remote_plugin_share_targets(
 ) -> Vec<nez_core_plugins::remote::RemotePluginShareTarget> {
     targets
         .into_iter()
-        .map(
-            |target| nez_core_plugins::remote::RemotePluginShareTarget {
-                principal_type: match target.principal_type {
-                    PluginSharePrincipalType::User => {
-                        nez_core_plugins::remote::RemotePluginSharePrincipalType::User
-                    }
-                    PluginSharePrincipalType::Group => {
-                        nez_core_plugins::remote::RemotePluginSharePrincipalType::Group
-                    }
-                    PluginSharePrincipalType::Workspace => {
-                        nez_core_plugins::remote::RemotePluginSharePrincipalType::Workspace
-                    }
-                },
-                principal_id: target.principal_id,
-                role: remote_plugin_share_target_role(target.role),
+        .map(|target| nez_core_plugins::remote::RemotePluginShareTarget {
+            principal_type: match target.principal_type {
+                PluginSharePrincipalType::User => {
+                    nez_core_plugins::remote::RemotePluginSharePrincipalType::User
+                }
+                PluginSharePrincipalType::Group => {
+                    nez_core_plugins::remote::RemotePluginSharePrincipalType::Group
+                }
+                PluginSharePrincipalType::Workspace => {
+                    nez_core_plugins::remote::RemotePluginSharePrincipalType::Workspace
+                }
             },
-        )
+            principal_id: target.principal_id,
+            role: remote_plugin_share_target_role(target.role),
+        })
         .collect()
 }
 
@@ -1804,8 +1800,7 @@ impl PluginRequestProcessor {
             return Vec::new();
         }
 
-        let plugin_apps =
-            nez_plugin::app_connector_ids_from_declarations(plugin_app_declarations);
+        let plugin_apps = nez_plugin::app_connector_ids_from_declarations(plugin_app_declarations);
         let app_category_by_id = plugin_app_declarations
             .iter()
             .filter_map(|app| {
@@ -1873,8 +1868,7 @@ impl PluginRequestProcessor {
         );
         for (name, server) in plugin_mcp_servers {
             // EMA uses the account's enterprise grant, never per-plugin OAuth fallback.
-            if !server.enabled || matches!(server.auth, nez_config::types::McpServerAuth::EmaAuth)
-            {
+            if !server.enabled || matches!(server.auth, nez_config::types::McpServerAuth::EmaAuth) {
                 continue;
             }
             if !server.is_local_environment() {

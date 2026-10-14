@@ -21,6 +21,18 @@ use crate::tools::sandboxing::ToolCtx;
 use crate::tools::sandboxing::ToolError;
 use crate::tools::sandboxing::ToolRuntime;
 use crate::turn_diff_tracker::TurnDiffTracker;
+use core_test_support::PathExt;
+use core_test_support::TempDirExt;
+use core_test_support::nez_linux_sandbox_exe_or_skip;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_response_once;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::sse_response;
+use core_test_support::responses::start_mock_server;
 use nez_config::ConfigLayerEntry;
 use nez_config::ConfigLayerSource;
 use nez_config::ConfigRequirements;
@@ -47,18 +59,6 @@ use nez_protocol::request_permissions::PermissionGrantScope;
 use nez_protocol::request_permissions::RequestPermissionProfile;
 use nez_protocol::request_permissions::RequestPermissionsArgs;
 use nez_protocol::request_permissions::RequestPermissionsResponse;
-use core_test_support::PathExt;
-use core_test_support::TempDirExt;
-use core_test_support::nez_linux_sandbox_exe_or_skip;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_response_once;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::sse_response;
-use core_test_support::responses::start_mock_server;
 use pretty_assertions::assert_eq;
 use std::fs;
 use std::sync::Arc;
@@ -771,11 +771,9 @@ async fn network_approval_uses_published_task_authority_within_same_turn(
             config.permissions.approval_policy = Constrained::allow_any(admitted_policy);
             config.approvals_reviewer = ApprovalsReviewer::AutoReview;
             config
-                    .permissions
-                    .set_permission_profile(
-                        nez_protocol::models::PermissionProfile::workspace_write(),
-                    )
-                    .expect("set managed permissions");
+                .permissions
+                .set_permission_profile(nez_protocol::models::PermissionProfile::workspace_write())
+                .expect("set managed permissions");
         },
     )
     .await;

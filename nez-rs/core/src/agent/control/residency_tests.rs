@@ -1,9 +1,9 @@
 use crate::StartThreadOptions;
 use crate::ThreadManager;
 use crate::agent::LocalAgentControl;
-use crate::nez_thread::NezThread;
 use crate::config::Config;
 use crate::config::test_config;
+use crate::nez_thread::NezThread;
 use crate::thread_manager::ThreadManagerState;
 use nez_features::Feature;
 use nez_login::NezAuth;

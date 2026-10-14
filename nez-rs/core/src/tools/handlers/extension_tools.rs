@@ -221,6 +221,8 @@ async fn to_extension_call<'a>(
 mod tests {
     use std::sync::Arc;
 
+    use core_test_support::responses::strip_response_item_id;
+    use core_test_support::responses::strip_response_item_ids;
     use nez_extension_items::ExtensionItem;
     use nez_extension_items::image_generation::ImageGenerationItem;
     use nez_extension_items::web_search::WebSearchItem;
@@ -235,8 +237,6 @@ mod tests {
     use nez_utils_absolute_path::test_support::PathExt;
     use nez_utils_absolute_path::test_support::test_path_buf;
     use nez_utils_path_uri::PathUri;
-    use core_test_support::responses::strip_response_item_id;
-    use core_test_support::responses::strip_response_item_ids;
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use tokio::sync::Mutex;
@@ -255,9 +255,7 @@ mod tests {
 
     struct StubExtensionExecutor;
 
-    impl<'call> nez_extension_api::ToolExecutor<nez_tools::ToolCall<'call>>
-        for StubExtensionExecutor
-    {
+    impl<'call> nez_extension_api::ToolExecutor<nez_tools::ToolCall<'call>> for StubExtensionExecutor {
         fn tool_name(&self) -> nez_tools::ToolName {
             nez_tools::ToolName::plain("extension_echo")
         }

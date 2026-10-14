@@ -1,4 +1,13 @@
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::StartIfIdleSubmission;
 use nez_core::TurnInputRequest;
 use nez_core::TurnInputSubmission;
@@ -16,15 +25,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::ThreadSettingsSnapshot;
 use nez_protocol::user_input::UserInput;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -230,12 +230,11 @@ async fn settings_notifications_keep_their_commit_across_postcommit_work(
                     Ok(turn_id)
                 }
                 SettingsOperation::Standalone => {
-                    nez
-                        .submit(Op::ThreadSettings {
-                            thread_settings,
-                            reply: None,
-                        })
-                        .await
+                    nez.submit(Op::ThreadSettings {
+                        thread_settings,
+                        reply: None,
+                    })
+                    .await
                 }
             }
         }

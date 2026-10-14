@@ -1,5 +1,5 @@
-use nez_http_client::TransportError;
 use http::StatusCode;
+use nez_http_client::TransportError;
 use std::time::Duration;
 
 /// API specific telemetry.

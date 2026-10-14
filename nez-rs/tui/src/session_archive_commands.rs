@@ -22,6 +22,9 @@ use crate::legacy_core::config::resolve_profile_v2_config_path;
 use crate::named_session_lookup::SessionCollection;
 use crate::named_session_lookup::display_label;
 use crate::named_session_lookup::lookup;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
+use color_eyre::eyre::eyre;
 use nez_app_server_protocol::Thread as AppServerThread;
 use nez_arg0::Arg0DispatchPaths;
 use nez_config::CloudConfigBundleLoader;
@@ -33,9 +36,6 @@ use nez_protocol::ThreadId;
 use nez_utils_cli::CliConfigOverrides;
 use nez_utils_home_dir::find_nez_home;
 use nez_utils_oss::get_default_model_for_oss_provider;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
-use color_eyre::eyre::eyre;
 
 use super::RemoteAppServerEndpoint;
 
@@ -87,13 +87,8 @@ pub async fn run_session_archive_command(
     let nez_home = find_nez_home().wrap_err("failed to find Nez home")?;
     let mut app_server =
         start_app_server_for_session_command(options, nez_home.to_path_buf()).await?;
-    run_session_archive_action_with_app_server(
-        &mut app_server,
-        nez_home.as_path(),
-        action,
-        &target,
-    )
-    .await
+    run_session_archive_action_with_app_server(&mut app_server, nez_home.as_path(), action, &target)
+        .await
 }
 
 async fn run_session_archive_action_with_app_server(

@@ -947,6 +947,8 @@ mod tests {
     use axum::Router;
     use axum::routing::get;
     use axum::routing::post;
+    use futures::future::BoxFuture;
+    use http::HeaderMap;
     use nez_config::McpServerOAuthConfig;
     use nez_config::types::AuthKeyringBackendKind;
     use nez_config::types::OAuthCredentialsStoreMode;
@@ -958,8 +960,6 @@ mod tests {
     use nez_exec_server::RouteAwareHttpClient;
     use nez_http_client::HttpClientFactory;
     use nez_http_client::OutboundProxyPolicy;
-    use futures::future::BoxFuture;
-    use http::HeaderMap;
     use oauth2::TokenResponse;
     use pretty_assertions::assert_eq;
     use serde_json::json;

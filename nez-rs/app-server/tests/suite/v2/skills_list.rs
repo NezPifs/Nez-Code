@@ -7,6 +7,8 @@ use app_test_support::MockResponsesConfig;
 use app_test_support::TestAppServer;
 use app_test_support::create_mock_responses_server_repeating_assistant;
 use app_test_support::write_chatgpt_auth;
+use core_test_support::skip_if_remote;
+use core_test_support::skip_if_wine_exec;
 use nez_app_server_protocol::ConfigBatchWriteParams;
 use nez_app_server_protocol::ConfigEdit;
 use nez_app_server_protocol::ConfigReadParams;
@@ -31,14 +33,12 @@ use nez_app_server_protocol::ThreadStartResponse;
 use nez_config::types::AuthCredentialsStoreMode;
 use nez_core::config::set_project_trust_level;
 use nez_core_plugins::store::PluginStore;
-use nez_exec_server::NEZ_EXEC_SERVER_URL_ENV_VAR;
 use nez_exec_server::CreateDirectoryOptions;
+use nez_exec_server::NEZ_EXEC_SERVER_URL_ENV_VAR;
 use nez_plugin::PluginId;
 use nez_protocol::config_types::TrustLevel;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use core_test_support::skip_if_remote;
-use core_test_support::skip_if_wine_exec;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use test_case::test_case;
@@ -89,9 +89,7 @@ plugins = true
     )
 }
 
-fn write_cached_remote_plugin_with_skill(
-    nez_home: &std::path::Path,
-) -> Result<std::path::PathBuf> {
+fn write_cached_remote_plugin_with_skill(nez_home: &std::path::Path) -> Result<std::path::PathBuf> {
     let plugin_root = nez_home.join("plugins/cache/openai-curated-remote/linear/local");
     std::fs::create_dir_all(plugin_root.join(".nez-plugin"))?;
     std::fs::write(
@@ -1407,11 +1405,7 @@ async fn skills_changed_notification_is_emitted_after_skill_change() -> Result<(
     let _: ThreadStartResponse =
         timeout(DEFAULT_TIMEOUT, mcp.read_response(thread_start_request_id)).await??;
 
-    let skill_path = nez_home
-        .path()
-        .join("skills")
-        .join("demo")
-        .join("SKILL.md");
+    let skill_path = nez_home.path().join("skills").join("demo").join("SKILL.md");
     std::fs::write(
         &skill_path,
         "---\nname: demo\ndescription: updated\n---\n\n# Updated\n",

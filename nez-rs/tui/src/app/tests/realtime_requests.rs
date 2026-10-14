@@ -1622,8 +1622,7 @@ async fn delegated_final_speech_reaches_app_server_once_and_stale_speech_is_reje
     );
     assert!(ops.try_recv().is_err());
     let mut tui = crate::tui::test_support::make_test_tui()?;
-    Box::pin(app.handle_event(&mut tui, &mut app_server, AppEvent::NezOp(speech.clone())))
-        .await?;
+    Box::pin(app.handle_event(&mut tui, &mut app_server, AppEvent::NezOp(speech.clone()))).await?;
     assert!(!app.chat_widget.has_pending_realtime_speech(delivery_id));
     assert_eq!(
         recorded_params(&requests, "thread/realtime/appendSpeech"),
@@ -2224,8 +2223,7 @@ async fn microphone_channel_is_machine_local_across_project_and_remote_transitio
             remote.path().to_path_buf(),
         ));
     app.persist_realtime_input_channel(
-        std::num::NonZeroU16::new(/*n*/ 1)
-            .map(nez_config::config_toml::MicrophoneChannels::Single),
+        std::num::NonZeroU16::new(/*n*/ 1).map(nez_config::config_toml::MicrophoneChannels::Single),
     )
     .await;
     app.cli_kv_overrides.clear();

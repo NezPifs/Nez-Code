@@ -1143,8 +1143,7 @@ mod metrics {
     pub(super) const FILE_COUNTER: &str = "nez.rollout_compression.file";
     const FILE_DURATION_HISTOGRAM: &str = "nez.rollout_compression.file.duration_ms";
     const FILE_SOURCE_BYTES_HISTOGRAM: &str = "nez.rollout_compression.file.source_bytes";
-    const FILE_COMPRESSION_RATIO_HISTOGRAM: &str =
-        "nez.rollout_compression.file.compression_ratio";
+    const FILE_COMPRESSION_RATIO_HISTOGRAM: &str = "nez.rollout_compression.file.compression_ratio";
     pub(super) const MATERIALIZE_COUNTER: &str = "nez.rollout_compression.materialize";
     pub(super) const RUN_COUNTER: &str = "nez.rollout_compression.run";
     pub(super) const RUN_DURATION_HISTOGRAM: &str = "nez.rollout_compression.run.duration_ms";

@@ -1,5 +1,12 @@
 use std::sync::Arc;
 
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::ForkSnapshot;
 use nez_core::NewThread;
 use nez_core::TurnInputRequest;
@@ -17,13 +24,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::ThreadSettingsSnapshot;
 use nez_protocol::user_input::UserInput;
 use nez_thread_store::InMemoryThreadStore;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use wiremock::Mock;
 use wiremock::MockServer;
@@ -89,13 +89,12 @@ async fn fork_thread_twice_drops_to_first_message() {
 
     // Send three user messages; wait for three completed turns.
     for text in ["first", "second", "third"] {
-        nez
-            .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-                text: text.to_string(),
-                text_elements: Vec::new(),
-            }]))
-            .await
-            .unwrap();
+        nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+            text: text.to_string(),
+            text_elements: Vec::new(),
+        }]))
+        .await
+        .unwrap();
         let _ = wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
     }
 
@@ -310,13 +309,12 @@ async fn assert_copied_fork_persists_inherited_history(history_mode: ThreadHisto
     let nez = test.nez.clone();
     let thread_manager = test.thread_manager.clone();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "fork me from stored history".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .expect("submit initial user turn");
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "fork me from stored history".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .expect("submit initial user turn");
     let _ = wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let source_path = nez.rollout_path().expect("source rollout path");
@@ -370,9 +368,9 @@ async fn assert_copied_fork_persists_inherited_history(history_mode: ThreadHisto
             .resume_thread_with_history(
                 test.config.clone(),
                 resumed_history,
-                nez_core::test_support::auth_manager_from_auth(
-                    nez_login::NezAuth::from_api_key("dummy"),
-                ),
+                nez_core::test_support::auth_manager_from_auth(nez_login::NezAuth::from_api_key(
+                    "dummy",
+                )),
                 /*parent_trace*/ None,
                 ClientMcpExtensions::default(),
             )

@@ -7,10 +7,7 @@ impl ChatWidget {
         Self::new_with_op_target(common, NezOpTarget::AppEvent)
     }
 
-    pub(super) fn new_with_op_target(
-        common: ChatWidgetInit,
-        nez_op_target: NezOpTarget,
-    ) -> Self {
+    pub(super) fn new_with_op_target(common: ChatWidgetInit, nez_op_target: NezOpTarget) -> Self {
         let ChatWidgetInit {
             config,
             local_settings,

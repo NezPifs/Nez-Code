@@ -1,12 +1,12 @@
 //! Cancellation prevents new speculation without cancelling session-owned work.
 
 use super::*;
+use core_test_support::responses;
 use nez_analytics::CompactionReason;
 use nez_analytics::CompactionTrigger;
 use nez_login::NezAuth;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::protocol::TokenUsage;
-use core_test_support::responses;
 use pretty_assertions::assert_eq;
 
 #[test_case::test_case(CompactionTrigger::Auto; "optional ready adoption")]

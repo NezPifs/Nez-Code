@@ -1,6 +1,20 @@
 use anyhow::Context;
 use anyhow::Result;
 use chrono::Utc;
+use core_test_support::responses;
+use core_test_support::responses::WebSocketConnectionConfig;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::start_websocket_server;
+use core_test_support::responses::start_websocket_server_with_headers;
+use core_test_support::skip_if_no_network;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server_protocol::ThreadRealtimeItemContent;
 use nez_app_server_protocol::ThreadRealtimeSessionOutcome;
 use nez_app_server_protocol::ThreadRealtimeTranscriptRole;
@@ -20,7 +34,6 @@ use nez_protocol::ThreadId;
 use nez_protocol::mcp::ClientMcpExtensions;
 use nez_protocol::models::ContentItem;
 use nez_protocol::models::ResponseItem;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::ConversationAudioParams;
 use nez_protocol::protocol::ConversationStartParams;
 use nez_protocol::protocol::ConversationStartTransport;
@@ -28,6 +41,7 @@ use nez_protocol::protocol::ConversationTextParams;
 use nez_protocol::protocol::ConversationTextRole;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::InternalSessionSource;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::RealtimeAudioFrame;
 use nez_protocol::protocol::RealtimeConversationRealtimeEvent;
@@ -43,20 +57,6 @@ use nez_protocol::protocol::ThreadHistoryMode;
 use nez_protocol::protocol::ThreadSource;
 use nez_protocol::user_input::UserInput;
 use nez_thread_store::ListTimelineParams;
-use core_test_support::responses;
-use core_test_support::responses::WebSocketConnectionConfig;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::start_websocket_server;
-use core_test_support::responses::start_websocket_server_with_headers;
-use core_test_support::skip_if_no_network;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -320,8 +320,7 @@ async fn conversation_start_audio_text_close_round_trip() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -503,8 +502,7 @@ async fn conversation_records_history_without_an_event_observer(
                 flush_transcript_tail_on_session_end: false,
                 nez_responses_as_items: false,
                 nez_response_item_prefix: None,
-                nez_response_handoff_mode:
-                    nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+                nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
                 backend_reasoning_status: false,
                 nez_response_handoff_channel_prefixes: None,
                 model: None,
@@ -615,8 +613,7 @@ async fn conversation_start_defaults_to_v2_and_gpt_realtime_1_5() -> Result<()> 
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -704,31 +701,29 @@ async fn conversation_websocket_transports_send_nez_headers_without_creating_a_c
         .await?;
     let nez = &conversation.thread;
 
-    nez
-        .submit(Op::RealtimeConversationStart(ConversationStartParams {
-            client_managed_handoffs: false,
-            delegation_ack_filler: None,
-            flush_transcript_tail_on_session_end: false,
-            nez_responses_as_items: false,
-            nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
-            backend_reasoning_status: false,
-            nez_response_handoff_channel_prefixes: None,
-            model: None,
-            output_modality: RealtimeOutputModality::Audio,
-            include_startup_context: false,
-            initial_items: Vec::new(),
-            realtime_start_instructions: None,
-            realtime_end_instructions: None,
-            prompt: None,
-            realtime_session_id: None,
-            voice_session_id: None,
-            transport: Some(transport.clone()),
-            version: Some(RealtimeConversationVersion::V3),
-            voice: None,
-        }))
-        .await?;
+    nez.submit(Op::RealtimeConversationStart(ConversationStartParams {
+        client_managed_handoffs: false,
+        delegation_ack_filler: None,
+        flush_transcript_tail_on_session_end: false,
+        nez_responses_as_items: false,
+        nez_response_item_prefix: None,
+        nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+        backend_reasoning_status: false,
+        nez_response_handoff_channel_prefixes: None,
+        model: None,
+        output_modality: RealtimeOutputModality::Audio,
+        include_startup_context: false,
+        initial_items: Vec::new(),
+        realtime_start_instructions: None,
+        realtime_end_instructions: None,
+        prompt: None,
+        realtime_session_id: None,
+        voice_session_id: None,
+        transport: Some(transport.clone()),
+        version: Some(RealtimeConversationVersion::V3),
+        voice: None,
+    }))
+    .await?;
 
     let started = wait_for_event_match(nez, |msg| match msg {
         EventMsg::RealtimeConversationStarted(started) => Some(Ok(started.clone())),
@@ -876,36 +871,34 @@ async fn conversation_webrtc_frameless_chatgpt_sends_nez_headers_to_backend(
     let requested_realtime_session_id = Uuid::new_v4().to_string();
     let voice_session_id = "voice-session-test".to_string();
 
-    nez
-        .submit(Op::RealtimeConversationStart(ConversationStartParams {
-            client_managed_handoffs: false,
-            delegation_ack_filler: None,
-            flush_transcript_tail_on_session_end: false,
-            nez_responses_as_items: false,
-            nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
-            backend_reasoning_status: false,
-            nez_response_handoff_channel_prefixes: None,
-            model: model.map(str::to_string),
-            output_modality: RealtimeOutputModality::Audio,
-            include_startup_context: false,
-            initial_items: vec![ConversationTextParams {
-                text: "private voice transcript".to_string(),
-                role: ConversationTextRole::User,
-            }],
-            realtime_start_instructions: None,
-            realtime_end_instructions: None,
-            prompt: Some(Some("backend prompt".to_string())),
-            realtime_session_id: Some(requested_realtime_session_id.clone()),
-            voice_session_id: Some(voice_session_id.clone()),
-            transport: Some(ConversationStartTransport::Webrtc {
-                sdp: "v=offer\r\n".to_string(),
-            }),
-            version: Some(RealtimeConversationVersion::V3),
-            voice: None,
-        }))
-        .await?;
+    nez.submit(Op::RealtimeConversationStart(ConversationStartParams {
+        client_managed_handoffs: false,
+        delegation_ack_filler: None,
+        flush_transcript_tail_on_session_end: false,
+        nez_responses_as_items: false,
+        nez_response_item_prefix: None,
+        nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+        backend_reasoning_status: false,
+        nez_response_handoff_channel_prefixes: None,
+        model: model.map(str::to_string),
+        output_modality: RealtimeOutputModality::Audio,
+        include_startup_context: false,
+        initial_items: vec![ConversationTextParams {
+            text: "private voice transcript".to_string(),
+            role: ConversationTextRole::User,
+        }],
+        realtime_start_instructions: None,
+        realtime_end_instructions: None,
+        prompt: Some(Some("backend prompt".to_string())),
+        realtime_session_id: Some(requested_realtime_session_id.clone()),
+        voice_session_id: Some(voice_session_id.clone()),
+        transport: Some(ConversationStartTransport::Webrtc {
+            sdp: "v=offer\r\n".to_string(),
+        }),
+        version: Some(RealtimeConversationVersion::V3),
+        voice: None,
+    }))
+    .await?;
 
     let created = wait_for_event_match(nez, |msg| match msg {
         EventMsg::RealtimeConversationSdp(created) => Some(Ok(created.clone())),
@@ -1051,8 +1044,7 @@ async fn conversation_webrtc_start_posts_generated_session() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: Some("session-override-model".to_string()),
@@ -1417,8 +1409,7 @@ async fn conversation_webrtc_live_reconnects_sideband_after_unclean_disconnect(
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -1574,8 +1565,7 @@ async fn conversation_webrtc_start_uses_avas_query() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -1681,8 +1671,7 @@ async fn conversation_webrtc_default_v1_ignores_configured_v2_voice() -> Result<
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -1750,8 +1739,7 @@ async fn conversation_webrtc_default_v1_rejects_explicit_v2_voice() -> Result<()
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -1829,8 +1817,7 @@ async fn conversation_webrtc_start_uses_configured_call_base_url_for_avas() -> R
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -1945,8 +1932,7 @@ async fn conversation_webrtc_close_while_sideband_connecting_drops_pending_join(
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2054,8 +2040,7 @@ async fn conversation_webrtc_sideband_connect_failure_closes_with_error() -> Res
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2163,8 +2148,7 @@ async fn conversation_start_uses_openai_env_key_fallback_with_chatgpt_auth() -> 
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2266,8 +2250,7 @@ async fn assert_transport_close_tail_flush(
             flush_transcript_tail_on_session_end,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2401,8 +2384,7 @@ async fn conversation_start_preflight_failure_emits_realtime_error_only() -> Res
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2461,8 +2443,7 @@ async fn conversation_start_connect_failure_emits_realtime_error_only() -> Resul
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2575,8 +2556,7 @@ async fn conversation_second_start_replaces_runtime() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2614,8 +2594,7 @@ async fn conversation_second_start_replaces_runtime() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2725,8 +2704,7 @@ async fn conversation_uses_experimental_realtime_ws_base_url_override() -> Resul
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2806,8 +2784,7 @@ async fn conversation_uses_default_realtime_backend_prompt() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -2898,8 +2875,7 @@ async fn conversation_uses_empty_instructions_for_null_or_empty_prompt() -> Resu
                 flush_transcript_tail_on_session_end: false,
                 nez_responses_as_items: false,
                 nez_response_item_prefix: None,
-                nez_response_handoff_mode:
-                    nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+                nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
                 backend_reasoning_status: false,
                 nez_response_handoff_channel_prefixes: None,
                 model: None,
@@ -2983,8 +2959,7 @@ async fn conversation_uses_explicit_start_voice() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3058,8 +3033,7 @@ async fn conversation_uses_configured_realtime_voice() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3118,8 +3092,7 @@ async fn conversation_rejects_voice_for_wrong_realtime_version() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3181,8 +3154,7 @@ async fn conversation_uses_experimental_realtime_ws_backend_prompt_override() ->
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3268,8 +3240,7 @@ async fn conversation_uses_experimental_realtime_ws_startup_context_override() -
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3348,8 +3319,7 @@ async fn conversation_disables_realtime_startup_context_with_empty_override() ->
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3421,8 +3391,7 @@ async fn conversation_start_injects_startup_context_from_thread_history() -> Res
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3549,31 +3518,29 @@ async fn conversation_startup_context_current_thread_selects_many_turns_by_budge
         .await?;
     let nez = resumed_thread.thread;
 
-    nez
-        .submit(Op::RealtimeConversationStart(ConversationStartParams {
-            client_managed_handoffs: false,
-            delegation_ack_filler: None,
-            flush_transcript_tail_on_session_end: false,
-            nez_responses_as_items: false,
-            nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
-            backend_reasoning_status: false,
-            nez_response_handoff_channel_prefixes: None,
-            model: None,
-            output_modality: RealtimeOutputModality::Audio,
-            include_startup_context: true,
-            initial_items: Vec::new(),
-            realtime_start_instructions: None,
-            realtime_end_instructions: None,
-            prompt: Some(Some("backend prompt".to_string())),
-            realtime_session_id: None,
-            voice_session_id: None,
-            transport: None,
-            version: None,
-            voice: None,
-        }))
-        .await?;
+    nez.submit(Op::RealtimeConversationStart(ConversationStartParams {
+        client_managed_handoffs: false,
+        delegation_ack_filler: None,
+        flush_transcript_tail_on_session_end: false,
+        nez_responses_as_items: false,
+        nez_response_item_prefix: None,
+        nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+        backend_reasoning_status: false,
+        nez_response_handoff_channel_prefixes: None,
+        model: None,
+        output_modality: RealtimeOutputModality::Audio,
+        include_startup_context: true,
+        initial_items: Vec::new(),
+        realtime_start_instructions: None,
+        realtime_end_instructions: None,
+        prompt: Some(Some("backend prompt".to_string())),
+        realtime_session_id: None,
+        voice_session_id: None,
+        transport: None,
+        version: None,
+        voice: None,
+    }))
+    .await?;
 
     let startup_context_request = wait_for_matching_websocket_request(
         &realtime_server,
@@ -3677,8 +3644,7 @@ async fn conversation_startup_context_falls_back_to_workspace_map() -> Result<()
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3750,8 +3716,7 @@ async fn conversation_startup_context_is_truncated_and_sent_once_per_start() -> 
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3856,8 +3821,7 @@ async fn conversation_user_text_turn_is_not_sent_to_realtime(ephemeral: bool) ->
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -3998,8 +3962,7 @@ async fn realtime_v2_noop_tool_call_returns_empty_function_output_without_respon
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -4117,8 +4080,7 @@ async fn conversation_mirrors_assistant_message_text_to_realtime_handoff(
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -4252,8 +4214,7 @@ async fn conversation_relays_only_public_reasoning_as_quiet_status(enabled: bool
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
             // The generic default omits its wire channel; quiet status must override it.
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: enabled,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -4439,8 +4400,7 @@ async fn conversation_routes_assistant_messages_for_v3_handoff(
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::BemTags,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::BemTags,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: Some(BTreeMap::from([
                 (
@@ -4640,8 +4600,7 @@ async fn conversation_handoff_persists_across_item_done_until_turn_complete(
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::BemTags,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::BemTags,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -4807,8 +4766,7 @@ async fn inbound_handoff_request_starts_turn_and_promotes_its_artifact() -> Resu
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -4973,8 +4931,7 @@ async fn inbound_handoff_request_uses_active_transcript() -> Result<()> {
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5089,8 +5046,7 @@ async fn inbound_handoff_request_sends_transcript_delta_after_each_handoff() -> 
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5229,8 +5185,7 @@ async fn conversation_close_routes_only_remaining_transcript_tail_once() -> Resu
             flush_transcript_tail_on_session_end: true,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5336,8 +5291,7 @@ async fn inbound_conversation_item_does_not_start_turn_and_still_forwards_audio(
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5472,8 +5426,7 @@ async fn delegated_turn_user_role_echo_does_not_redelegate_and_still_forwards_au
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5638,8 +5591,7 @@ async fn inbound_handoff_request_does_not_block_realtime_event_forwarding() -> R
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5824,8 +5776,7 @@ async fn inbound_handoff_request_updates_realtime_state_during_active_turn(
             flush_transcript_tail_on_session_end,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -5909,10 +5860,7 @@ async fn inbound_handoff_request_updates_realtime_state_during_active_turn(
     }
     if interrupt {
         test.nez.submit(Op::Interrupt).await?;
-        wait_for_event(&test.nez, |event| {
-            matches!(event, EventMsg::TurnAborted(_))
-        })
-        .await;
+        wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
         let _ = second_completed_tx.send(());
         realtime_server.shutdown().await;
         api_server.shutdown().await;
@@ -6066,8 +6014,7 @@ async fn inbound_handoff_request_starts_turn_and_does_not_block_realtime_audio()
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,

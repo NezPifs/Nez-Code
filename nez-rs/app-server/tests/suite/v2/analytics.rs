@@ -8,6 +8,10 @@ use app_test_support::create_mock_responses_server_sequence;
 use app_test_support::to_response;
 use app_test_support::write_chatgpt_auth;
 use app_test_support::write_mock_responses_config_toml_with_chatgpt_base_url;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+use core_test_support::skip_if_wine_exec;
 use nez_app_server_protocol::ApprovalsReviewer;
 use nez_app_server_protocol::AskForApproval;
 use nez_app_server_protocol::ClientRequest;
@@ -37,10 +41,6 @@ use nez_models_manager::bundled_models_response;
 use nez_plugin::PluginId;
 use nez_protocol::openai_models::ModelsResponse;
 use nez_protocol::openai_models::ReasoningEffort;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-use core_test_support::skip_if_wine_exec;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -670,10 +670,7 @@ pub(crate) async fn wait_for_matching_analytics_event(
             };
             for request in &requests {
                 if request.method != "POST"
-                    || !request
-                        .url
-                        .path()
-                        .ends_with("/nez/analytics-events/events")
+                    || !request.url.path().ends_with("/nez/analytics-events/events")
                 {
                     continue;
                 }

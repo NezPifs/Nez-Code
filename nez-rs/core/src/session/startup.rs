@@ -11,11 +11,11 @@ use std::sync::PoisonError;
 use crate::agent::control::AgentTreeMembership;
 use crate::agent::control::AgentTreeTeardownGuard;
 use crate::thread_manager::thread_store_error_kind;
+use futures::future::BoxFuture;
 use nez_protocol::ThreadId;
 use nez_protocol::error::NezErrKind;
 use nez_protocol::protocol::Op;
 use nez_thread_store::LiveThreadInitGuard;
-use futures::future::BoxFuture;
 use tokio::sync::Mutex;
 
 use super::SessionIo;

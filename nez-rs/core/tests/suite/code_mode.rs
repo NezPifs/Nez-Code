@@ -4,6 +4,46 @@ use anyhow::Context;
 use anyhow::Result;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::AppsTestToolLoading;
+use core_test_support::apps_test_server::DIRECT_CALENDAR_APP_ONLY_TOOL;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::apps_test_server::search_capable_apps_builder;
+use core_test_support::assert_regex_match;
+#[cfg(unix)]
+use core_test_support::code_mode_host::CodeModeHostRecorder;
+use core_test_support::responses;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::namespace_child_tool;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::stdio_server_bin;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
+use image::DynamicImage;
+use image::GenericImageView;
+use image::ImageBuffer;
+use image::ImageDecoder;
+use image::ImageEncoder;
+use image::ImageFormat;
+use image::ImageReader;
+use image::Rgba;
+use image::codecs::png::PngEncoder;
+use image::metadata::Orientation;
 use nez_analytics::AnalyticsEventsClient;
 use nez_config::types::McpServerConfig;
 use nez_config::types::McpServerTransportConfig;
@@ -71,46 +111,6 @@ use nez_tools::ToolOutput;
 use nez_tools::ToolPayload;
 use nez_tools::ToolSpec;
 use nez_web_search_extension::install as install_web_search_extension;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::AppsTestToolLoading;
-use core_test_support::apps_test_server::DIRECT_CALENDAR_APP_ONLY_TOOL;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::apps_test_server::search_capable_apps_builder;
-use core_test_support::assert_regex_match;
-#[cfg(unix)]
-use core_test_support::code_mode_host::CodeModeHostRecorder;
-use core_test_support::responses;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::namespace_child_tool;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::stdio_server_bin;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
-use image::DynamicImage;
-use image::GenericImageView;
-use image::ImageBuffer;
-use image::ImageDecoder;
-use image::ImageEncoder;
-use image::ImageFormat;
-use image::ImageReader;
-use image::Rgba;
-use image::codecs::png::PngEncoder;
-use image::metadata::Orientation;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use std::collections::BTreeSet;
@@ -635,10 +635,7 @@ text(result);
     let search_body = search_request
         .body_json::<Value>()
         .expect("search request body should be JSON");
-    assert_eq!(
-        search_body["model"],
-        serde_json::json!("test-gpt-5.1-nez")
-    );
+    assert_eq!(search_body["model"], serde_json::json!("test-gpt-5.1-nez"));
     assert_eq!(
         search_body["commands"],
         serde_json::json!({
@@ -852,14 +849,8 @@ async fn code_mode_exec_holds_captured_result_during_elicitation() -> Result<()>
     )
     .await;
 
-    assert_eq!(
-        test.nez.increment_out_of_band_elicitation_count().await?,
-        1
-    );
-    assert_eq!(
-        test.nez.increment_out_of_band_elicitation_count().await?,
-        2
-    );
+    assert_eq!(test.nez.increment_out_of_band_elicitation_count().await?, 1);
+    assert_eq!(test.nez.increment_out_of_band_elicitation_count().await?, 2);
     let release_elicitation = async {
         tokio::time::timeout(Duration::from_secs(5), async {
             while first_mock.requests().is_empty() {
@@ -873,19 +864,13 @@ async fn code_mode_exec_holds_captured_result_during_elicitation() -> Result<()>
             second_mock.requests().is_empty(),
             "captured exec result should not return during an elicitation"
         );
-        assert_eq!(
-            test.nez.decrement_out_of_band_elicitation_count().await?,
-            1
-        );
+        assert_eq!(test.nez.decrement_out_of_band_elicitation_count().await?, 1);
         tokio::time::sleep(Duration::from_millis(100)).await;
         assert!(
             second_mock.requests().is_empty(),
             "captured exec result should wait for every elicitation"
         );
-        assert_eq!(
-            test.nez.decrement_out_of_band_elicitation_count().await?,
-            0
-        );
+        assert_eq!(test.nez.decrement_out_of_band_elicitation_count().await?, 0);
         Ok::<(), anyhow::Error>(())
     };
 
@@ -2682,9 +2667,7 @@ async fn result_metadata_follows_call_binding(
             .iter()
             .find_map(|item| match item {
                 nez_protocol::models::ResponseItem::FunctionCallOutput {
-                    call_id,
-                    output,
-                    ..
+                    call_id, output, ..
                 } if call_id.as_deref() == Some("call-1") => Some(output),
                 _ => None,
             })
@@ -6119,10 +6102,7 @@ async fn code_mode_interrupt_terminates_active_cells_and_nested_tools() -> Resul
     let active_cell_id = tokio::time::timeout(Duration::from_secs(10), started_rx).await??;
 
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
     let nested_outcome = tokio::time::timeout(Duration::from_secs(10), finished_rx).await??;
     assert_eq!(nested_outcome, ToolCallOutcome::Aborted);
 
@@ -6713,14 +6693,12 @@ async fn code_mode_can_use_view_image_result_with_image_helper(
     skip_if_no_network!(Ok(()));
 
     let server = responses::start_mock_server().await;
-    let mut builder = test_nez()
-        .with_model("gpt-5.5")
-        .with_config(move |config| {
-            let _ = config.features.enable(Feature::CodeMode);
-            if unified_image_budget {
-                let _ = config.features.enable(Feature::UnifiedImageBudget);
-            }
-        });
+    let mut builder = test_nez().with_model("gpt-5.5").with_config(move |config| {
+        let _ = config.features.enable(Feature::CodeMode);
+        if unified_image_budget {
+            let _ = config.features.enable(Feature::UnifiedImageBudget);
+        }
+    });
     let test = builder.build(&server).await?;
 
     let image = ImageBuffer::from_pixel(
@@ -6987,9 +6965,7 @@ async fn code_mode_records_mcp_completion_even_when_result_is_not_printed() -> R
     let first_turn_id = request.body_json()["client_metadata"]["turn_id"].clone();
     assert!(first_turn_id.is_string());
     assert_eq!(
-        serde_json::to_value(nez_core::test_support::mcp_attribution_snapshot(
-            &test.nez
-        ))?,
+        serde_json::to_value(nez_core::test_support::mcp_attribution_snapshot(&test.nez))?,
         serde_json::json!({
             "status": "complete",
             "sources": [{

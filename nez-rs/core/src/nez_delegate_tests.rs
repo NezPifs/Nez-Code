@@ -1,5 +1,6 @@
 use super::*;
 use async_channel::bounded;
+use futures::FutureExt;
 use nez_extension_api::ExtensionFuture;
 use nez_extension_api::ExtensionRegistryBuilder;
 use nez_extension_api::ThreadLifecycleContributor;
@@ -17,7 +18,6 @@ use nez_protocol::protocol::RawResponseItemEvent;
 use nez_protocol::protocol::TurnAbortReason;
 use nez_protocol::protocol::TurnAbortedEvent;
 use nez_protocol::protocol::TurnEnvironmentSelection;
-use futures::FutureExt;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;

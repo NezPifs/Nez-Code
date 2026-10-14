@@ -5,12 +5,12 @@
 
 use super::App;
 use crate::app_server_session::AppServerSession;
+use color_eyre::eyre::Result;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_protocol::ConfigEdit;
 use nez_app_server_protocol::WriteStatus;
 use nez_protocol::config_types::ModeKind;
 use nez_protocol::openai_models::ReasoningEffort;
-use color_eyre::eyre::Result;
 
 impl App {
     pub(super) async fn select_session_model(

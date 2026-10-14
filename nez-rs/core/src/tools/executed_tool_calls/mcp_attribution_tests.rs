@@ -1,8 +1,8 @@
 //! Tests for cumulative MCP attribution restoration and checkpoint acknowledgements.
 
 use super::*;
-use nez_history::NezHarnessMetadata;
 use nez_history::CompactedItem;
+use nez_history::NezHarnessMetadata;
 use nez_history::ResponseItemEnvelope;
 use nez_protocol::models::ResponseItem;
 use pretty_assertions::assert_eq;

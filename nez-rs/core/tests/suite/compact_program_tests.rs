@@ -1,8 +1,8 @@
 //! Model-switch compaction must retain the historical model/program pair across replay.
 
 use super::*;
-use nez_core::NezThread;
 use nez_core::ForkSnapshot;
+use nez_core::NezThread;
 use nez_core::StartThreadOptions;
 use nez_core::TurnStartOptions;
 use nez_protocol::turn_input::CyberAccessProgram;

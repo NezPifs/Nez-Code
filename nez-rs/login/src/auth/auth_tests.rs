@@ -217,8 +217,7 @@ async fn agent_identity_jwt_uses_explicit_staging_endpoint_overrides() -> anyhow
     )
     .await;
     let authapi_base_url = format!("{}/api/accounts/", authapi_server.uri());
-    let _authapi_guard =
-        EnvVarGuard::set("NEZ_AGENT_IDENTITY_AUTHAPI_BASE_URL", &authapi_base_url);
+    let _authapi_guard = EnvVarGuard::set("NEZ_AGENT_IDENTITY_AUTHAPI_BASE_URL", &authapi_base_url);
     let jwks_base_url = format!("{}/api/nez/", jwks_server.uri());
     let _jwks_guard = EnvVarGuard::set("NEZ_AGENT_IDENTITY_JWKS_BASE_URL", &jwks_base_url);
 
@@ -259,8 +258,7 @@ async fn agent_identity_jwt_supports_existing_staging_launcher() -> anyhow::Resu
     )
     .await;
     let authapi_base_url = format!("{}/api/accounts", authapi_server.uri());
-    let _authapi_guard =
-        EnvVarGuard::set("NEZ_AGENT_IDENTITY_AUTHAPI_BASE_URL", &authapi_base_url);
+    let _authapi_guard = EnvVarGuard::set("NEZ_AGENT_IDENTITY_AUTHAPI_BASE_URL", &authapi_base_url);
     let jwks_base_url = format!("{}/api/nez", jwks_server.uri());
     let _jwks_guard = EnvVarGuard::set("NEZ_AGENT_IDENTITY_JWKS_BASE_URL", &jwks_base_url);
 

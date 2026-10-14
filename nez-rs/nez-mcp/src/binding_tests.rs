@@ -4,6 +4,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
+use futures::FutureExt;
 use nez_config::AppToolApproval;
 use nez_config::Constrained;
 use nez_config::types::ApprovalsReviewer;
@@ -13,7 +14,6 @@ use nez_protocol::protocol::AskForApproval;
 use nez_rmcp_client::InProcessTransportFactory;
 use nez_rmcp_client::RmcpClient;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use futures::FutureExt;
 use pretty_assertions::assert_eq;
 use rmcp::model::JsonObject;
 use rmcp::model::Tool;

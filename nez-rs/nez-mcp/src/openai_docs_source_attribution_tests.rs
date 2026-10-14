@@ -1,14 +1,14 @@
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use futures::FutureExt;
+use futures::future::BoxFuture;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::HttpClient;
 use nez_exec_server::HttpRedirectPolicy;
 use nez_exec_server::HttpRequestParams;
 use nez_exec_server::HttpRequestResponse;
 use nez_exec_server::HttpResponseBodyStream;
-use futures::FutureExt;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 
 use super::OPENAI_DEVELOPER_DOCS_MCP_NEZ_URL;

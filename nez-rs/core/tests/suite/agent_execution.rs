@@ -1,18 +1,5 @@
 use anyhow::Context;
 use anyhow::Result;
-use nez_core::AgentTreeShutdownFailure;
-use nez_core::AgentTreeShutdownFailureReason;
-use nez_core::windows_sandbox::WindowsSandboxLevelExt;
-use nez_exec_server::CreateDirectoryOptions;
-use nez_features::Feature;
-use nez_protocol::config_types::WindowsSandboxLevel;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::models::PermissionProfileSnapshot;
-use nez_protocol::protocol::EnvironmentConfig;
-use nez_protocol::protocol::EnvironmentConfigState;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::protocol::TurnEnvironmentRequests;
 use core_test_support::apps_test_server::AppsTestServer;
 use core_test_support::responses::ResponseMock;
 use core_test_support::responses::ev_assistant_message;
@@ -27,6 +14,19 @@ use core_test_support::submit_thread_settings;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
 use futures::FutureExt;
+use nez_core::AgentTreeShutdownFailure;
+use nez_core::AgentTreeShutdownFailureReason;
+use nez_core::windows_sandbox::WindowsSandboxLevelExt;
+use nez_exec_server::CreateDirectoryOptions;
+use nez_features::Feature;
+use nez_protocol::config_types::WindowsSandboxLevel;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::models::PermissionProfileSnapshot;
+use nez_protocol::protocol::EnvironmentConfig;
+use nez_protocol::protocol::EnvironmentConfigState;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::protocol::TurnEnvironmentRequests;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::time::Duration;
@@ -182,19 +182,17 @@ async fn v2_nested_spawn_checks_shared_active_execution_capacity() -> Result<()>
     )
     .await;
 
-    let mut builder = test_nez()
-        .with_model("gpt-5.6-sol")
-        .with_config(|config| {
-            config
-                .features
-                .enable(Feature::Collab)
-                .expect("test config should allow feature update");
-            config
-                .features
-                .enable(Feature::MultiAgentV2)
-                .expect("test config should allow feature update");
-            config.multi_agent_v2.max_concurrent_threads_per_session = 2;
-        });
+    let mut builder = test_nez().with_model("gpt-5.6-sol").with_config(|config| {
+        config
+            .features
+            .enable(Feature::Collab)
+            .expect("test config should allow feature update");
+        config
+            .features
+            .enable(Feature::MultiAgentV2)
+            .expect("test config should allow feature update");
+        config.multi_agent_v2.max_concurrent_threads_per_session = 2;
+    });
     let test = builder.build(&server).await?;
     test.submit_turn(FIRST_PROMPT).await?;
 

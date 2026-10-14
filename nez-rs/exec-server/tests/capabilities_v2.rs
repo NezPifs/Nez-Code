@@ -2,6 +2,8 @@
 mod common;
 
 use anyhow::Context;
+use common::exec_server::ExecServerHarness;
+use common::exec_server::exec_server_with_env;
 use nez_exec_server::CAPABILITIES_DISCOVER_V2_METHOD;
 use nez_exec_server::DiscoverV2CapabilitiesRequest;
 use nez_exec_server::DiscoverV2CapabilitiesResponse;
@@ -9,8 +11,6 @@ use nez_exec_server::InitializeResponse;
 use nez_exec_server::SkillDiscoveryRoot;
 use nez_exec_server_protocol::JSONRPCMessage;
 use nez_utils_path_uri::PathUri;
-use common::exec_server::ExecServerHarness;
-use common::exec_server::exec_server_with_env;
 use pretty_assertions::assert_eq;
 
 #[cfg(any(target_os = "linux", target_os = "macos", windows))]

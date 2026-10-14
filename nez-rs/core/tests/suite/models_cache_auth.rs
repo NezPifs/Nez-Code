@@ -7,14 +7,22 @@ use std::time::Duration;
 use tokio_util::sync::CancellationToken;
 
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::sse;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use http::HeaderMap;
+use http::HeaderValue;
 use nez_core::TurnInputRequest;
 use nez_login::AuthCredentialsStoreMode;
 use nez_login::AuthHeaders;
 use nez_login::AuthKeyringBackendKind;
-use nez_login::NezAuth;
 use nez_login::ExternalAuth;
 use nez_login::ExternalAuthFuture;
 use nez_login::ExternalAuthRefreshContext;
+use nez_login::NezAuth;
 use nez_login::login_with_api_key;
 use nez_models_manager::bundled_models_response;
 use nez_models_manager::manager::RefreshStrategy;
@@ -26,14 +34,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::InterAgentCommunication;
 use nez_protocol::protocol::Op;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::sse;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use http::HeaderMap;
-use http::HeaderValue;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use test_case::test_case;
@@ -206,10 +206,8 @@ async fn auth_rotation_refreshes_before_turn_with_best_effort(
                 .await?;
         }
     }
-    let started = wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnStarted(_))
-    })
-    .await;
+    let started =
+        wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnStarted(_))).await;
     let EventMsg::TurnStarted(started) = started else {
         unreachable!()
     };

@@ -13,9 +13,9 @@ use std::time::Instant;
 
 use super::live_output::LiveCommandOutput;
 use crate::history_cell::ActivityGroup;
+use itertools::Either;
 use nez_app_server_protocol::CommandExecutionSource as ExecCommandSource;
 use nez_protocol::parse_command::ParsedCommand;
-use itertools::Either;
 
 #[derive(Debug, Default)]
 pub(crate) struct CommandOutput {

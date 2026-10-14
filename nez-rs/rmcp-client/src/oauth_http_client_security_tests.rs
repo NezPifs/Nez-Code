@@ -3,6 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
+use futures::future::BoxFuture;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::HttpClient;
 use nez_exec_server::HttpRequestParams;
@@ -11,7 +12,6 @@ use nez_exec_server::HttpResponseBodyStream;
 use nez_exec_server::RouteAwareHttpClient;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 use rmcp::transport::auth::AuthorizationManager;
 use rmcp::transport::auth::AuthorizationMetadata;

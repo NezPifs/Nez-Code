@@ -152,6 +152,8 @@ use crate::diff_model::FileChange;
 use crate::legacy_core::config::ConfigBuilder;
 use crate::legacy_core::config::ConfigOverrides;
 use crate::legacy_core::config::PermissionProfileSnapshot;
+use crossterm::event::KeyModifiers;
+use insta::assert_snapshot;
 use nez_app_server_client::AppServerPath;
 use nez_app_server_protocol::AdditionalFileSystemPermissions;
 use nez_app_server_protocol::AdditionalNetworkPermissions;
@@ -226,8 +228,6 @@ use nez_protocol::protocol::TurnStartedEvent;
 use nez_protocol::request_permissions::RequestPermissionProfile;
 use nez_protocol::user_input::TextElement;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use crossterm::event::KeyModifiers;
-use insta::assert_snapshot;
 use pretty_assertions::assert_eq;
 use ratatui::buffer::Buffer;
 use ratatui::prelude::Line;
@@ -302,11 +302,8 @@ async fn duplicate_named_resume_renders_error_without_replacing_current_session(
             /*git_info*/ None,
         )
         .expect("materialized rollout should be created");
-        let path = app_test_support::rollout_path(
-            app.config.nez_home.as_path(),
-            filename_ts,
-            &thread_id,
-        );
+        let path =
+            app_test_support::rollout_path(app.config.nez_home.as_path(), filename_ts, &thread_id);
         let thread_id = ThreadId::from_string(&thread_id)?;
         thread_ids.push(thread_id);
         let created_at =
@@ -526,10 +523,7 @@ async fn external_editor_writable_directory_rejected_snapshot() -> Result<()> {
 
     let (mut app, mut app_event_rx, _op_rx) = make_test_app_with_channels().await;
     let nez_home = app.chat_widget.config_ref().nez_home.clone();
-    let fallback_home = dirs::home_dir()
-        .expect("home directory")
-        .join(".nez")
-        .abs();
+    let fallback_home = dirs::home_dir().expect("home directory").join(".nez").abs();
     let workspace_nez_home = app.chat_widget.config_ref().cwd.join(".nez");
     let permission_profile = PermissionProfile::workspace_write_with(
         &[nez_home, fallback_home, workspace_nez_home],
@@ -9133,25 +9127,22 @@ async fn replace_chat_widget_reseeds_collab_agent_metadata_for_replay() {
             session: None,
             turns: Vec::new(),
             events: vec![ThreadBufferedEvent::Notification(Box::new(
-                ServerNotification::ItemStarted(
-                    nez_app_server_protocol::ItemStartedNotification {
-                        thread_id: "thread-1".to_string(),
-                        turn_id: "turn-1".to_string(),
-                        started_at_ms: 0,
-                        item: ThreadItem::CollabAgentToolCall {
-                            id: "wait-1".to_string(),
-                            tool: nez_app_server_protocol::CollabAgentTool::Wait,
-                            status:
-                                nez_app_server_protocol::CollabAgentToolCallStatus::InProgress,
-                            sender_thread_id: ThreadId::new().to_string(),
-                            receiver_thread_ids: vec![receiver_thread_id.to_string()],
-                            prompt: None,
-                            model: None,
-                            reasoning_effort: None,
-                            agents_states: HashMap::new(),
-                        },
+                ServerNotification::ItemStarted(nez_app_server_protocol::ItemStartedNotification {
+                    thread_id: "thread-1".to_string(),
+                    turn_id: "turn-1".to_string(),
+                    started_at_ms: 0,
+                    item: ThreadItem::CollabAgentToolCall {
+                        id: "wait-1".to_string(),
+                        tool: nez_app_server_protocol::CollabAgentTool::Wait,
+                        status: nez_app_server_protocol::CollabAgentToolCallStatus::InProgress,
+                        sender_thread_id: ThreadId::new().to_string(),
+                        receiver_thread_ids: vec![receiver_thread_id.to_string()],
+                        prompt: None,
+                        model: None,
+                        reasoning_effort: None,
+                        agents_states: HashMap::new(),
                     },
-                ),
+                }),
             ))],
             active_reasoning_item: None,
             input_state: None,
@@ -9632,8 +9623,7 @@ async fn changing_cyber_model_reasoning_preserves_selected_permissions() {
 
         assert!(
             app.apply_permission_profile_selection(PermissionProfileSelection {
-                profile_id: nez_protocol::models::BUILT_IN_PERMISSION_PROFILE_READ_ONLY
-                    .to_string(),
+                profile_id: nez_protocol::models::BUILT_IN_PERMISSION_PROFILE_READ_ONLY.to_string(),
                 approval_policy: Some(AskForApproval::OnRequest),
                 approvals_reviewer: Some(ApprovalsReviewer::User),
                 display_label: "Read Only".to_string(),

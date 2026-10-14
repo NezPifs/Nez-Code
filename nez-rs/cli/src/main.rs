@@ -1060,9 +1060,7 @@ async fn cli_main(
                     );
                 }
                 if is_workload_identity_selected() {
-                    anyhow::bail!(
-                        "`nez agents` is unavailable while workload identity is active"
-                    );
+                    anyhow::bail!("`nez agents` is unavailable while workload identity is active");
                 }
                 if root_remote.is_none() {
                     resolve_remote_endpoint(
@@ -1203,9 +1201,7 @@ async fn cli_main(
                         managed_daemon,
                         remote_control_startup_mode: match (remote_control, remote_control_disabled)
                         {
-                            (true, _) => {
-                                nez_app_server::RemoteControlStartupMode::EnabledEphemeral
-                            }
+                            (true, _) => nez_app_server::RemoteControlStartupMode::EnabledEphemeral,
                             (false, true) => {
                                 nez_app_server::RemoteControlStartupMode::DisabledEphemeral
                             }
@@ -1237,11 +1233,10 @@ async fn cli_main(
                         print_app_server_daemon_output(AppServerLifecycleCommand::Start).await?;
                     }
                     AppServerDaemonSubcommand::Bootstrap(bootstrap_cli) => {
-                        let output =
-                            nez_app_server_daemon::bootstrap(AppServerBootstrapOptions {
-                                remote_control_enabled: bootstrap_cli.remote_control,
-                            })
-                            .await?;
+                        let output = nez_app_server_daemon::bootstrap(AppServerBootstrapOptions {
+                            remote_control_enabled: bootstrap_cli.remote_control,
+                        })
+                        .await?;
                         println!("{}", serde_json::to_string(&output)?);
                     }
                     AppServerDaemonSubcommand::Restart => {
@@ -1270,12 +1265,11 @@ async fn cli_main(
                             } else {
                                 value
                             };
-                            let feature =
-                                nez_features::feature_for_key(name).ok_or_else(|| {
-                                    anyhow::anyhow!(
-                                        "daemon restart requires a boolean feature toggle: {name}"
-                                    )
-                                })?;
+                            let feature = nez_features::feature_for_key(name).ok_or_else(|| {
+                                anyhow::anyhow!(
+                                    "daemon restart requires a boolean feature toggle: {name}"
+                                )
+                            })?;
                             let enabled = value.as_bool().ok_or_else(|| {
                                 anyhow::anyhow!("daemon restart requires a boolean enablement for features.{name}")
                             })?;
@@ -2005,9 +1999,7 @@ async fn run_debug_prompt_input_command(
             max_context_tokens: config.skill_max_context_tokens,
             bundled_skills_enabled: config.bundled_skills_enabled(),
             cloud_skill_enabled: config.cloud_skill_enabled,
-            shadow_selection_enabled: config
-                .features
-                .enabled(nez_features::Feature::SkillSearch),
+            shadow_selection_enabled: config.features.enabled(nez_features::Feature::SkillSearch),
         }
     });
     let prompt_input = nez_core::build_prompt_input(
@@ -2975,8 +2967,7 @@ enabled = true
         let nez_home = tempfile::tempdir()?;
         let profile: ProfileV2Name = "work".parse()?;
 
-        let overrides =
-            loader_overrides_for_profile_at_nez_home(Some(&profile), nez_home.path());
+        let overrides = loader_overrides_for_profile_at_nez_home(Some(&profile), nez_home.path());
 
         assert_eq!(
             overrides.user_config_path,
@@ -3215,13 +3206,8 @@ enabled = true
 
     #[test]
     fn later_exec_sandbox_partially_overrides_approve_for_me() {
-        let exec = finalize_exec_from_args(&[
-            "nez",
-            "--approve-for-me",
-            "exec",
-            "--sandbox",
-            "read-only",
-        ]);
+        let exec =
+            finalize_exec_from_args(&["nez", "--approve-for-me", "exec", "--sandbox", "read-only"]);
 
         assert_matches!(
             exec.sandbox_mode,
@@ -3239,13 +3225,8 @@ enabled = true
 
     #[test]
     fn later_approve_for_me_overrides_root_exec_sandbox() {
-        let exec = finalize_exec_from_args(&[
-            "nez",
-            "--sandbox",
-            "read-only",
-            "exec",
-            "--approve-for-me",
-        ]);
+        let exec =
+            finalize_exec_from_args(&["nez", "--sandbox", "read-only", "exec", "--approve-for-me"]);
 
         assert!(exec.sandbox_mode.is_none());
         assert_eq!(
@@ -3474,9 +3455,8 @@ enabled = true
 
     #[test]
     fn plugin_list_parses_under_plugin() {
-        let cli =
-            MultitoolCli::try_parse_from(["nez", "plugin", "list", "--marketplace", "debug"])
-                .expect("parse");
+        let cli = MultitoolCli::try_parse_from(["nez", "plugin", "list", "--marketplace", "debug"])
+            .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
     }
@@ -3672,25 +3652,22 @@ enabled = true
 
     #[test]
     fn plugin_marketplace_remove_parses_under_plugin() {
-        let cli =
-            MultitoolCli::try_parse_from(["nez", "plugin", "marketplace", "remove", "debug"])
-                .expect("parse");
+        let cli = MultitoolCli::try_parse_from(["nez", "plugin", "marketplace", "remove", "debug"])
+            .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
     }
 
     #[test]
     fn marketplace_no_longer_parses_at_top_level() {
-        let add_result =
-            MultitoolCli::try_parse_from(["nez", "marketplace", "add", "owner/repo"]);
+        let add_result = MultitoolCli::try_parse_from(["nez", "marketplace", "add", "owner/repo"]);
         assert!(add_result.is_err());
 
         let upgrade_result =
             MultitoolCli::try_parse_from(["nez", "marketplace", "upgrade", "debug"]);
         assert!(upgrade_result.is_err());
 
-        let remove_result =
-            MultitoolCli::try_parse_from(["nez", "marketplace", "remove", "debug"]);
+        let remove_result = MultitoolCli::try_parse_from(["nez", "marketplace", "remove", "debug"]);
         assert!(remove_result.is_err());
     }
 
@@ -4126,9 +4103,8 @@ enabled = true
 
     #[test]
     fn fork_last_rejects_explicit_session_and_prompt() {
-        let err =
-            MultitoolCli::try_parse_from(["nez", "fork", "--last", "1234", "continue here"])
-                .expect_err("--last with an explicit session and prompt should be rejected");
+        let err = MultitoolCli::try_parse_from(["nez", "fork", "--last", "1234", "continue here"])
+            .expect_err("--last with an explicit session and prompt should be rejected");
 
         assert_eq!(err.kind(), clap::error::ErrorKind::ArgumentConflict);
     }
@@ -4165,10 +4141,7 @@ enabled = true
         let app_server = app_server_from_args(["nez", "app-server"].as_ref());
         assert!(!app_server.analytics_default_enabled);
         assert!(!app_server.remote_control);
-        assert_eq!(
-            app_server.listen,
-            nez_app_server::AppServerTransport::Stdio
-        );
+        assert_eq!(app_server.listen, nez_app_server::AppServerTransport::Stdio);
     }
 
     #[test]
@@ -4200,8 +4173,8 @@ enabled = true
             }))
         );
 
-        let cli = MultitoolCli::try_parse_from(["nez", "exec-server", "--strict-config"])
-            .expect("parse");
+        let cli =
+            MultitoolCli::try_parse_from(["nez", "exec-server", "--strict-config"]).expect("parse");
         assert_matches!(
             cli.subcommand,
             Some(Subcommand::ExecServer(ExecServerCommand {
@@ -4270,8 +4243,8 @@ enabled = true
 
     #[test]
     fn root_strict_config_is_supported_for_exec_server() {
-        let cli = MultitoolCli::try_parse_from(["nez", "--strict-config", "exec-server"])
-            .expect("parse");
+        let cli =
+            MultitoolCli::try_parse_from(["nez", "--strict-config", "exec-server"]).expect("parse");
 
         reject_root_strict_config_for_subcommand(cli.interactive.strict_config, &cli.subcommand)
             .expect("exec-server should support root --strict-config");
@@ -4279,8 +4252,8 @@ enabled = true
 
     #[test]
     fn root_strict_config_is_rejected_for_unsupported_subcommands() {
-        let cli = MultitoolCli::try_parse_from(["nez", "--strict-config", "mcp", "list"])
-            .expect("parse");
+        let cli =
+            MultitoolCli::try_parse_from(["nez", "--strict-config", "mcp", "list"]).expect("parse");
         let err = reject_root_strict_config_for_subcommand(
             cli.interactive.strict_config,
             &cli.subcommand,
@@ -4352,8 +4325,8 @@ enabled = true
 
     #[test]
     fn remote_flag_parses_for_interactive_root() {
-        let cli = MultitoolCli::try_parse_from(["nez", "--remote", "unix://nez.sock"])
-            .expect("parse");
+        let cli =
+            MultitoolCli::try_parse_from(["nez", "--remote", "unix://nez.sock"]).expect("parse");
         assert_eq!(cli.remote.remote.as_deref(), Some("unix://nez.sock"));
     }
 
@@ -4375,9 +4348,8 @@ enabled = true
 
     #[test]
     fn remote_flag_parses_for_resume_subcommand() {
-        let cli =
-            MultitoolCli::try_parse_from(["nez", "resume", "--remote", "unix://nez.sock"])
-                .expect("parse");
+        let cli = MultitoolCli::try_parse_from(["nez", "resume", "--remote", "unix://nez.sock"])
+            .expect("parse");
         let Subcommand::Resume(ResumeCommand { remote, .. }) =
             cli.subcommand.expect("resume present")
         else {
@@ -4473,11 +4445,10 @@ enabled = true
 
     #[test]
     fn read_remote_auth_token_from_env_var_trims_values() {
-        let auth_token =
-            read_remote_auth_token_from_env_var_with("NEZ_REMOTE_AUTH_TOKEN", |_| {
-                Ok("  bearer-token  ".to_string())
-            })
-            .expect("env var should parse");
+        let auth_token = read_remote_auth_token_from_env_var_with("NEZ_REMOTE_AUTH_TOKEN", |_| {
+            Ok("  bearer-token  ".to_string())
+        })
+        .expect("env var should parse");
         assert_eq!(auth_token, "bearer-token");
     }
 
@@ -4540,9 +4511,8 @@ enabled = true
 
     #[test]
     fn app_server_listen_websocket_url_parses() {
-        let app_server = app_server_from_args(
-            ["nez", "app-server", "--listen", "ws://127.0.0.1:4500"].as_ref(),
-        );
+        let app_server =
+            app_server_from_args(["nez", "app-server", "--listen", "ws://127.0.0.1:4500"].as_ref());
         assert_eq!(
             app_server.listen,
             nez_app_server::AppServerTransport::WebSocket {
@@ -4555,10 +4525,7 @@ enabled = true
     fn app_server_listen_stdio_url_parses() {
         let app_server =
             app_server_from_args(["nez", "app-server", "--listen", "stdio://"].as_ref());
-        assert_eq!(
-            app_server.listen,
-            nez_app_server::AppServerTransport::Stdio
-        );
+        assert_eq!(app_server.listen, nez_app_server::AppServerTransport::Stdio);
     }
 
     #[test]
@@ -4569,14 +4536,9 @@ enabled = true
 
     #[test]
     fn app_server_stdio_flag_conflicts_with_listen() {
-        let err = MultitoolCli::try_parse_from([
-            "nez",
-            "app-server",
-            "--stdio",
-            "--listen",
-            "stdio://",
-        ])
-        .expect_err("--stdio and --listen should be rejected together");
+        let err =
+            MultitoolCli::try_parse_from(["nez", "app-server", "--stdio", "--listen", "stdio://"])
+                .expect_err("--stdio and --listen should be rejected together");
         assert_eq!(err.kind(), clap::error::ErrorKind::ArgumentConflict);
     }
 
@@ -4663,10 +4625,8 @@ enabled = true
             }))
         ));
         assert!(matches!(
-            app_server_from_args(
-                ["nez", "app-server", "daemon", "enable-remote-control"].as_ref()
-            )
-            .subcommand,
+            app_server_from_args(["nez", "app-server", "daemon", "enable-remote-control"].as_ref())
+                .subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
                 subcommand: AppServerDaemonSubcommand::EnableRemoteControl
             }))

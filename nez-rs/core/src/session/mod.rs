@@ -61,6 +61,9 @@ use async_channel::Sender;
 use chrono::DateTime;
 use chrono::Local;
 use chrono::Utc;
+use futures::future::BoxFuture;
+use futures::future::Shared;
+use futures::prelude::*;
 use nez_analytics::AnalyticsEventsClient;
 use nez_analytics::ImagePreparationFact;
 use nez_analytics::ImagePreparationMetadata;
@@ -192,9 +195,6 @@ use nez_utils_audio::prepare_response_items as prepare_audio_response_items;
 use nez_utils_git_discovery::GitRootDiscovery;
 use nez_utils_output_truncation::with_serialization_allowance;
 use nez_utils_path_uri::PathUri;
-use futures::future::BoxFuture;
-use futures::future::Shared;
-use futures::prelude::*;
 use rmcp::model::RequestId;
 use serde_json::Value;
 use tokio::sync::Mutex;
@@ -214,8 +214,6 @@ use tracing::warn;
 use uuid::Uuid;
 
 use crate::client::ModelClient;
-use crate::nez_thread::NezThreadSettingsOverrides;
-use crate::nez_thread::ThreadConfigSnapshot;
 #[cfg(test)]
 use crate::compact::collect_user_messages;
 use crate::config::Config;
@@ -226,6 +224,8 @@ use crate::config::StartedNetworkProxy;
 use crate::config::resolve_web_search_mode_for_turn;
 use crate::context_manager::ContextManager;
 use crate::context_manager::HistoryReplacement;
+use crate::nez_thread::NezThreadSettingsOverrides;
+use crate::nez_thread::ThreadConfigSnapshot;
 use crate::thread_rollout_truncation::initial_history_has_prior_user_turns;
 use nez_config::CONFIG_TOML_FILE;
 use nez_config::ConfigLayerSource;
@@ -346,10 +346,10 @@ use nez_core_plugins::PluginCommandAttribution;
 use nez_core_plugins::PluginsManager;
 use nez_core_plugins::RecommendedPluginCandidatesInput;
 use nez_git_utils::get_git_repo_root;
-use nez_history::NezHarnessMetadata;
 use nez_history::CompactedItem;
 use nez_history::CompactionResumeMetadata;
 use nez_history::InitialHistory;
+use nez_history::NezHarnessMetadata;
 pub(crate) use nez_history::PreviousTurnSettings;
 use nez_history::ResponseItemEnvelope;
 use nez_mcp::McpConfig;
@@ -372,7 +372,6 @@ use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::ReasoningEffort as ReasoningEffortConfig;
 use nez_protocol::protocol::ApplyPatchApprovalRequestEvent;
 use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::DeprecationNoticeEvent;
 use nez_protocol::protocol::Event;
 use nez_protocol::protocol::EventMsg;
@@ -382,6 +381,7 @@ use nez_protocol::protocol::ModelRerouteReason;
 use nez_protocol::protocol::ModelVerification;
 use nez_protocol::protocol::ModelVerificationEvent;
 use nez_protocol::protocol::NetworkApprovalContext;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::RateLimitSnapshot;
 use nez_protocol::protocol::RawResponseCompletedEvent;
@@ -528,8 +528,7 @@ pub(crate) struct SessionSpawnArgs {
     pub(crate) external_time_provider: Option<Arc<dyn TimeProvider>>,
     pub(crate) inherited_multi_agent_version: Option<MultiAgentVersion>,
     pub(crate) git_enrichment_policy: GitEnrichmentPolicy,
-    pub(crate) windows_sandbox_proxy_settings_mode:
-        nez_sandboxing::WindowsSandboxProxySettingsMode,
+    pub(crate) windows_sandbox_proxy_settings_mode: nez_sandboxing::WindowsSandboxProxySettingsMode,
 }
 
 pub(crate) fn resolve_multi_agent_version(
@@ -2316,12 +2315,7 @@ impl Session {
                     })
                     .collect::<Vec<_>>();
                 let paths = if user_config_paths.is_empty() {
-                    vec![
-                        state
-                            .session_configuration
-                            .nez_home
-                            .join(CONFIG_TOML_FILE),
-                    ]
+                    vec![state.session_configuration.nez_home.join(CONFIG_TOML_FILE)]
                 } else {
                     user_config_paths
                 };
@@ -3934,8 +3928,7 @@ impl Session {
                     &environments,
                 )
                 .await;
-            let extension_data =
-                nez_extension_api::ExtensionData::new(turn_context.sub_id.clone());
+            let extension_data = nez_extension_api::ExtensionData::new(turn_context.sub_id.clone());
             if let Some(snapshots) = &executor_capability_discovery_v2 {
                 extension_data.insert(snapshots.clone());
             }

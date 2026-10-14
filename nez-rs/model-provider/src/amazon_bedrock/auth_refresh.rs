@@ -47,9 +47,7 @@ impl AwsAuthRecovery {
         let mut command = if interactive {
             Command::new(&self.config.command)
         } else {
-            Command::from(nez_utils_process::background_command(
-                &self.config.command,
-            ))
+            Command::from(nez_utils_process::background_command(&self.config.command))
         };
         command
             .args(self.config.args.iter().map(Deref::deref))

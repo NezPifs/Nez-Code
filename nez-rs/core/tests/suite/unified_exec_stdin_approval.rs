@@ -1,6 +1,21 @@
 //! Exercises retained terminal grants and strict stdin review through the agent API.
 
 use anyhow::Result;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::mount_function_call_agent_response;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_target_windows;
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::TestNezHarness;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::TurnInputRequest;
 use nez_core::config::Config;
 use nez_core::config::Constrained;
@@ -22,21 +37,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::request_permissions::PermissionGrantScope;
 use nez_protocol::request_permissions::RequestPermissionsResponse;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::mount_function_call_agent_response;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_target_windows;
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::TestNezHarness;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -234,25 +234,23 @@ async fn stdin_reviews_escalated_terminal_with_denied_reads_before_delivering_in
         &json!({"cmd":"/bin/bash --noprofile --norc", "tty":true, "yield_time_ms":200, "sandbox_permissions":"require_escalated", "justification":"open an escalated terminal"}).to_string(),
         "exec_command",
     ).await;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "open terminal".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "open terminal".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     let launch = wait_for_event_match(nez, |event| match event {
         EventMsg::ExecApprovalRequest(request) => Some(request.clone()),
         _ => None,
     })
     .await;
     assert_eq!(launch.kind, ExecApprovalKind::Command);
-    nez
-        .submit(Op::ExecApproval {
-            id: launch.effective_approval_id(),
-            turn_id: Some(launch.turn_id),
-            decision: ReviewDecision::Approved,
-        })
-        .await?;
+    nez.submit(Op::ExecApproval {
+        id: launch.effective_approval_id(),
+        turn_id: Some(launch.turn_id),
+        decision: ReviewDecision::Approved,
+    })
+    .await?;
     wait_for_event(nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
     let _writes = mount_sse_sequence(harness.server(), vec![
@@ -260,12 +258,11 @@ async fn stdin_reviews_escalated_terminal_with_denied_reads_before_delivering_in
         tool_response("allowed", "write_stdin", json!({"session_id":1000,"chars":"if test -e denied-marker || cat secret.env; then exit 12; fi; printf approved > approved-marker; exit\n"})),
         sse(vec![ev_completed("done")]),
     ]).await;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "send input".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "send input".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     for (id, decision) in [
         ("denied", ReviewDecision::denied("blocked input")),
         ("allowed", ReviewDecision::Approved),
@@ -285,13 +282,12 @@ async fn stdin_reviews_escalated_terminal_with_denied_reads_before_delivering_in
         );
         assert!(!harness.path_exists("denied-marker").await?);
         assert!(!harness.path_exists("approved-marker").await?);
-        nez
-            .submit(Op::ExecApproval {
-                id: request.effective_approval_id(),
-                turn_id: Some(request.turn_id),
-                decision,
-            })
-            .await?;
+        nez.submit(Op::ExecApproval {
+            id: request.effective_approval_id(),
+            turn_id: Some(request.turn_id),
+            decision,
+        })
+        .await?;
     }
     let mut process_end = None;
     let mut turn_completed = false;

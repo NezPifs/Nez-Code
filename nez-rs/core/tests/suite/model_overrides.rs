@@ -1,9 +1,9 @@
-use nez_protocol::openai_models::ReasoningEffort;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
 use core_test_support::responses::start_mock_server;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_protocol::openai_models::ReasoningEffort;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
 use pretty_assertions::assert_eq;
 
 const CONFIG_TOML: &str = "config.toml";

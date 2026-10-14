@@ -2,14 +2,14 @@
 
 use nez_core::TurnInputRequest;
 
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::user_input::UserInput;
 use core_test_support::fs_wait;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::TestNez;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -53,12 +53,11 @@ mv "${tmp_path}" "${payload_path}""#,
         .await?;
 
     // 1) Normal user input – should hit server once.
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello world".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello world".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     // We fork the notify script, so we need to wait for it to write to the file.

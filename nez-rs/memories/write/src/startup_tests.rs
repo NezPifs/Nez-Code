@@ -6,6 +6,23 @@ use crate::runtime::MemoryStartupContext;
 use crate::start_memories_startup_task;
 use crate::storage::rebuild_raw_memories_file_from_memories;
 use crate::storage::sync_rollout_summaries_from_memories;
+use core_test_support::fs_wait;
+use core_test_support::hooks::trust_discovered_hooks;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+#[cfg(unix)]
+use core_test_support::responses::mount_sse_once_match;
+use core_test_support::responses::sse;
+#[cfg(unix)]
+use core_test_support::responses::sse_failed;
+use core_test_support::responses::start_mock_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_config::types::MemoriesConfig;
 use nez_features::Feature;
@@ -33,23 +50,6 @@ use nez_rollout::RolloutItem;
 use nez_rollout::RolloutLine;
 use nez_state::Phase2JobClaimOutcome;
 use nez_utils_absolute_path::test_support::PathExt;
-use core_test_support::fs_wait;
-use core_test_support::hooks::trust_discovered_hooks;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-#[cfg(unix)]
-use core_test_support::responses::mount_sse_once_match;
-use core_test_support::responses::sse;
-#[cfg(unix)]
-use core_test_support::responses::sse_failed;
-use core_test_support::responses::start_mock_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::path::Path;
@@ -675,11 +675,7 @@ async fn memories_startup_phase1_uses_live_thread_service_tier_and_detached_meta
     )
     .await;
     context
-        .stream_stage_one_prompt(
-            &test.config,
-            &nez_core::Prompt::default(),
-            &request_context,
-        )
+        .stream_stage_one_prompt(&test.config, &nez_core::Prompt::default(), &request_context)
         .await?;
     let request = wait_for_single_request(&stage_one).await;
     let metadata_header = request
@@ -1246,8 +1242,7 @@ impl ModelProvider for MockMemoryModelProvider {
         nez_home: PathBuf,
         config_model_catalog: Option<ModelsResponse>,
     ) -> nez_models_manager::manager::SharedModelsManager {
-        self.delegate
-            .models_manager(nez_home, config_model_catalog)
+        self.delegate.models_manager(nez_home, config_model_catalog)
     }
 }
 

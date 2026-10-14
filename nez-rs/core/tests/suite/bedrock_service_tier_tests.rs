@@ -1,14 +1,14 @@
 //! Exercises Bedrock service-tier selection through provider catalogs and HTTP requests.
 
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
 use nez_login::NezAuth;
 use nez_login::auth::BedrockApiKeyAuth;
 use nez_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 use nez_model_provider_info::AMAZON_BEDROCK_RUNTIME_PROVIDER_ID;
 use nez_model_provider_info::built_in_model_providers;
 use nez_protocol::openai_models::ModelServiceTier;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 
 #[test_case::test_case(AMAZON_BEDROCK_PROVIDER_ID, "openai.gpt-6-astra"; "mantle")]

@@ -1,15 +1,15 @@
 //! Verifies V2 catalog tool messages change only their selected description or parameter schema.
 
 use anyhow::Result;
-use nez_core::config::AgentRoleConfig;
-use nez_features::Feature;
-use nez_protocol::openai_models::ToolMessages;
-use nez_protocol::protocol::MultiAgentVersion;
 use core_test_support::responses::mount_sse_sequence;
 use core_test_support::responses::sse_completed;
 use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
+use nez_core::config::AgentRoleConfig;
+use nez_features::Feature;
+use nez_protocol::openai_models::ToolMessages;
+use nez_protocol::protocol::MultiAgentVersion;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

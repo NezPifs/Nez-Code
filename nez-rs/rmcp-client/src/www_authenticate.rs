@@ -1,5 +1,5 @@
-use nez_exec_server::HttpHeader;
 use http::header::WWW_AUTHENTICATE;
+use nez_exec_server::HttpHeader;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct InsufficientScopeChallenge {

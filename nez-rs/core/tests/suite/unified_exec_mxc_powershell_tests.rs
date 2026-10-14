@@ -2,12 +2,12 @@
 
 use anyhow::Context;
 use anyhow::Result;
-use nez_protocol::models::PermissionProfile;
-use nez_shell_command::shell_detect::DetectedShell;
-use nez_shell_command::shell_detect::ShellType;
 use core_test_support::responses::mount_function_call_agent_response;
 use core_test_support::test_nez::TestNezHarness;
 use core_test_support::test_nez::test_nez;
+use nez_protocol::models::PermissionProfile;
+use nez_shell_command::shell_detect::DetectedShell;
+use nez_shell_command::shell_detect::ShellType;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::path::PathBuf;

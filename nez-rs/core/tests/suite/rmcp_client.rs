@@ -38,15 +38,39 @@ use nez_exec_server::HttpRequestParams;
 use nez_features::Feature;
 use nez_http_client::HttpClientBuilder;
 use nez_login::NezAuth;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::MCP_SANDBOX_LAUNCHER_META_KEY;
 use nez_mcp::MCP_SANDBOX_STATE_CAPABILITY;
 use nez_mcp::MCP_SANDBOX_STATE_META_CAPABILITY;
 use nez_mcp::McpProtocolMode;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::SandboxState;
 use nez_models_manager::manager::RefreshStrategy;
 use nez_utils_path_uri::LegacyAppPathString;
 
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::assert_regex_match;
+use core_test_support::is_remote_test_environment;
+use core_test_support::responses;
+use core_test_support::responses::mount_models_once;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_no_remote_env;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::stdio_server_bin;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_docker_container_name;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_env;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_mcp_server;
+use http::StatusCode;
+use image::DynamicImage;
+use image::GenericImageView;
+use image::ImageBuffer;
+use image::Rgba;
 use nez_history::RolloutItem;
 use nez_protocol::config_types::CollaborationMode;
 use nez_protocol::config_types::ModeKind;
@@ -97,30 +121,6 @@ use nez_protocol::user_input::UserInput;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_cargo_bin::cargo_bin;
 use nez_utils_path_uri::PathUri;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::assert_regex_match;
-use core_test_support::is_remote_test_environment;
-use core_test_support::responses;
-use core_test_support::responses::mount_models_once;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_no_remote_env;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::stdio_server_bin;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::test_env;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::test_docker_container_name;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_mcp_server;
-use http::StatusCode;
-use image::DynamicImage;
-use image::GenericImageView;
-use image::ImageBuffer;
-use image::Rgba;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -272,13 +272,7 @@ fn copy_binary_to_remote_env(
 ) -> anyhow::Result<String> {
     let remote_path = unique_remote_path(binary_name)?;
     let mkdir_output = StdCommand::new("docker")
-        .args([
-            "exec",
-            container_name,
-            "mkdir",
-            "-p",
-            "/tmp/nez-remote-env",
-        ])
+        .args(["exec", container_name, "mkdir", "-p", "/tmp/nez-remote-env"])
         .output()
         .context("create remote MCP test binary directory")?;
     ensure!(
@@ -451,10 +445,8 @@ async fn call_structured_tool(
         matches!(ev, EventMsg::McpToolCallBegin(_))
     })
     .await;
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };
@@ -1165,10 +1157,8 @@ async fn stdio_server_round_trip(server_name: &'static str, namespace: &str) -> 
     assert_eq!(begin.invocation.server, server_name);
     assert_eq!(begin.invocation.tool, "echo");
 
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };
@@ -1737,9 +1727,7 @@ async fn startup_prewarm_connects_before_delayed_mcp_tools_then_reuses_socket(
         "websocket handshake should finish while MCP discovery is blocked"
     );
     assert_eq!(
-        server
-            .single_handshake()
-            .header(X_NEZ_ROUTING_HINT_HEADER),
+        server.single_handshake().header(X_NEZ_ROUTING_HINT_HEADER),
         Some(format!("model=gpt-5.4;tier={service_tier}"))
     );
     assert!(
@@ -1938,10 +1926,7 @@ async fn interrupt_during_mcp_startup_preserves_user_input_in_history(
     })
     .await;
 
-    let history = fixture
-        .nez
-        .load_history(/*include_archived*/ false)
-        .await?;
+    let history = fixture.nez.load_history(/*include_archived*/ false).await?;
     let user_prompt_index = history
         .items
         .iter()
@@ -2072,9 +2057,9 @@ async fn stdio_server_uses_configured_cwd_before_runtime_fallback() -> anyhow::R
 #[serial(mcp_cwd)]
 async fn local_stdio_server_uses_runtime_fallback_cwd_when_config_omits_cwd() -> anyhow::Result<()>
 {
-    use nez_core::StartThreadOptions;
     use core_test_support::exec_server::ExecServerProcess;
     use core_test_support::test_nez::local;
+    use nez_core::StartThreadOptions;
 
     skip_if_no_network!(Ok(()));
 
@@ -2388,11 +2373,9 @@ async fn stdio_mcp_tool_call_includes_sandbox_state_meta(
             config.prefer_mxc = prefer_mxc;
             // The real CLI is explicitly provided; the test harness is not a CLI.
             config.nez_self_exe = Some(
-                AbsolutePathBuf::from_absolute_path_checked(
-                    cargo_bin("nez").expect("nez binary"),
-                )
-                .expect("absolute nez binary path")
-                .into_path_buf(),
+                AbsolutePathBuf::from_absolute_path_checked(cargo_bin("nez").expect("nez binary"))
+                    .expect("absolute nez binary path")
+                    .into_path_buf(),
             );
             insert_mcp_server(
                 config,
@@ -3134,10 +3117,8 @@ async fn stdio_image_responses_round_trip() -> anyhow::Result<()> {
         },
     );
 
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("end");
     };
@@ -3526,10 +3507,7 @@ async fn stdio_image_responses_are_sanitized_for_text_only_model() -> anyhow::Re
         matches!(ev, EventMsg::McpToolCallBegin(_))
     })
     .await;
-    wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let output_item = final_mock.single_request().function_call_output(call_id);
@@ -3630,10 +3608,8 @@ async fn stdio_server_propagates_whitelisted_env_vars() -> anyhow::Result<()> {
     assert_eq!(begin.invocation.server, server_name);
     assert_eq!(begin.invocation.tool, "echo");
 
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };
@@ -3748,10 +3724,8 @@ async fn stdio_server_propagates_explicit_local_env_var_source() -> anyhow::Resu
         matches!(ev, EventMsg::McpToolCallBegin(_))
     })
     .await;
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };
@@ -3844,10 +3818,8 @@ async fn remote_stdio_env_var_source_does_not_copy_local_env() -> anyhow::Result
         matches!(ev, EventMsg::McpToolCallBegin(_))
     })
     .await;
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };
@@ -4103,10 +4075,8 @@ async fn streamable_http_tool_call_round_trip(mode: HeadersHelperMode) -> anyhow
 
     // Phase 6: assert the tool result proves the server handled the request and
     // propagated the expected environment value.
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };
@@ -4710,10 +4680,8 @@ async fn streamable_http_with_oauth_round_trip_impl() -> anyhow::Result<()> {
 
     // Phase 8: assert the tool result proves the authenticated request reached
     // the server and preserved the expected environment value.
-    let end_event = wait_for_event(&fixture.nez, |ev| {
-        matches!(ev, EventMsg::McpToolCallEnd(_))
-    })
-    .await;
+    let end_event =
+        wait_for_event(&fixture.nez, |ev| matches!(ev, EventMsg::McpToolCallEnd(_))).await;
     let EventMsg::McpToolCallEnd(end) = end_event else {
         unreachable!("event guard guarantees McpToolCallEnd");
     };

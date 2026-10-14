@@ -36,9 +36,9 @@ use nez_connectors::AppToolPolicyEvaluator;
 use nez_connectors::AppToolPolicyInput;
 use nez_extension_api::McpToolContext;
 use nez_features::Feature;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::MCP_TOOL_NEZ_APPS_META_KEY;
 use nez_mcp::McpPermissionPromptAutoApproveContext;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::PreparedMcpCall;
 use nez_mcp::SandboxState;
 use nez_mcp::ToolInfo;
@@ -120,8 +120,7 @@ const MCP_RESULT_TELEMETRY_SPAN_KEY: &str = "span";
 const MCP_RESULT_TELEMETRY_TARGET_ID_KEY: &str = "target_id";
 const MCP_RESULT_TELEMETRY_DID_TRIGGER_SERVER_USER_FLOW_KEY: &str = "did_trigger_server_user_flow";
 const MCP_RESULT_TELEMETRY_TARGET_ID_SPAN_ATTR: &str = "nez.mcp.target.id";
-const MCP_RESULT_TELEMETRY_SERVER_USER_FLOW_SPAN_ATTR: &str =
-    "nez.mcp.server_user_flow.triggered";
+const MCP_RESULT_TELEMETRY_SERVER_USER_FLOW_SPAN_ATTR: &str = "nez.mcp.server_user_flow.triggered";
 const MCP_RESULT_TELEMETRY_TARGET_ID_MAX_CHARS: usize = 256;
 const MCP_TOOL_CALL_EVENT_RESULT_MAX_BYTES: usize = DEFAULT_OUTPUT_BYTES_CAP;
 
@@ -621,15 +620,15 @@ async fn handle_approved_mcp_tool_call(
         .is_host_owned_apps()
         .then(|| prepared_call.tool_info().connector_id.clone())
         .flatten();
-    sess.services.executed_tool_calls.record_mcp_source(
-        nez_protocol::mcp::McpAttributionSource {
+    sess.services
+        .executed_tool_calls
+        .record_mcp_source(nez_protocol::mcp::McpAttributionSource {
             connector_id: source_connector_id,
             plugin_id: prepared_call.plugin_id().map(str::to_string),
             server_name: prepared_call.server_name().to_string(),
             tool_name: prepared_call.tool_info().tool.name.to_string(),
             first_turn_id: turn_context.sub_id.clone(),
-        },
-    );
+        });
     notify_mcp_tool_call_completed(
         sess,
         turn_context,
@@ -1315,10 +1314,7 @@ fn build_mcp_tool_call_request_meta(
             &step_context.settings,
         ))
     {
-        request_meta.insert(
-            crate::X_NEZ_TURN_METADATA_HEADER.to_string(),
-            turn_metadata,
-        );
+        request_meta.insert(crate::X_NEZ_TURN_METADATA_HEADER.to_string(), turn_metadata);
     }
 
     if server == NEZ_APPS_MCP_SERVER_NAME {

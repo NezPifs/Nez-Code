@@ -44,16 +44,16 @@ use crate::pager_overlay::Overlay;
 use crate::pager_overlay::TranscriptHistoryState;
 use crate::tui;
 use crate::tui::TuiEvent;
-use nez_app_server_protocol::ThreadItem;
-use nez_app_server_protocol::Turn;
-use nez_app_server_protocol::TurnStatus;
-use nez_protocol::ThreadId;
-use nez_protocol::models::local_image_label_text;
 use color_eyre::eyre::Result;
 use color_eyre::eyre::bail;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
+use nez_app_server_protocol::ThreadItem;
+use nez_app_server_protocol::Turn;
+use nez_app_server_protocol::TurnStatus;
+use nez_protocol::ThreadId;
+use nez_protocol::models::local_image_label_text;
 
 const NO_PREVIOUS_MESSAGE_TO_EDIT: &str = "No previous message to edit.";
 pub(crate) const SIDE_EDIT_PREVIOUS_UNAVAILABLE_MESSAGE: &str =

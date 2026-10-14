@@ -1,9 +1,9 @@
 use super::*;
+use futures::StreamExt;
 use nez_core::config::ConfigOverrides;
 use nez_core_plugins::PluginMarketplaceContext;
 use nez_core_plugins::PluginMarketplaceScope;
 use nez_core_plugins::marketplace::MarketplaceListError;
-use futures::StreamExt;
 
 const CONFIG_LOAD_CONCURRENCY: usize = 5;
 

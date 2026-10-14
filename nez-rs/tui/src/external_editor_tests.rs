@@ -232,12 +232,7 @@ fn editor_directory_rejects_workspace_fallback_symlink_to_writable_target() {
     assert!(!policy.can_write_local_path_with_cwd(&workspace_nez_home, &paths.cwd));
     assert!(policy.can_write_local_path_with_cwd(&paths.nez_home, &paths.cwd));
     assert!(
-        editor_directory(
-            &[&paths.nez_home, &workspace_nez_home],
-            &policy,
-            &paths.cwd,
-        )
-        .is_err()
+        editor_directory(&[&paths.nez_home, &workspace_nez_home], &policy, &paths.cwd,).is_err()
     );
 }
 
@@ -326,8 +321,8 @@ async fn editor_process_uses_protected_workspace_fallback_with_default_temporary
     fs::create_dir(&nez_home).expect("create Nez home");
     fs::create_dir(&cwd).expect("create workspace");
     let default_nez_home = dirs::home_dir().expect("home directory").join(".nez");
-    let writable_default_nez_home = AbsolutePathBuf::from_absolute_path(&default_nez_home)
-        .expect("absolute default Nez home");
+    let writable_default_nez_home =
+        AbsolutePathBuf::from_absolute_path(&default_nez_home).expect("absolute default Nez home");
     let policy = FileSystemSandboxPolicy::workspace_write(
         &[writable_default_nez_home],
         /*exclude_tmpdir_env_var*/ false,

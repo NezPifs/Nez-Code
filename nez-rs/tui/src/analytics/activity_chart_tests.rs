@@ -1,7 +1,7 @@
 //! Calendar, aggregation, and chart rendering regressions.
 use super::*;
-use nez_backend_client::TokenUsageProfileDailyBucket as AccountTokenUsageDailyBucket;
 use insta::assert_snapshot;
+use nez_backend_client::TokenUsageProfileDailyBucket as AccountTokenUsageDailyBucket;
 use pretty_assertions::assert_eq;
 
 fn graph_width(width: u16) -> u16 {

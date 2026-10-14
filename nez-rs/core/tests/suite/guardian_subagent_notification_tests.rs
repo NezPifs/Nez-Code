@@ -1,17 +1,17 @@
 //! Guardian circuit breakers notify the parent without changing the child's interrupted state.
 
 use super::*;
+use core_test_support::ThreadIdle;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
 use nez_config::config_toml::CircuitBreakAction;
 use nez_core::config::Constrained;
 use nez_extension_api::ExtensionRegistryBuilder;
 use nez_protocol::config_types::ApprovalsReviewer;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::ErrorEvent;
 use nez_protocol::protocol::MultiAgentVersion;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::TurnAbortReason;
-use core_test_support::ThreadIdle;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use test_case::test_case;
@@ -258,8 +258,7 @@ async fn guardian_circuit_breaker_notifies_parent(action: CircuitBreakAction) ->
                 .requests()
                 .into_iter()
                 .filter(|request| {
-                    request.body_json()["client_metadata"]["x-nez-parent-thread-id"]
-                        == json!(root)
+                    request.body_json()["client_metadata"]["x-nez-parent-thread-id"] == json!(root)
                         && request.body_json()["client_metadata"]["x-openai-subagent"] != "guardian"
                 })
                 .count())

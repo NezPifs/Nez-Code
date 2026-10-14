@@ -2,6 +2,18 @@
 //! Parent token-budget mode must not replace Guardian's summary compaction.
 
 use anyhow::Result;
+use core_test_support::ThreadIdle;
+use core_test_support::responses;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::TurnInputRequest;
 use nez_core::config::Constrained;
@@ -20,18 +32,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::ReviewDecision;
 use nez_protocol::user_input::UserInput;
-use core_test_support::ThreadIdle;
-use core_test_support::responses;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Arc;
@@ -79,12 +79,9 @@ async fn independent_review_preserves_oversized_instruction_order() -> Result<()
     }]))?;
     test.nez.ensure_rollout_materialized().await;
     test.nez.append_rollout_items(&old_history).await?;
-    test.nez =
-        super::guardian_checkpoint_migration::resume(&test, &test.nez, old_history).await?;
+    test.nez = super::guardian_checkpoint_migration::resume(&test, &test.nez, old_history).await?;
     assert_eq!(
-        GuardianContextMode::from_history(
-            test.nez.conversation_history_snapshot().await.as_ref()
-        ),
+        GuardianContextMode::from_history(test.nez.conversation_history_snapshot().await.as_ref()),
         GuardianContextMode::Independent,
     );
     let command = json!({

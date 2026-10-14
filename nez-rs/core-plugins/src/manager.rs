@@ -653,10 +653,7 @@ impl PluginLoadCacheKey {
         auth_identity: RemoteInstalledPluginsAuthIdentity,
     ) -> Self {
         Self {
-            configured_plugins: configured_plugins_from_stack(
-                &config.config_layer_stack,
-                nez_home,
-            ),
+            configured_plugins: configured_plugins_from_stack(&config.config_layer_stack, nez_home),
             plugin_policy: config.plugins.clone(),
             skill_config_rules: skill_config_rules_from_stack(&config.config_layer_stack),
             remote_global_catalog_active,
@@ -2985,12 +2982,10 @@ impl PluginsManager {
             ));
         }
         if !outcome.upgraded_roots.is_empty() {
-            let mut configured_plugin_keys = configured_plugins_from_stack(
-                &config.config_layer_stack,
-                self.nez_home.as_path(),
-            )
-            .into_keys()
-            .collect::<Vec<_>>();
+            let mut configured_plugin_keys =
+                configured_plugins_from_stack(&config.config_layer_stack, self.nez_home.as_path())
+                    .into_keys()
+                    .collect::<Vec<_>>();
             configured_plugin_keys.sort_unstable();
             match refresh_non_curated_plugin_cache_force_reinstall_detailed(
                 self.nez_home.as_path(),

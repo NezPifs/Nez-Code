@@ -35,7 +35,6 @@ use nez_protocol::items::UserMessageItem;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::ModelInfo;
 use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::HookCompletedEvent;
 use nez_protocol::protocol::HookEventName;
@@ -47,6 +46,7 @@ use nez_protocol::protocol::HookRunSummary;
 use nez_protocol::protocol::HookSource;
 use nez_protocol::protocol::HookStartedEvent;
 use nez_protocol::protocol::InternalSessionSource;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::WarningEvent;
@@ -136,8 +136,7 @@ pub(crate) async fn run_pending_session_start_hooks(
             SessionSource::SubAgent(SubAgentSource::ThreadSpawn { agent_role, .. })
                 if matches!(
                     session_start_source,
-                    nez_hooks::SessionStartSource::Startup
-                        | nez_hooks::SessionStartSource::Fork
+                    nez_hooks::SessionStartSource::Startup | nez_hooks::SessionStartSource::Fork
                 ) =>
             {
                 let context = subagent_hook_context(sess, agent_role);
@@ -380,10 +379,7 @@ fn build_request_metadata(
         .turn_metadata_state
         .current_meta_value_for_mcp_request(ExecutionMetadata::from_settings(settings))
         .map(|turn_metadata| {
-            Map::from_iter([(
-                crate::X_NEZ_TURN_METADATA_HEADER.to_string(),
-                turn_metadata,
-            )])
+            Map::from_iter([(crate::X_NEZ_TURN_METADATA_HEADER.to_string(), turn_metadata)])
         })
         .unwrap_or_default()
 }

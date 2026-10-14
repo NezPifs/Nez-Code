@@ -366,10 +366,7 @@ impl<'a> CapturedSnapshot<'a> {
                 }
                 // Each launch supplies execution IDs; omit their captured exports.
                 records.retain(|export| {
-                    !matches!(
-                        export.key,
-                        NEZ_THREAD_ID_ENV_VAR | NEZ_TOOL_CALL_ID_ENV_VAR
-                    )
+                    !matches!(export.key, NEZ_THREAD_ID_ENV_VAR | NEZ_TOOL_CALL_ID_ENV_VAR)
                 });
                 return Some(Self {
                     startup_environment,

@@ -120,11 +120,7 @@ fn manager_attaches_metadata_tags_to_metrics() -> Result<()> {
     )
     .with_metrics(metrics);
 
-    manager.counter(
-        "nez.session_started",
-        /*inc*/ 1,
-        &[("source", "tui")],
-    );
+    manager.counter("nez.session_started", /*inc*/ 1, &[("source", "tui")]);
     for tokens in [32_000, 256_000] {
         manager.histogram_with_boundaries(
             "nez.request_tokens",
@@ -197,11 +193,7 @@ fn manager_allows_disabling_metadata_tags() -> Result<()> {
     )
     .with_metrics_without_metadata_tags(metrics);
 
-    manager.counter(
-        "nez.session_started",
-        /*inc*/ 1,
-        &[("source", "tui")],
-    );
+    manager.counter("nez.session_started", /*inc*/ 1, &[("source", "tui")]);
     manager.shutdown_metrics()?;
 
     let resource_metrics = latest_metrics(&exporter);

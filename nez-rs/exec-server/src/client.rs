@@ -10,13 +10,13 @@ use std::time::Duration;
 
 use arc_swap::ArcSwap;
 use arc_swap::ArcSwapOption;
+use futures::FutureExt;
+use futures::future::BoxFuture;
 use nez_exec_server_protocol::JSONRPCNotification;
 use nez_network_proxy::NetworkPolicyDecider;
 use nez_network_proxy::NetworkProxyAuditMetadata;
 use nez_network_proxy::NetworkRequestCancellation;
 use nez_network_proxy::NetworkRequestCancellationReason;
-use futures::FutureExt;
-use futures::future::BoxFuture;
 use serde_json::Value;
 use tokio::sync::Mutex;
 use tokio::sync::OnceCell;
@@ -1953,15 +1953,15 @@ async fn handle_server_notification(
 
 #[cfg(test)]
 mod tests {
+    use futures::SinkExt;
+    use futures::StreamExt;
+    use http::HeaderMap;
     use nez_exec_server_protocol::JSONRPCMessage;
     use nez_exec_server_protocol::JSONRPCNotification;
     use nez_exec_server_protocol::JSONRPCResponse;
     use nez_http_client::HttpClientFactory;
     use nez_http_client::OutboundProxyPolicy;
     use nez_utils_path_uri::PathUri;
-    use futures::SinkExt;
-    use futures::StreamExt;
-    use http::HeaderMap;
     use opentelemetry::trace::TracerProvider as _;
     use opentelemetry_sdk::trace::SdkTracerProvider;
     use pretty_assertions::assert_eq;

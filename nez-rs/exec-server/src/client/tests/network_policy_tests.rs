@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use http::HeaderMap;
 use nez_exec_server_protocol::JSONRPCMessage;
 use nez_exec_server_protocol::JSONRPCNotification;
 use nez_exec_server_protocol::JSONRPCRequest;
@@ -14,7 +15,6 @@ use nez_network_proxy::NetworkPolicyDecider;
 use nez_network_proxy::NetworkPolicyRequest;
 use nez_network_proxy::NetworkProxyAuditMetadata;
 use nez_utils_path_uri::PathUri;
-use http::HeaderMap;
 use opentelemetry::trace::TracerProvider as _;
 use opentelemetry_sdk::trace::InMemorySpanExporter;
 use opentelemetry_sdk::trace::SdkTracerProvider;

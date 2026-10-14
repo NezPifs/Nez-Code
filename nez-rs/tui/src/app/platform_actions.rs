@@ -216,9 +216,8 @@ impl App {
         >,
     ) {
         match response {
-            Ok(Ok(nez_app_server_protocol::WindowsSandboxSetupStartResponse {
-                started: true,
-            })) => {}
+            Ok(Ok(nez_app_server_protocol::WindowsSandboxSetupStartResponse { started: true })) => {
+            }
             Err(_) => {
                 self.chat_widget.add_error_message(
                     "Windows sandbox setup request timed out. Waiting for completion; restart Nez if it does not finish."

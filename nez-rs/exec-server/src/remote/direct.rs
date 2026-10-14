@@ -1,5 +1,7 @@
 use std::time::Instant;
 
+use http::Method;
+use http::StatusCode;
 use nez_api::AuthError;
 use nez_api::AuthProvider;
 use nez_http_client::NetworkPolicy;
@@ -7,8 +9,6 @@ use nez_http_client::NetworkPolicyDenied;
 use nez_http_client::Request;
 use nez_websocket_client::WebSocketConnection;
 use nez_websocket_client::WebSocketConnector;
-use http::Method;
-use http::StatusCode;
 use serde::Deserialize;
 use serde::Serialize;
 use tokio::time::sleep;

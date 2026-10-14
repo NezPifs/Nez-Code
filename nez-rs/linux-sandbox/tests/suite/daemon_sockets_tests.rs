@@ -15,11 +15,8 @@ async fn private_tmp_mount_preserves_daemon_socket_isolation() {
     let test_executable = std::env::current_exe().unwrap();
     // Keep both executables available after the original /tmp is hidden.
     nez_utils_cargo_bin::copy_executable(&test_executable, &private.path().join("test")).unwrap();
-    nez_utils_cargo_bin::copy_executable(
-        &nez_linux_sandbox_exe(),
-        &private.path().join("sandbox"),
-    )
-    .unwrap();
+    nez_utils_cargo_bin::copy_executable(&nez_linux_sandbox_exe(), &private.path().join("sandbox"))
+        .unwrap();
     let (_, test_module) = module_path!().split_once("::").unwrap();
     let fixture_test = format!("{test_module}::private_tmp_fixture");
     // Mount setup needs capabilities, which bubblewrap only accepts as namespace root.

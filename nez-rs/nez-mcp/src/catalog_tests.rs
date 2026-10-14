@@ -14,8 +14,8 @@ use nez_protocol::mcp_policy::PluginMcpRequirements;
 use nez_utils_path_uri::PathUri;
 use pretty_assertions::assert_eq;
 
-use crate::NEZ_APPS_MCP_SERVER_NAME;
 use crate::McpProtocolMode;
+use crate::NEZ_APPS_MCP_SERVER_NAME;
 use crate::server::McpCredentialPolicy;
 
 use super::McpEnvironmentAuthority;

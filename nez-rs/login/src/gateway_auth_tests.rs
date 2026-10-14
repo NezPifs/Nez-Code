@@ -498,12 +498,7 @@ async fn gateway_credentials_use_a_dedicated_encrypted_file_and_reload_large_tok
         })
         .expect("save encrypted provider OAuth token");
     assert_eq!(keyring.saved_value(&client.credential_id()), None);
-    assert!(
-        nez_home
-            .path()
-            .join("secrets/gateway_oauth.age")
-            .is_file()
-    );
+    assert!(nez_home.path().join("secrets/gateway_oauth.age").is_file());
     assert!(!nez_home.path().join("secrets/nez_auth.age").exists());
 
     let reloaded = GatewayAuthManager::new(

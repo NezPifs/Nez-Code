@@ -1,3 +1,12 @@
+use core_test_support::PathBufExt;
+use core_test_support::responses;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::NezThread;
 use nez_core::REVIEW_PROMPT;
 use nez_core::TurnInputRequest;
@@ -38,15 +47,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::TurnEnvironmentRequests;
 use nez_protocol::review_format::render_review_output_text;
 use nez_protocol::user_input::UserInput;
-use core_test_support::PathBufExt;
-use core_test_support::responses;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -93,17 +93,16 @@ async fn review_op_emits_lifecycle_and_review_output() {
     let nez = new_conversation_for_server(&server, nez_home.clone(), |_| {}).await;
 
     // Submit review request.
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "Please review my changes".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "Please review my changes".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     // Item lifecycle events are emitted first, then the legacy review event is fanned out
     // with the same stable IDs for compatibility consumers.
@@ -315,15 +314,14 @@ async fn review_overload_preserves_lifecycle_order() {
     })
     .await;
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::UncommittedChanges,
-                user_facing_hint: None,
-            },
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::UncommittedChanges,
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     let mut lifecycle = Vec::new();
     loop {
@@ -365,17 +363,16 @@ async fn cancelled_review_does_not_forward_delegate_mcp_startup() {
     })
     .await;
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "Cancel this review".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "Cancel this review".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     tokio::time::timeout(Duration::from_secs(5), async {
         loop {
@@ -449,17 +446,16 @@ async fn review_op_with_plain_text_emits_review_fallback() {
     let nez_home = Arc::new(TempDir::new().unwrap());
     let nez = new_conversation_for_server(&server, nez_home.clone(), |_| {}).await;
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "Plain text review".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "Plain text review".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     let _entered = wait_for_event(&nez, |ev| matches!(ev, EventMsg::EnteredReviewMode(_))).await;
     let closed = wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExitedReviewMode(_))).await;
@@ -505,17 +501,16 @@ async fn review_filters_agent_message_related_events() {
     let nez_home = Arc::new(TempDir::new().unwrap());
     let nez = new_conversation_for_server(&server, nez_home.clone(), |_| {}).await;
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "Filter streaming events".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "Filter streaming events".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     let mut saw_entered = false;
     let mut saw_exited = false;
@@ -579,17 +574,16 @@ async fn review_does_not_emit_agent_message_on_structured_output() {
     let nez_home = Arc::new(TempDir::new().unwrap());
     let nez = new_conversation_for_server(&server, nez_home.clone(), |_| {}).await;
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "check structured".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "check structured".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     // Drain events until TurnComplete; ensure we only see a final
     // AgentMessage (no streaming assistant messages).
@@ -743,17 +737,16 @@ async fn review_uses_updated_turn_permissions_and_approval_policy() {
     .expect("updated thread permissions should be accepted");
 
     let stored_settings = nez.thread_settings_snapshot().await;
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "review current permissions".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "review current permissions".to_string(),
             },
-        })
-        .await
-        .expect("review should start");
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .expect("review should start");
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
     assert_eq!(nez.thread_settings_snapshot().await, stored_settings);
@@ -808,8 +801,8 @@ async fn review_uses_updated_turn_permissions_and_approval_policy() {
     let review_session_cwd = review_rollout
         .lines()
         .find_map(|line| {
-            let rollout_line = nez_rollout::parse_rollout_line(line)
-                .expect("review rollout line should be valid");
+            let rollout_line =
+                nez_rollout::parse_rollout_line(line).expect("review rollout line should be valid");
             match rollout_line.item {
                 RolloutItem::SessionMeta(session_meta) => Some(session_meta.meta.cwd),
                 _ => None,
@@ -820,8 +813,8 @@ async fn review_uses_updated_turn_permissions_and_approval_policy() {
     let review_context = review_rollout
         .lines()
         .filter_map(|line| {
-            let rollout_line = nez_rollout::parse_rollout_line(line)
-                .expect("review rollout line should be valid");
+            let rollout_line =
+                nez_rollout::parse_rollout_line(line).expect("review rollout line should be valid");
             match rollout_line.item {
                 RolloutItem::TurnContext(turn_context) => Some(turn_context),
                 _ => None,
@@ -999,8 +992,8 @@ async fn review_uses_custom_review_model_from_config() {
     let nez = Arc::clone(&test.nez);
     std::fs::remove_file(nez_home.path().join("models_cache.json"))
         .expect("initial empty model catalog should be cached");
-    let mut models = nez_models_manager::bundled_models_response()
-        .expect("bundled model catalog should parse");
+    let mut models =
+        nez_models_manager::bundled_models_response().expect("bundled model catalog should parse");
     let model = models
         .models
         .iter_mut()
@@ -1011,17 +1004,16 @@ async fn review_uses_custom_review_model_from_config() {
     model.node_repl_disabled = true;
     let models_mock = responses::mount_models_once(&server, models).await;
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "use custom model".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "use custom model".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     // Wait for completion
     let _entered = wait_for_event(&nez, |ev| matches!(ev, EventMsg::EnteredReviewMode(_))).await;
@@ -1078,17 +1070,16 @@ async fn review_uses_session_model_when_review_model_unset() {
         .expect("same-model review conversation should be created");
     let nez = Arc::clone(&test.nez);
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "use session model".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "use session model".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     let _entered = wait_for_event(&nez, |ev| matches!(ev, EventMsg::EnteredReviewMode(_))).await;
     let _closed = wait_for_event(&nez, |ev| {
@@ -1207,17 +1198,16 @@ async fn review_input_isolated_from_parent_history() {
 
     // Submit review request; it must start fresh (no parent history in `input`).
     let review_prompt = "Please review only this".to_string();
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: review_prompt.clone(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: review_prompt.clone(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     let _entered = wait_for_event(&nez, |ev| matches!(ev, EventMsg::EnteredReviewMode(_))).await;
     let _closed = wait_for_event(&nez, |ev| {
@@ -1321,17 +1311,16 @@ async fn review_history_surfaces_in_parent_session() {
     let nez = new_conversation_for_server(&server, nez_home.clone(), |_| {}).await;
 
     // 1) Run a review turn that produces an assistant message (isolated in child).
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::Custom {
-                    instructions: "Start a review".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::Custom {
+                instructions: "Start a review".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
     let _entered = wait_for_event(&nez, |ev| matches!(ev, EventMsg::EnteredReviewMode(_))).await;
     let _closed = wait_for_event(&nez, |ev| {
         matches!(
@@ -1347,13 +1336,12 @@ async fn review_history_surfaces_in_parent_session() {
 
     // 2) Continue in the parent session; request input must not include any review items.
     let followup = "back to parent".to_string();
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: followup.clone(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: followup.clone(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
     let _complete = wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     // Inspect the second request (parent turn) input contents.
@@ -1465,17 +1453,16 @@ async fn review_uses_overridden_cwd_for_base_branch_merge_base() {
     .await
     .unwrap();
 
-    nez
-        .submit(Op::Review {
-            review_request: ReviewRequest {
-                target: ReviewTarget::BaseBranch {
-                    branch: "main".to_string(),
-                },
-                user_facing_hint: None,
+    nez.submit(Op::Review {
+        review_request: ReviewRequest {
+            target: ReviewTarget::BaseBranch {
+                branch: "main".to_string(),
             },
-        })
-        .await
-        .unwrap();
+            user_facing_hint: None,
+        },
+    })
+    .await
+    .unwrap();
 
     let _entered = wait_for_event(&nez, |ev| matches!(ev, EventMsg::EnteredReviewMode(_))).await;
     let _complete = wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
@@ -1534,12 +1521,10 @@ where
     F: FnOnce(&mut Config) + Send + 'static,
 {
     let base_url = format!("{}/v1", server.uri());
-    let mut builder = test_nez()
-        .with_home(nez_home)
-        .with_config(move |config| {
-            config.model_provider.base_url = Some(base_url.clone());
-            mutator(config);
-        });
+    let mut builder = test_nez().with_home(nez_home).with_config(move |config| {
+        config.model_provider.base_url = Some(base_url.clone());
+        mutator(config);
+    });
     builder
         .build(server)
         .await

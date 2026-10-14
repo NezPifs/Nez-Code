@@ -1,9 +1,9 @@
 //! Applies discovered routing and keeps requests within the selected ChatGPT backend.
 
+use http::HeaderValue;
 use nez_login::WorkspaceRouting;
 use nez_login::WorkspaceRoutingSession;
 use nez_login::default_client::ClientRedirectPolicy;
-use http::HeaderValue;
 use std::io;
 use std::sync::Arc;
 use tokio::sync::Mutex;

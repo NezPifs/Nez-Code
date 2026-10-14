@@ -186,12 +186,7 @@ impl TraceReducer {
                 nez_turn_id,
                 thread_id,
             } => {
-                self.start_nez_turn(
-                    event.seq,
-                    event.wall_time_unix_ms,
-                    nez_turn_id,
-                    thread_id,
-                )?;
+                self.start_nez_turn(event.seq, event.wall_time_unix_ms, nez_turn_id, thread_id)?;
             }
             RawTraceEventPayload::NezTurnEnded {
                 nez_turn_id,

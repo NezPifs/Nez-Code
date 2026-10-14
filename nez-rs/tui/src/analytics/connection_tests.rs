@@ -2,12 +2,12 @@
 
 use super::tests::live;
 use super::tests::sign_in;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_client::RemoteAppServerClient;
 use nez_app_server_client::RemoteAppServerConnectArgs;
 use nez_app_server_client::RemoteAppServerEndpoint;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

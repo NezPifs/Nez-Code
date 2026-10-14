@@ -12,12 +12,12 @@ use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
+use lru::LruCache;
 use nez_config::McpServerAuth;
 use nez_config::McpServerConfig;
 use nez_config::McpServerTransportConfig;
 use nez_exec_server::Environment;
 use nez_protocol::mcp::ClientMcpExtensions;
-use lru::LruCache;
 use rmcp::model::ElicitationCapability;
 use sha1::Digest;
 use sha1::Sha1;

@@ -1,6 +1,6 @@
-use nez_api::AuthProvider;
 use http::HeaderMap;
 use http::HeaderValue;
+use nez_api::AuthProvider;
 
 /// Bearer-token auth provider for OpenAI-compatible model-provider requests.
 #[derive(Clone, Default)]

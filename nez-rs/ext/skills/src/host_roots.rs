@@ -2,6 +2,8 @@ use std::collections::HashSet;
 use std::io;
 use std::sync::Arc;
 
+use dirs::home_dir;
+use futures::StreamExt;
 use nez_config::ConfigLayerSource;
 use nez_config::ConfigLayerStack;
 use nez_config::default_project_root_markers;
@@ -15,8 +17,6 @@ use nez_skills::system_cache_root_dir;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
 use nez_utils_plugins::PluginSkillRoot;
-use dirs::home_dir;
-use futures::StreamExt;
 use toml::Value as TomlValue;
 
 use crate::loader::HostSkillRoot;

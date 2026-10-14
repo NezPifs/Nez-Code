@@ -29,11 +29,8 @@ fn only_registered_refresh_skips_configuration_loading() {
         };
         // An invalid worker token makes any attempt to load config fail closed.
         // Refresh must succeed without starting that runtime; setup must not.
-        let result = super::validate_provisioning_request(
-            &request.nez_home,
-            &request,
-            std::ptr::null_mut(),
-        );
+        let result =
+            super::validate_provisioning_request(&request.nez_home, &request, std::ptr::null_mut());
         assert_eq!(result.is_ok(), registered_core && refresh_only);
         if let Err(error) = result {
             assert!(error.to_string().contains("failed to impersonate"));

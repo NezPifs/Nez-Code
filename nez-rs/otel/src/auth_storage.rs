@@ -118,10 +118,9 @@ impl Observation {
                 "nez.auth_storage.refresh_persist",
                 "nez.auth_storage.refresh_persist.duration",
             ),
-            Operation::Load | Operation::Save | Operation::Delete | Operation::Cleanup => (
-                "nez.auth_storage.operation",
-                "nez.auth_storage.duration",
-            ),
+            Operation::Load | Operation::Save | Operation::Delete | Operation::Cleanup => {
+                ("nez.auth_storage.operation", "nez.auth_storage.duration")
+            }
         };
         let _ = crate::record_global_operation(count, duration, self.duration, tags);
     }

@@ -1,7 +1,7 @@
+use http::Method;
 use nez_http_client::OutboundProxyPolicy;
 use nez_http_client::RequestBuilder;
 use nez_http_client::RouteAwareClientPool;
-use http::Method;
 use std::fmt::Debug;
 
 /// Builds requests whose URL is also used to resolve their outbound route.

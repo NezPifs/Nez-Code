@@ -12,6 +12,12 @@ use std::time::Duration;
 
 use anyhow::Result;
 use anyhow::anyhow;
+use futures::FutureExt;
+use futures::future::BoxFuture;
+use futures::future::Shared;
+use http::HeaderMap;
+use http::HeaderName;
+use http::HeaderValue;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::HttpClient;
 use nez_exec_server::HttpHeader;
@@ -21,12 +27,6 @@ use nez_exec_server::HttpRequestResponse;
 use nez_exec_server::HttpResponseBodyStream;
 #[cfg(unix)]
 use nez_utils_pty::process_group::kill_process_group;
-use futures::FutureExt;
-use futures::future::BoxFuture;
-use futures::future::Shared;
-use http::HeaderMap;
-use http::HeaderName;
-use http::HeaderValue;
 use serde::Deserialize;
 use serde::de::MapAccess;
 use serde::de::Visitor;

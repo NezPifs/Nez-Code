@@ -3,10 +3,10 @@
 use crate::PostPreview;
 use chrono::DateTime;
 use chrono::Utc;
+use futures::future::BoxFuture;
 use nez_protocol::AgentPath;
 use nez_protocol::ThreadId;
 use nez_protocol::error::Result;
-use futures::future::BoxFuture;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NotificationDelivery {

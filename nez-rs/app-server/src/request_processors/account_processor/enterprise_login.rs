@@ -3,12 +3,12 @@
 //! The credential store separately fences logins invalidated by another process.
 
 use super::*;
+use futures::FutureExt;
 use nez_config::McpEmaRegistration;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_mcp::ema_auth_scope;
 use nez_rmcp_client::EnterpriseOAuthLoginRequest;
 use nez_rmcp_client::perform_enterprise_oauth_login_return_url;
-use futures::FutureExt;
 use tokio::sync::watch;
 
 pub(crate) struct EnterpriseLoginTarget {

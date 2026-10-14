@@ -4,6 +4,8 @@
 //! when a config mutation must be owned by the app server rather than written
 //! to the local `config.toml` directly.
 
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_client::TypedRequestError;
 use nez_app_server_protocol::ClientRequest;
@@ -32,8 +34,6 @@ use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::LegacyAppPathString;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
 use serde_json::Value as JsonValue;
 use std::fmt::Display;
 use std::path::Path;

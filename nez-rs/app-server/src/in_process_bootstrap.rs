@@ -69,10 +69,7 @@ impl EmbeddedNetworkPolicy {
     }
 
     /// Limits cloud discovery and each authentication request to their exact local-policy endpoints.
-    pub fn bind_bootstrap_auth(
-        &self,
-        mut auth: nez_login::AuthConfig,
-    ) -> nez_login::AuthConfig {
+    pub fn bind_bootstrap_auth(&self, mut auth: nez_login::AuthConfig) -> nez_login::AuthConfig {
         let factory = auth
             .auth_route_config
             .http_client_factory()
@@ -119,12 +116,10 @@ pub(super) async fn configure(
         ..caller_auth.clone()
     };
     bootstrap_auth.validate()?;
-    let bootstrap_auth_manager = AuthManager::shared_from_auth_config(
-        bootstrap_auth,
-        /*enable_nez_api_key_env*/ false,
-    )
-    .await
-    .map_err(IoError::other)?;
+    let bootstrap_auth_manager =
+        AuthManager::shared_from_auth_config(bootstrap_auth, /*enable_nez_api_key_env*/ false)
+            .await
+            .map_err(IoError::other)?;
     config_manager.replace_cloud_config_bundle_loader(
         bootstrap_auth_manager,
         bootstrap_config.chatgpt_base_url.clone(),

@@ -1,3 +1,5 @@
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::ConfigBatchWriteParams;
@@ -9,8 +11,6 @@ use nez_app_server_protocol::HooksListParams;
 use nez_app_server_protocol::HooksListResponse;
 use nez_app_server_protocol::MergeStrategy;
 use nez_app_server_protocol::RequestId;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
 use std::path::Path;
 use std::path::PathBuf;
 use uuid::Uuid;

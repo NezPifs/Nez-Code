@@ -39,10 +39,10 @@ use tokio::io::AsyncWriteExt;
 
 use crate::ExecServerRuntimeOptions;
 use crate::FileSystemSandboxContext;
-use crate::fs_helper::NEZ_FS_HELPER_ARG1;
 use crate::fs_helper::FsHelperPayload;
 use crate::fs_helper::FsHelperRequest;
 use crate::fs_helper::FsHelperResponse;
+use crate::fs_helper::NEZ_FS_HELPER_ARG1;
 use crate::rpc::internal_error;
 use crate::rpc::invalid_request;
 
@@ -154,9 +154,8 @@ impl FileSystemSandboxRunner {
         let sandbox_manager = SandboxManager::for_file_system_helpers()
             .with_linux_sandbox_pid_namespace(self.runtime_paths.linux_sandbox_pid_namespace);
         #[cfg(target_os = "macos")]
-        let sandbox_manager = sandbox_manager.with_allowed_symlinked_nez_home(
-            self.runtime_paths.allowed_symlinked_nez_home.clone(),
-        );
+        let sandbox_manager = sandbox_manager
+            .with_allowed_symlinked_nez_home(self.runtime_paths.allowed_symlinked_nez_home.clone());
         let (sandbox, windows_sandbox_level) = crate::sandbox_selection::select_sandbox(
             &sandbox_manager,
             permission_profile,
@@ -746,9 +745,8 @@ mod tests {
         let path_key = path_key.to_string_lossy().into_owned();
         let path = path.to_string_lossy().into_owned();
         let nez_self_exe = std::env::current_exe().expect("current exe");
-        let runtime_paths =
-            ExecServerRuntimeOptions::new(nez_self_exe.clone(), Some(nez_self_exe))
-                .expect("runtime paths");
+        let runtime_paths = ExecServerRuntimeOptions::new(nez_self_exe.clone(), Some(nez_self_exe))
+            .expect("runtime paths");
         let runner = FileSystemSandboxRunner::new(runtime_paths);
         let native_cwd = AbsolutePathBuf::current_dir().expect("cwd");
         let cwd = PathUri::from_abs_path(&native_cwd);
@@ -802,9 +800,8 @@ mod tests {
     #[test]
     fn sandbox_exec_request_uses_filesystem_root_and_preserves_policy_cwd() {
         let nez_self_exe = std::env::current_exe().expect("current exe");
-        let runtime_paths =
-            ExecServerRuntimeOptions::new(nez_self_exe.clone(), Some(nez_self_exe))
-                .expect("runtime paths");
+        let runtime_paths = ExecServerRuntimeOptions::new(nez_self_exe.clone(), Some(nez_self_exe))
+            .expect("runtime paths");
         let runner = FileSystemSandboxRunner::new(runtime_paths);
         let selected = tempfile::tempdir().expect("selected directory");
         let selected_cwd = AbsolutePathBuf::from_absolute_path(selected.path()).expect("cwd");
@@ -1007,10 +1004,8 @@ mod tests {
         );
 
         assert!(
-            policy.can_read_local_path_with_cwd(
-                runtime_paths.nez_self_exe.as_path(),
-                cwd.as_path(),
-            )
+            policy
+                .can_read_local_path_with_cwd(runtime_paths.nez_self_exe.as_path(), cwd.as_path(),)
         );
         assert!(!policy.can_read_local_path_with_cwd(parent.as_path(), cwd.as_path()));
         assert!(!policy.can_read_local_path_with_cwd(sibling.as_path(), cwd.as_path()));
@@ -1041,10 +1036,8 @@ mod tests {
         );
 
         assert!(
-            policy.can_read_local_path_with_cwd(
-                runtime_paths.nez_self_exe.as_path(),
-                cwd.as_path(),
-            )
+            policy
+                .can_read_local_path_with_cwd(runtime_paths.nez_self_exe.as_path(), cwd.as_path(),)
         );
         assert!(policy.can_read_local_path_with_cwd(alias.as_path(), cwd.as_path()));
         assert!(!policy.can_read_local_path_with_cwd(nez_parent.as_path(), cwd.as_path()));

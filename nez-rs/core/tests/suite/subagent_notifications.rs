@@ -1,4 +1,31 @@
 use anyhow::Result;
+use core_test_support::hooks::trust_discovered_hooks;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::assert_parent_turn;
+use core_test_support::responses::assert_root_turn;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_completed_with_tokens;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::ev_tool_search_call;
+use core_test_support::responses::mount_response_once_match;
+use core_test_support::responses::mount_sse_once_match;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::namespace_child_tool;
+use core_test_support::responses::sse;
+use core_test_support::responses::sse_response;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::strip_metadata_from_json;
+use core_test_support::responses::strip_response_item_ids_from_json;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::StartThreadOptions;
 use nez_core::ThreadConfigSnapshot;
 use nez_core::TurnInputRequest;
@@ -29,33 +56,6 @@ use nez_protocol::protocol::ThreadHistoryMode;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
 use nez_thread_store::LoadThreadHistoryParams;
-use core_test_support::hooks::trust_discovered_hooks;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::assert_parent_turn;
-use core_test_support::responses::assert_root_turn;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_completed_with_tokens;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::ev_tool_search_call;
-use core_test_support::responses::mount_response_once_match;
-use core_test_support::responses::mount_sse_once_match;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::namespace_child_tool;
-use core_test_support::responses::sse;
-use core_test_support::responses::sse_response;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::strip_metadata_from_json;
-use core_test_support::responses::strip_response_item_ids_from_json;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -440,11 +440,7 @@ async fn setup_turn_one_with_custom_spawned_child(
     configure_test: impl FnOnce(
         core_test_support::test_nez::TestNezBuilder,
     ) -> core_test_support::test_nez::TestNezBuilder,
-) -> Result<(
-    TestNez,
-    String,
-    core_test_support::responses::ResponseMock,
-)> {
+) -> Result<(TestNez, String, core_test_support::responses::ResponseMock)> {
     let spawn_args = serde_json::to_string(&spawn_args)?;
 
     mount_sse_once_match(
@@ -2865,19 +2861,17 @@ async fn multi_agent_v2_peer_followup_completion_notifies_initiating_turn(
     const FOLLOWUP_CALL_ID: &str = "request-peer-followup";
 
     let server = start_mock_server().await;
-    let mut builder = test_nez()
-        .with_model("gpt-5.6-sol")
-        .with_config(|config| {
-            for feature in [Feature::Collab, Feature::MultiAgentV2] {
-                config
-                    .features
-                    .enable(feature)
-                    .expect("test config should allow feature update");
-            }
-            config.model_provider.request_max_retries = Some(0);
-            config.model_provider.stream_max_retries = Some(0);
-            config.model_provider.supports_websockets = false;
-        });
+    let mut builder = test_nez().with_model("gpt-5.6-sol").with_config(|config| {
+        for feature in [Feature::Collab, Feature::MultiAgentV2] {
+            config
+                .features
+                .enable(feature)
+                .expect("test config should allow feature update");
+        }
+        config.model_provider.request_max_retries = Some(0);
+        config.model_provider.stream_max_retries = Some(0);
+        config.model_provider.supports_websockets = false;
+    });
     let test = builder.build_with_auto_env(&server).await?;
     let root_thread_id = test.session_configured.thread_id;
     let mut created_threads = test.thread_manager.subscribe_thread_created();

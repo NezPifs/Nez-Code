@@ -1,11 +1,6 @@
 //! Verifies that the agent retries when the SSE stream terminates before
 //! delivering a `response.completed` event.
 
-use nez_core::TurnInputRequest;
-use nez_model_provider_info::ModelProviderInfo;
-use nez_model_provider_info::WireApi;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::streaming_sse::StreamingSseChunk;
@@ -13,6 +8,11 @@ use core_test_support::streaming_sse::start_streaming_sse_server;
 use core_test_support::test_nez::TestNez;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_model_provider_info::ModelProviderInfo;
+use nez_model_provider_info::WireApi;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use std::net::TcpListener;
 use wiremock::MockServer;
@@ -82,13 +82,12 @@ async fn retries_on_early_close() {
         .await
         .unwrap();
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await
-        .unwrap();
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await
+    .unwrap();
 
     // Wait until TurnComplete (should succeed after retry).
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
@@ -123,12 +122,11 @@ async fn connection_failure_pauses_retry_budget_until_provider_is_reachable() ->
         .build_with_auto_env(&bootstrap_server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "recover after the network returns".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "recover after the network returns".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     let EventMsg::StreamError(connection_error) =
         wait_for_event(&nez, |event| matches!(event, EventMsg::StreamError(_))).await

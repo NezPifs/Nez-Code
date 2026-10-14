@@ -11,12 +11,12 @@ use nez_core_plugin_common::plugin_id;
 mod provider;
 
 pub use bundled_hooks::is_allowlisted_bundled_cleanup_hook;
-use nez_config::HookEventsToml;
-use nez_utils_absolute_path::AbsolutePathBuf;
-use nez_utils_path_uri::PathUri;
 pub use load_outcome::LoadedPlugin;
 pub use load_outcome::PluginLoadOutcome;
 pub use load_outcome::prompt_safe_plugin_description;
+use nez_config::HookEventsToml;
+use nez_utils_absolute_path::AbsolutePathBuf;
+use nez_utils_path_uri::PathUri;
 pub use plugin_id::PluginId;
 pub use plugin_id::PluginIdError;
 pub use plugin_id::validate_plugin_segment;

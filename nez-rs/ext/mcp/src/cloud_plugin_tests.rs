@@ -8,6 +8,16 @@ use crate::PluginProviders;
 use crate::PluginsThreadState;
 use crate::install_plugin_providers;
 use anyhow::Context;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::test_nez::run_test_with_large_stack;
+use core_test_support::test_nez::test_nez;
 use nez_core_plugins::ExecutorPluginProvider;
 use nez_core_plugins::PluginCatalog;
 use nez_core_plugins::PluginCatalogEntry;
@@ -26,16 +36,6 @@ use nez_protocol::config_types::CollaborationMode;
 use nez_protocol::config_types::ModeKind;
 use nez_protocol::config_types::Settings;
 use nez_utils_path_uri::PathUri;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::test_nez::run_test_with_large_stack;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Arc;
@@ -193,10 +193,7 @@ async fn account_change_clears_hosted_plugins_before_waiting_for_executor() -> a
             _: nez_exec_server::NoiseChannelPublicKey,
         ) -> futures::future::BoxFuture<
             '_,
-            Result<
-                nez_exec_server::NoiseRendezvousConnectBundle,
-                nez_exec_server::ExecServerError,
-            >,
+            Result<nez_exec_server::NoiseRendezvousConnectBundle, nez_exec_server::ExecServerError>,
         > {
             Box::pin(futures::future::pending())
         }
@@ -550,8 +547,8 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
                             .unwrap_or_else(std::sync::PoisonError::into_inner)
                             .clone()
                             .context("cloud provider resource client missing")?;
-                        let previous_auth = resources
-                            .auth_cache_key_for_server(nez_mcp::NEZ_APPS_MCP_SERVER_NAME);
+                        let previous_auth =
+                            resources.auth_cache_key_for_server(nez_mcp::NEZ_APPS_MCP_SERVER_NAME);
                         // Rotate credentials without replacing the captured runtime/client.
                         nez_login::auth::login_with_chatgpt_auth_tokens(
                             test.nez_home_path(),
@@ -560,8 +557,7 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
                             /*chatgpt_plan_type*/ None,
                         )?;
                         test.thread_manager.auth_manager().reload().await;
-                        while resources
-                            .auth_cache_key_for_server(nez_mcp::NEZ_APPS_MCP_SERVER_NAME)
+                        while resources.auth_cache_key_for_server(nez_mcp::NEZ_APPS_MCP_SERVER_NAME)
                             == previous_auth
                         {
                             tokio::task::yield_now().await;

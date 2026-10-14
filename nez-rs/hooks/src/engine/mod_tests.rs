@@ -5,6 +5,8 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use futures::FutureExt;
+use futures::future::BoxFuture;
 use nez_config::AbsolutePathBuf;
 use nez_config::ConfigLayerEntry;
 use nez_config::ConfigLayerSource;
@@ -32,8 +34,6 @@ use nez_protocol::protocol::HookOutputEntryKind;
 use nez_protocol::protocol::HookRunStatus;
 use nez_protocol::protocol::HookSource;
 use nez_protocol::protocol::HookTrustStatus;
-use futures::FutureExt;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 use tempfile::tempdir;
 use tokio::sync::Notify;

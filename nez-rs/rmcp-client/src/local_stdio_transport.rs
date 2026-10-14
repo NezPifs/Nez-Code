@@ -6,8 +6,8 @@ use std::future::Future;
 use std::io;
 use std::time::Duration;
 
-use nez_utils_pty::Command;
 use futures::FutureExt;
+use nez_utils_pty::Command;
 use rmcp::service::RoleClient;
 use rmcp::service::RxJsonRpcMessage;
 use rmcp::service::TxJsonRpcMessage;

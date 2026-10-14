@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::io;
 
+use futures::StreamExt;
 use nez_exec_server_protocol::CapabilityRootDiscoverRequest;
 use nez_exec_server_protocol::CapabilityRootDiscovery;
 use nez_exec_server_protocol::CapabilityRootsDiscoverParams;
@@ -14,7 +15,6 @@ use nez_file_system::FileSystemSandboxContext;
 use nez_file_system::WalkEntryKind;
 use nez_file_system::WalkOptions;
 use nez_utils_path_uri::PathUri;
-use futures::StreamExt;
 use serde::Deserialize;
 use serde_json::Value;
 

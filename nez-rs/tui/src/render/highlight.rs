@@ -245,9 +245,7 @@ fn resolve_theme_with_override(name: Option<&str>, nez_home: Option<&Path>) -> T
 /// Extracted from the old `theme()` init closure so it can be reused.
 fn build_default_theme() -> Theme {
     let name = THEME_OVERRIDE.get().and_then(|name| name.as_deref());
-    let nez_home = NEZ_HOME
-        .get()
-        .and_then(|nez_home| nez_home.as_deref());
+    let nez_home = NEZ_HOME.get().and_then(|nez_home| nez_home.as_deref());
     resolve_theme_with_override(name, nez_home)
 }
 

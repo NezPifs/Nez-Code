@@ -1,22 +1,4 @@
 use anyhow::Context;
-use nez_core::TurnInputRequest;
-use nez_features::Feature;
-use nez_protocol::config_types::CollaborationMode;
-use nez_protocol::config_types::ModeKind;
-use nez_protocol::config_types::Settings;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::permissions::NetworkSandboxPolicy;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ExecCommandEndEvent;
-use nez_protocol::protocol::ExecCommandSource;
-use nez_protocol::protocol::ExecOutputStream;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::protocol::TurnAbortReason;
-use nez_protocol::protocol::TurnEnvironmentRequests;
-use nez_protocol::protocol::TurnEnvironmentSelection;
-use nez_protocol::user_input::UserInput;
 use core_test_support::PathBufExt;
 use core_test_support::PathExt;
 use core_test_support::assert_regex_match;
@@ -37,6 +19,24 @@ use core_test_support::test_nez::turn_permission_fields;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
 use core_test_support::wait_for_event_with_timeout;
+use nez_core::TurnInputRequest;
+use nez_features::Feature;
+use nez_protocol::config_types::CollaborationMode;
+use nez_protocol::config_types::ModeKind;
+use nez_protocol::config_types::Settings;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::permissions::NetworkSandboxPolicy;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ExecCommandEndEvent;
+use nez_protocol::protocol::ExecCommandSource;
+use nez_protocol::protocol::ExecOutputStream;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::protocol::TurnAbortReason;
+use nez_protocol::protocol::TurnEnvironmentRequests;
+use nez_protocol::protocol::TurnEnvironmentSelection;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use regex_lite::escape;
 use std::path::PathBuf;
@@ -69,13 +69,12 @@ async fn user_shell_cmd_ls_and_cat_in_temp_dir() {
 
     // 1) shell command should list the file
     let list_cmd = "ls".to_string();
-    nez
-        .submit(Op::RunUserShellCommand {
-            command: list_cmd,
-            timeout_ms: None,
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::RunUserShellCommand {
+        command: list_cmd,
+        timeout_ms: None,
+    })
+    .await
+    .unwrap();
     let msg = wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecCommandEnd(_))).await;
     let EventMsg::ExecCommandEnd(ExecCommandEndEvent {
         aggregated_output,
@@ -93,13 +92,12 @@ async fn user_shell_cmd_ls_and_cat_in_temp_dir() {
 
     // 2) shell command should print the file contents verbatim
     let cat_cmd = format!("cat {file_name}");
-    nez
-        .submit(Op::RunUserShellCommand {
-            command: cat_cmd,
-            timeout_ms: None,
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::RunUserShellCommand {
+        command: cat_cmd,
+        timeout_ms: None,
+    })
+    .await
+    .unwrap();
     let msg = wait_for_event(&nez, |ev| matches!(ev, EventMsg::ExecCommandEnd(_))).await;
     let EventMsg::ExecCommandEnd(ExecCommandEndEvent {
         mut aggregated_output,
@@ -164,13 +162,12 @@ async fn user_shell_cmd_can_be_interrupted() {
     let nez = &fixture.nez;
 
     // Start a long-running command and then interrupt it before its deadline.
-    nez
-        .submit(Op::RunUserShellCommand {
-            command: slow_user_shell_command().to_string(),
-            timeout_ms: Some(28_800_000),
-        })
-        .await
-        .unwrap();
+    nez.submit(Op::RunUserShellCommand {
+        command: slow_user_shell_command().to_string(),
+        timeout_ms: Some(28_800_000),
+    })
+    .await
+    .unwrap();
 
     // Output proves that the process was spawned before cancellation.
     wait_for_event(nez, |event| {
@@ -504,8 +501,7 @@ async fn user_shell_command_does_not_set_network_sandbox_env_var() -> anyhow::Re
     #[cfg(windows)]
     let command = r#"$val = $env:NEZ_SANDBOX_NETWORK_DISABLED; if ([string]::IsNullOrEmpty($val)) { $val = 'not-set' } ; [System.Console]::Write($val)"#.to_string();
     #[cfg(not(windows))]
-    let command =
-        r#"sh -c "printf '%s' \"${NEZ_SANDBOX_NETWORK_DISABLED:-not-set}\"""#.to_string();
+    let command = r#"sh -c "printf '%s' \"${NEZ_SANDBOX_NETWORK_DISABLED:-not-set}\"""#.to_string();
 
     test.nez
         .submit(Op::RunUserShellCommand {

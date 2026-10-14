@@ -21,6 +21,7 @@ use std::sync::atomic::Ordering;
 #[cfg(test)]
 use std::time::Duration;
 
+use futures::future::BoxFuture;
 use nez_analytics::GuardianReviewAnalyticsResult;
 use nez_analytics::GuardianReviewSessionAnalyticsParams;
 use nez_analytics::GuardianReviewSessionKind;
@@ -43,14 +44,13 @@ use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::GuardianScope;
 use nez_protocol::openai_models::InputModality;
 use nez_protocol::openai_models::ReasoningEffort as ReasoningEffortConfig;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Event;
 use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::TokenUsage;
-use futures::future::BoxFuture;
 use serde_json::Value;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
@@ -725,9 +725,8 @@ async fn run_review_on_session(
         .turn_environments()
         .map(|environment| {
             let mut selection = environment.selection();
-            selection.config = nez_protocol::protocol::EnvironmentConfigState::Ready(
-                environment.config().clone(),
-            );
+            selection.config =
+                nez_protocol::protocol::EnvironmentConfigState::Ready(environment.config().clone());
             selection
         })
         .collect();

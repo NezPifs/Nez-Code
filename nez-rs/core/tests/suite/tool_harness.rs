@@ -1,20 +1,10 @@
 #![cfg(not(target_os = "windows"))]
 
-use nez_core::TurnInputRequest;
 use core_test_support::test_nez::local_requests;
+use nez_core::TurnInputRequest;
 use std::fs;
 
 use assert_matches::assert_matches;
-use nez_protocol::config_types::CollaborationMode;
-use nez_protocol::config_types::ModeKind;
-use nez_protocol::config_types::Settings;
-use nez_protocol::items::TurnItem;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::plan_tool::StepStatus;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::user_input::UserInput;
 use core_test_support::TempDirExt;
 use core_test_support::assert_regex_match;
 use core_test_support::responses;
@@ -31,6 +21,16 @@ use core_test_support::test_nez::TestNez;
 use core_test_support::test_nez::test_nez;
 use core_test_support::test_nez::turn_permission_fields;
 use core_test_support::wait_for_event;
+use nez_protocol::config_types::CollaborationMode;
+use nez_protocol::config_types::ModeKind;
+use nez_protocol::config_types::Settings;
+use nez_protocol::items::TurnItem;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::plan_tool::StepStatus;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::user_input::UserInput;
 use serde_json::Value;
 use serde_json::json;
 fn call_output(req: &ResponsesRequest, call_id: &str) -> (String, Option<bool>) {
@@ -99,29 +99,28 @@ async fn exec_command_tool_executes_command_and_streams_output() -> anyhow::Resu
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please run the shell command".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please run the shell command".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
@@ -177,29 +176,28 @@ async fn update_plan_tool_emits_plan_update_event() -> anyhow::Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please update the plan".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please update the plan".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let mut saw_plan_update = false;
     wait_for_event(&nez, |event| match event {
@@ -265,29 +263,28 @@ async fn update_plan_tool_rejects_malformed_payload() -> anyhow::Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please update the plan".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please update the plan".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let mut saw_plan_update = false;
     wait_for_event(&nez, |event| match event {
@@ -363,29 +360,28 @@ async fn apply_patch_tool_executes_and_emits_patch_events() -> anyhow::Result<()
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please apply a patch".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please apply a patch".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let mut saw_file_change_started = false;
     let mut saw_file_change_completed = false;
@@ -498,29 +494,28 @@ async fn apply_patch_reports_parse_diagnostics() -> anyhow::Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please apply a patch".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please apply a patch".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 

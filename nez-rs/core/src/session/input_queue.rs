@@ -24,10 +24,7 @@ use tokio_util::task::AbortOnDropHandle;
 pub struct UserInputMetadata {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acceptance_order: Option<u64>,
-    #[serde(
-        default,
-        skip_serializing_if = "nez_history::UserInputOrigin::is_user"
-    )]
+    #[serde(default, skip_serializing_if = "nez_history::UserInputOrigin::is_user")]
     pub origin: nez_history::UserInputOrigin,
 }
 

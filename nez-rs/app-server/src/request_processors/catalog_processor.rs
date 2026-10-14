@@ -1,12 +1,12 @@
 use super::*;
 use crate::model_catalog::ModelCatalog;
+use futures::StreamExt;
 use nez_config::ConfigPathContext;
 use nez_core::config::permission_profile_catalog;
 use nez_hooks::HookListEntryHandler;
 use nez_utils_absolute_path::AbsolutePathBufGuard;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use futures::StreamExt;
 
 #[derive(Clone)]
 pub(crate) struct CatalogRequestProcessor {

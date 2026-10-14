@@ -4,6 +4,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 use bytes::Bytes;
+use futures::StreamExt;
+use http::HeaderMap;
+use http::StatusCode;
 use nez_api::AuthProvider;
 use nez_api::Compression;
 use nez_api::Provider;
@@ -15,9 +18,6 @@ use nez_client::Response;
 use nez_client::StreamResponse;
 use nez_client::TransportError;
 use nez_protocol::models::ResponseItem;
-use futures::StreamExt;
-use http::HeaderMap;
-use http::StatusCode;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 

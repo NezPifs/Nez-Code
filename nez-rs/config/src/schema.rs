@@ -53,9 +53,8 @@ pub fn features_schema(schema_gen: &mut SchemaGenerator) -> Schema {
         if feature.id == nez_features::Feature::CodeMode {
             validation.properties.insert(
                 feature.key.to_string(),
-                schema_gen.subschema_for::<nez_features::FeatureToml<
-                    nez_features::CodeModeConfigToml,
-                >>(),
+                schema_gen
+                    .subschema_for::<nez_features::FeatureToml<nez_features::CodeModeConfigToml>>(),
             );
             continue;
         }
@@ -84,9 +83,9 @@ pub fn features_schema(schema_gen: &mut SchemaGenerator) -> Schema {
         if feature.id == nez_features::Feature::GuardianV2 {
             validation.properties.insert(
                 feature.key.to_string(),
-                schema_gen.subschema_for::<nez_features::FeatureToml<
-                    nez_features::GuardianV2ConfigToml,
-                >>(),
+                schema_gen
+                    .subschema_for::<nez_features::FeatureToml<nez_features::GuardianV2ConfigToml>>(
+                    ),
             );
             continue;
         }
@@ -147,9 +146,9 @@ pub fn features_schema(schema_gen: &mut SchemaGenerator) -> Schema {
         if feature.id == nez_features::Feature::SleepTool {
             validation.properties.insert(
                 feature.key.to_string(),
-                schema_gen.subschema_for::<nez_features::FeatureToml<
-                    nez_features::SleepToolConfigToml,
-                >>(),
+                schema_gen
+                    .subschema_for::<nez_features::FeatureToml<nez_features::SleepToolConfigToml>>(
+                    ),
             );
             continue;
         }

@@ -88,8 +88,8 @@ impl OAuthStoreLock {
         // the default home (`~/.nez`), and if an embedder has no local home/filesystem authority
         // those stores already cannot operate. A future provider-backed credential store should
         // provide its own matching lock authority instead of using this local path.
-        let nez_home = find_nez_home()
-            .map_err(|source| OAuthStoreLockFailure::NezHome { store, source })?;
+        let nez_home =
+            find_nez_home().map_err(|source| OAuthStoreLockFailure::NezHome { store, source })?;
         Self::acquire_in_with_mode(&nez_home, store, acquire_timeout, mode)
     }
 

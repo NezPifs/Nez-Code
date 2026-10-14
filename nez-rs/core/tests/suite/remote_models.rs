@@ -1,5 +1,25 @@
 #![cfg(not(target_os = "windows"))]
 use anyhow::Result;
+use core_test_support::TempDirExt;
+use core_test_support::load_default_config_for_test;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_models_once;
+use core_test_support::responses::mount_models_once_with_delay;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::TurnInputRequest;
 use nez_features::Feature;
 use nez_login::NezAuth;
@@ -27,26 +47,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::ExecCommandSource;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::TempDirExt;
-use core_test_support::load_default_config_for_test;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_models_once;
-use core_test_support::responses::mount_models_once_with_delay;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tempfile::TempDir;
@@ -247,12 +247,11 @@ async fn remote_models_config_context_window_override_clamps_to_max_context_wind
         .build(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "check context window".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "check context window".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     let turn_started_event = wait_for_event(&nez, |event| {
         matches!(
@@ -308,12 +307,11 @@ async fn remote_models_config_override_above_max_uses_max_context_window() -> Re
         .build(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "check context window".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "check context window".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     let turn_started_event = wait_for_event(&nez, |event| {
         matches!(
@@ -368,12 +366,11 @@ async fn remote_models_use_context_window_when_config_override_is_absent() -> Re
         .build(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "check context window".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "check context window".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     let turn_started_event = wait_for_event(&nez, |event| {
         matches!(
@@ -456,12 +453,11 @@ async fn remote_models_long_model_slug_is_sent_with_supported_reasoning(
         .build_with_auto_env(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "check model slug".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "check model slug".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
@@ -528,12 +524,11 @@ async fn namespaced_model_slug_uses_catalog_metadata_without_fallback_warning() 
         .build(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "check namespaced model metadata".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "check namespaced model metadata".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     let mut fallback_warning_count = 0;
     loop {
@@ -685,22 +680,21 @@ async fn remote_models_remote_model_uses_unified_exec() -> Result<()> {
     let cwd_path = cwd.abs();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "run call".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                summary: Some(ReasoningSummary::Auto),
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "run call".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            summary: Some(ReasoningSummary::Auto),
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let begin_event = wait_for_event_match(&nez, |msg| match msg {
         EventMsg::ExecCommandBegin(event) if event.call_id == call_id => Some(event.clone()),
@@ -955,22 +949,21 @@ async fn remote_models_apply_legacy_instructions(auth: NezAuth) -> Result<()> {
     let cwd_path = cwd.abs();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello base".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path.clone())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                summary: Some(ReasoningSummary::Auto),
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello base".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path.clone())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            summary: Some(ReasoningSummary::Auto),
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
@@ -985,22 +978,21 @@ async fn remote_models_apply_legacy_instructions(auth: NezAuth) -> Result<()> {
 
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd_path.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello remote".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                summary: Some(ReasoningSummary::Auto),
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello remote".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            summary: Some(ReasoningSummary::Auto),
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 

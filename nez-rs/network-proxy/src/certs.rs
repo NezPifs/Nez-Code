@@ -287,8 +287,7 @@ pub(crate) struct ManagedMitmCaTrustBundle {
 }
 
 fn managed_ca_dir() -> Result<PathBuf> {
-    let nez_home =
-        find_nez_home().context("failed to resolve NEZ_HOME for managed MITM CA")?;
+    let nez_home = find_nez_home().context("failed to resolve NEZ_HOME for managed MITM CA")?;
     Ok(nez_home.join(MANAGED_MITM_CA_DIR).to_path_buf())
 }
 

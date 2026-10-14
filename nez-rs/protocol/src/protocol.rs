@@ -3526,9 +3526,7 @@ impl TruncationPolicy {
     pub fn byte_budget(&self) -> usize {
         match self {
             TruncationPolicy::Bytes(bytes) => *bytes,
-            TruncationPolicy::Tokens(tokens) => {
-                nez_utils_string::approx_bytes_for_tokens(*tokens)
-            }
+            TruncationPolicy::Tokens(tokens) => nez_utils_string::approx_bytes_for_tokens(*tokens),
         }
     }
 }
@@ -4904,10 +4902,7 @@ mod tests {
 
     #[test]
     fn session_source_restriction_product_defaults_non_subagent_sources_to_nez() {
-        assert_eq!(
-            SessionSource::Cli.restriction_product(),
-            Some(Product::Nez)
-        );
+        assert_eq!(SessionSource::Cli.restriction_product(), Some(Product::Nez));
         assert_eq!(
             SessionSource::VSCode.restriction_product(),
             Some(Product::Nez)
@@ -4916,10 +4911,7 @@ mod tests {
             SessionSource::Exec.restriction_product(),
             Some(Product::Nez)
         );
-        assert_eq!(
-            SessionSource::Mcp.restriction_product(),
-            Some(Product::Nez)
-        );
+        assert_eq!(SessionSource::Mcp.restriction_product(), Some(Product::Nez));
         assert_eq!(
             SessionSource::Unknown.restriction_product(),
             Some(Product::Nez)
@@ -5342,10 +5334,7 @@ mod tests {
             vec![
                 (
                     canonical_cwd,
-                    vec![
-                        expected_dot_nez.to_path_buf(),
-                        expected_docs.to_path_buf()
-                    ],
+                    vec![expected_dot_nez.to_path_buf(), expected_docs.to_path_buf()],
                 ),
                 (expected_docs_public.to_path_buf(), Vec::new()),
             ]

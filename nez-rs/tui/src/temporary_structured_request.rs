@@ -1,5 +1,6 @@
 //! Run isolated structured requests through existing app-server methods.
 
+use color_eyre::eyre::eyre;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_client::TypedRequestError;
 use nez_app_server_protocol::ClientRequest;
@@ -23,7 +24,6 @@ use nez_app_server_protocol::TurnStatus;
 use nez_app_server_protocol::UserInput;
 use nez_protocol::models::BUILT_IN_PERMISSION_PROFILE_READ_ONLY;
 use nez_protocol::openai_models::ReasoningEffort;
-use color_eyre::eyre::eyre;
 use serde_json::Value;
 use std::time::Duration;
 use tokio::sync::mpsc::UnboundedReceiver;

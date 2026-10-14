@@ -4,10 +4,10 @@ use super::*;
 use crate::app_server_session::ThreadParamsMode;
 use crate::bottom_pane::TerminalTitleItem;
 use crate::chatwidget::tests::helpers::normalize_agent_center_snapshot;
-use nez_app_server_protocol::JSONRPCMessage;
-use nez_app_server_protocol::JSONRPCRequest;
 use futures::SinkExt;
 use futures::StreamExt;
+use nez_app_server_protocol::JSONRPCMessage;
+use nez_app_server_protocol::JSONRPCRequest;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tokio::net::TcpListener;
@@ -99,8 +99,7 @@ async fn lost_mutation_reply_preserves_work_without_resubmitting() -> Result<()>
         loop {
             if let Ok(text) =
                 tokio::fs::read_to_string(app.config.nez_home.join("history.jsonl")).await
-                && let Ok(entry) =
-                    serde_json::from_str::<nez_message_history::HistoryEntry>(&text)
+                && let Ok(entry) = serde_json::from_str::<nez_message_history::HistoryEntry>(&text)
             {
                 break entry;
             }

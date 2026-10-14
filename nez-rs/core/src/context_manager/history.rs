@@ -36,8 +36,8 @@ use nez_context_fragments::to_annotated_content;
 use nez_extension_api::ConversationHistorySnapshot;
 use nez_guardian_context::SectionHistory;
 use nez_guardian_context::TranscriptHistory;
-use nez_history::NezHarnessMetadata;
 use nez_history::GuardianHistoryCheckpoint;
+use nez_history::NezHarnessMetadata;
 use nez_history::ResponseItemEnvelope;
 use nez_history::RetainedContext;
 use nez_history::RetainedContextEntry;
@@ -1142,9 +1142,9 @@ fn estimate_response_item_model_visible_bytes(item: &ResponseItem) -> i64 {
         | ResponseItem::ContextCompaction {
             encrypted_content: Some(content),
             ..
-        } => i64::try_from(
-            nez_protocol::protocol::estimate_compaction_content_length(content.len()),
-        )
+        } => i64::try_from(nez_protocol::protocol::estimate_compaction_content_length(
+            content.len(),
+        ))
         .unwrap_or(i64::MAX),
         ResponseItem::FunctionCall {
             name,

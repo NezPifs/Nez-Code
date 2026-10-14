@@ -833,10 +833,9 @@ impl FeedbackSnapshot {
             extra_attachments.into_iter().partition(|attachment| {
                 nez_rollout::rollout_id_from_path(Path::new(&attachment.filename)).is_some()
             });
-        let (rollout_paths, diagnostic_paths): (Vec<_>, Vec<_>) =
-            extra_attachment_paths.iter().partition(|attachment| {
-                nez_rollout::rollout_id_from_path(&attachment.path).is_some()
-            });
+        let (rollout_paths, diagnostic_paths): (Vec<_>, Vec<_>) = extra_attachment_paths
+            .iter()
+            .partition(|attachment| nez_rollout::rollout_id_from_path(&attachment.path).is_some());
         let has_rollouts = !rollouts.is_empty() || !rollout_paths.is_empty();
         let archive = has_rollouts
             .then_some((rollout_paths, rollouts))
@@ -1021,11 +1020,11 @@ mod tests {
 
     use super::*;
     use crate::FeedbackDiagnostic;
-    use nez_http_client::OutboundProxyPolicy;
     use flate2::Compression;
     use flate2::read::GzDecoder;
     use flate2::write::GzEncoder;
     use http::StatusCode;
+    use nez_http_client::OutboundProxyPolicy;
     use pretty_assertions::assert_eq;
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;

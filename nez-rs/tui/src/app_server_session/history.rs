@@ -9,6 +9,8 @@ use crate::local_settings::LocalSettings;
 use crate::resize_reflow_cap::resize_reflow_max_rows;
 use crate::thread_transcript::RawReasoningVisibility;
 use crate::thread_transcript::thread_items_to_transcript_cells;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::SortDirection;
 use nez_app_server_protocol::Thread;
@@ -24,8 +26,6 @@ use nez_app_server_protocol::ThreadTurnsListResponse;
 use nez_app_server_protocol::Turn;
 use nez_app_server_protocol::TurnItemsView;
 use nez_protocol::ThreadId;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
 
 pub(crate) const INITIAL_HISTORY_TURN_LIMIT: u32 = 5;
 pub(crate) const HISTORY_ITEM_PAGE_LIMIT: u32 = 100;

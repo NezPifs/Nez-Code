@@ -1,18 +1,18 @@
 //! Configured MCP servers cannot activate verification or hold a turn waiting for proof.
 
 use anyhow::Result;
-use nez_core::StartThreadOptions;
-use nez_core::TurnInputRequest;
-use nez_protocol::mcp::ClientMcpExtensions;
-use nez_protocol::mcp::OPENAI_ELICITATION_EXTENSION_ID;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::skip_if_wine_exec;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_mcp_server;
+use nez_core::StartThreadOptions;
+use nez_core::TurnInputRequest;
+use nez_protocol::mcp::ClientMcpExtensions;
+use nez_protocol::mcp::OPENAI_ELICITATION_EXTENSION_ID;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

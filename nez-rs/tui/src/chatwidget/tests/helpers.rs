@@ -185,8 +185,9 @@ pub(super) fn test_model_catalog(_config: &Config) -> Arc<ModelCatalog> {
     Arc::new(
         ModelCatalog::new(crate::test_support::TEST_MODEL_PRESETS.clone())
             .with_collaboration_modes(
-            nez_models_manager::collaboration_mode_presets::builtin_collaboration_mode_presets(),
-        ),
+                nez_models_manager::collaboration_mode_presets::builtin_collaboration_mode_presets(
+                ),
+            ),
     )
 }
 

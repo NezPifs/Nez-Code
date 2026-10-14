@@ -8,6 +8,17 @@
 #![allow(clippy::expect_used)]
 
 use anyhow::Context;
+use core_test_support::PathExt;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::test_nez::TestNezHarness;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_with_timeout;
 use nez_config::types::ApprovalsReviewer;
 use nez_core::TurnInputRequest;
 use nez_core::config::Constrained;
@@ -42,17 +53,6 @@ use nez_sandboxing::SandboxType;
 use nez_sandboxing::WindowsSandboxProxySettingsMode;
 use nez_utils_path_uri::PathUri;
 use nez_windows_sandbox_test_support::WindowsSandboxAccountTestGuard;
-use core_test_support::PathExt;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::test_nez::TestNezHarness;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_with_timeout;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use serial_test::serial;
@@ -211,8 +211,7 @@ fn assert_managed_deny_probe(output: &std::process::Output, launch: usize) -> an
 #[serial(nez_home)]
 fn windows_sandbox_cli_preserves_managed_deny_reads_across_launches() -> anyhow::Result<()> {
     let _account_guard = WindowsSandboxAccountTestGuard::acquire()?;
-    let nez_home =
-        nez_home_for_windows_sandbox_test("windows-cli-managed-deny-read-nez-home")?;
+    let nez_home = nez_home_for_windows_sandbox_test("windows-cli-managed-deny-read-nez-home")?;
 
     let fixture = TempDir::new()?;
     let fixture_root = dunce::canonicalize(fixture.path())?;
@@ -606,8 +605,7 @@ async fn windows_elevated_temp_only_core_and_direct_spawn_enforce_carveouts() ->
 #[serial(nez_home)]
 async fn windows_elevated_does_not_create_missing_workspace_metadata() -> anyhow::Result<()> {
     let _account_guard = WindowsSandboxAccountTestGuard::acquire()?;
-    let nez_home =
-        nez_home_for_windows_sandbox_test("windows-elevated-missing-metadata-nez-home")?;
+    let nez_home = nez_home_for_windows_sandbox_test("windows-elevated-missing-metadata-nez-home")?;
     let _nez_home_guard = EnvVarGuard::set("NEZ_HOME", nez_home.path().as_os_str());
     stage_windows_sandbox_helpers()?;
     let workspace = TempDir::new()?;
@@ -873,9 +871,8 @@ async fn windows_elevated_enforces_deny_read_and_protects_setup_marker() -> anyh
 #[serial(nez_home)]
 async fn windows_elevated_powershell_preserves_relative_paths() -> anyhow::Result<()> {
     let _account_guard = WindowsSandboxAccountTestGuard::acquire()?;
-    let nez_home = nez_home_for_windows_sandbox_test(
-        "windows-elevated-powershell-relative-paths-nez-home",
-    )?;
+    let nez_home =
+        nez_home_for_windows_sandbox_test("windows-elevated-powershell-relative-paths-nez-home")?;
     let _nez_home_guard = EnvVarGuard::set("NEZ_HOME", nez_home.path().as_os_str());
     stage_windows_sandbox_helpers()?;
     // The refresh caller must own the helper directory after provisioning protects its DACL.
@@ -1370,12 +1367,11 @@ async fn windows_elevated_approved_git_pull_preserves_deny_read() -> anyhow::Res
     )
     .await;
     let nez = &harness.test().nez;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "pull the fixture repository".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "pull the fixture repository".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     let approval = wait_for_event(nez, |event| {
         matches!(event, ExecApprovalRequest(_) | TurnComplete(_))
     })
@@ -1387,13 +1383,12 @@ async fn windows_elevated_approved_git_pull_preserves_deny_read() -> anyhow::Res
     assert!(!fetch_head.exists());
     assert!(!cwd.join("git-and-denials-ok.txt").exists());
     assert_eq!(read("tracked.txt")?.trim(), "before");
-    nez
-        .submit(Op::ExecApproval {
-            id: approval.effective_approval_id(),
-            turn_id: None,
-            decision: ReviewDecision::Approved,
-        })
-        .await?;
+    nez.submit(Op::ExecApproval {
+        id: approval.effective_approval_id(),
+        turn_id: None,
+        decision: ReviewDecision::Approved,
+    })
+    .await?;
     let mut process_end = None;
     let mut turn_completed = false;
     while process_end.is_none() || !turn_completed {

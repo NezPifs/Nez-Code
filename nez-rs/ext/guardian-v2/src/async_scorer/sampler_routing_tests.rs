@@ -5,21 +5,21 @@ use super::proxy_websocket_servers;
 use super::sample_request;
 use super::sampler_config;
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::responses::WebSocketConnectionConfig;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::ExternalAuth;
 use nez_login::ExternalAuthFuture;
 use nez_login::ExternalAuthRefreshContext;
+use nez_login::NezAuth;
 use nez_login::WorkspaceRouting;
 use nez_login::WorkspaceRoutingRequest;
 use nez_login::WorkspaceRoutingResolver;
 use nez_model_provider::ModelProviderFuture;
 use nez_model_provider::create_model_provider;
 use nez_model_provider_info::ModelProviderInfo;
-use core_test_support::responses;
-use core_test_support::responses::WebSocketConnectionConfig;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -44,8 +44,7 @@ async fn failed_routing_blocks_a_prewarmed_classifier_connection() -> Result<()>
     let base_url = proxy_websocket_servers(&[&server, &server])
         .await?
         .replace("/v1", "/backend-api/nez");
-    let auth =
-        AuthManager::from_auth_for_testing(NezAuth::create_dummy_chatgpt_auth_for_testing());
+    let auth = AuthManager::from_auth_for_testing(NezAuth::create_dummy_chatgpt_auth_for_testing());
     let mut config = sampler_config(base_url.clone());
     config.provider = create_model_provider(
         ModelProviderInfo::create_openai_provider(Some(base_url)),
@@ -188,8 +187,7 @@ async fn idle_classifier_retains_the_owning_threads_workspace_binding() -> Resul
     let test = core_test_support::test_nez::test_nez()
         .build_with_auto_env(&server)
         .await?;
-    let auth =
-        AuthManager::from_auth_for_testing(NezAuth::create_dummy_chatgpt_auth_for_testing());
+    let auth = AuthManager::from_auth_for_testing(NezAuth::create_dummy_chatgpt_auth_for_testing());
     let resolver: Arc<dyn WorkspaceRoutingResolver> =
         Arc::new(ChangedBootstrap(AtomicBool::new(/*v*/ true)));
     auth.set_workspace_routing_resolver(Arc::downgrade(&resolver));

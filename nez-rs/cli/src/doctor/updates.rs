@@ -9,12 +9,12 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use http::Method;
 use nez_core::config::Config;
 use nez_http_client::ClientRouteClass;
 use nez_http_client::RouteAwareClientPool;
 use nez_install_context::InstallContext;
 use nez_install_context::InstallMethod;
-use http::Method;
 use serde::Deserialize;
 #[cfg(target_os = "macos")]
 use url::Url;

@@ -6866,9 +6866,9 @@ async fn managed_config_overrides_oauth_store_mode() -> anyhow::Result<()> {
     let cfg =
         deserialize_config_toml_with_base(config_layer_stack.effective_config(), nez_home.path())
             .map_err(|e| {
-                tracing::error!("Failed to deserialize overridden config: {e}");
-                e
-            })?;
+            tracing::error!("Failed to deserialize overridden config: {e}");
+            e
+        })?;
     assert_eq!(
         cfg.mcp_oauth_credentials_store,
         Some(OAuthCredentialsStoreMode::Keyring),
@@ -6987,10 +6987,7 @@ async fn managed_config_wins_over_cli_overrides() -> anyhow::Result<()> {
     let nez_home = TempDir::new()?;
     let managed_path = nez_home.path().join("managed_config.toml");
 
-    std::fs::write(
-        nez_home.path().join(CONFIG_TOML_FILE),
-        "model = \"base\"\n",
-    )?;
+    std::fs::write(nez_home.path().join(CONFIG_TOML_FILE), "model = \"base\"\n")?;
     std::fs::write(&managed_path, "model = \"managed_config\"\n")?;
 
     let overrides = LoaderOverrides::with_managed_config_path_for_tests(managed_path);
@@ -7009,9 +7006,9 @@ async fn managed_config_wins_over_cli_overrides() -> anyhow::Result<()> {
     let cfg =
         deserialize_config_toml_with_base(config_layer_stack.effective_config(), nez_home.path())
             .map_err(|e| {
-                tracing::error!("Failed to deserialize overridden config: {e}");
-                e
-            })?;
+            tracing::error!("Failed to deserialize overridden config: {e}");
+            e
+        })?;
 
     assert_eq!(cfg.model.as_deref(), Some("managed_config"));
     Ok(())

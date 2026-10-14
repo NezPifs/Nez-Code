@@ -3,6 +3,11 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
 use nez_core::config::Config;
 use nez_extension_api::ExtensionRegistryBuilder;
 use nez_features::Feature;
@@ -15,11 +20,6 @@ use nez_skills_extension::catalog::SkillPackageId;
 use nez_skills_extension::catalog::SkillResourceId;
 use nez_skills_extension::catalog::SkillSourceKind;
 use nez_skills_extension::install_with_providers;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 
 use super::super::skills_extension::CatalogSkillProvider;

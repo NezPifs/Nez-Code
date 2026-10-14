@@ -716,8 +716,7 @@ impl OpenAiModelsManager {
         let Some(cache) = self.cache.as_ref() else {
             return false;
         };
-        let _timer =
-            nez_otel::start_global_timer("nez.remote_models.load_cache.duration_ms", &[]);
+        let _timer = nez_otel::start_global_timer("nez.remote_models.load_cache.duration_ms", &[]);
         let client_version = crate::client_version_to_whole();
         info!(client_version, "models cache: evaluating cache eligibility");
         let Some(identity) = self.endpoint_client.identity() else {

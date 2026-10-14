@@ -7,6 +7,11 @@ mod fake_bwrap;
 use anyhow::Context as _;
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
+use common::exec_server::exec_server;
+#[cfg(target_os = "linux")]
+use common::exec_server::exec_server_with_env;
+#[cfg(target_os = "linux")]
+use fake_bwrap::write_fake_bwrap;
 use nez_exec_server::CAPABILITY_ROOTS_DISCOVER_METHOD;
 use nez_exec_server::CapabilityRootDiscovery;
 use nez_exec_server::CapabilityRootsDiscoverParams;
@@ -39,11 +44,6 @@ use nez_protocol::permissions::FileSystemSpecialPath;
 use nez_protocol::permissions::NetworkSandboxPolicy;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use common::exec_server::exec_server;
-#[cfg(target_os = "linux")]
-use common::exec_server::exec_server_with_env;
-#[cfg(target_os = "linux")]
-use fake_bwrap::write_fake_bwrap;
 use pretty_assertions::assert_eq;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -952,10 +952,7 @@ async fn v2_helper_batches_roots_and_bounds_its_response() -> anyhow::Result<()>
     let config = serde_json::to_string(&serde_json::json!({"padding": "x".repeat(900 * 1024)}))?;
     for index in 0..5 {
         let root = workspace.path().join(format!("plugin-{index}"));
-        write_file(
-            &root.join(".nez-plugin/plugin.json"),
-            r#"{"name":"demo"}"#,
-        )?;
+        write_file(&root.join(".nez-plugin/plugin.json"), r#"{"name":"demo"}"#)?;
         write_file(&root.join(".mcp.json"), &config)?;
         write_file(
             &root.join("skills/deploy/SKILL.md"),

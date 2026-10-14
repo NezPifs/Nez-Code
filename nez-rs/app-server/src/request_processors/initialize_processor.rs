@@ -107,8 +107,7 @@ impl InitializeRequestProcessor {
         let user_verification_enabled = experimental_api_enabled
             && matches!(
                 (session.origin, name.as_str()),
-                (ConnectionOrigin::InProcess, "nez-tui")
-                    | (ConnectionOrigin::Stdio, "Nez Desktop")
+                (ConnectionOrigin::InProcess, "nez-tui") | (ConnectionOrigin::Stdio, "Nez Desktop")
             )
             && tokio::task::spawn_blocking(self.user_verification.device_supported)
                 .await

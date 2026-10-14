@@ -1,12 +1,12 @@
 //! Feedback event contracts for titles, report grouping, and lossless comment bodies.
 
-use crate::NezFeedback;
 use crate::FeedbackUploadOptions;
+use crate::NezFeedback;
 use crate::UPLOAD_TIMEOUT;
-use nez_http_client::HttpClientFactory;
-use nez_http_client::OutboundProxyPolicy;
 use flate2::read::GzDecoder;
 use http::StatusCode;
+use nez_http_client::HttpClientFactory;
+use nez_http_client::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 use sentry::protocol::Event;
 use sentry::protocol::Exception;

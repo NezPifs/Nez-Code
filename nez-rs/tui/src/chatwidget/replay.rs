@@ -205,8 +205,7 @@ impl ChatWidget {
             // A resolved historical precaution must not clear the restored draft or input queue.
             if Some(&turn_id) != latest_turn_id.as_ref()
                 && error.as_ref().is_some_and(|error| {
-                    error.nez_error_info
-                        == Some(AppServerNezErrorInfo::MisalignmentPolicyViolation)
+                    error.nez_error_info == Some(AppServerNezErrorInfo::MisalignmentPolicyViolation)
                 })
             {
                 error = None;

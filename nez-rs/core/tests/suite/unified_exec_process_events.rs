@@ -2,6 +2,21 @@ use anyhow::Context;
 use anyhow::Result;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::managed_network_requirements_loader;
+use core_test_support::responses::ev_apply_patch_custom_tool_call;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::startup::STARTUP_TIMEOUT;
+use core_test_support::startup::expect_startup;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::TurnInputRequest;
 use nez_exec_server::ExecParams;
@@ -31,21 +46,6 @@ use nez_protocol::protocol::TurnEnvironmentRequest;
 use nez_protocol::protocol::TurnEnvironmentRequests;
 use nez_protocol::user_input::UserInput;
 use nez_utils_path_uri::PathUri;
-use core_test_support::managed_network_requirements_loader;
-use core_test_support::responses::ev_apply_patch_custom_tool_call;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::startup::STARTUP_TIMEOUT;
-use core_test_support::startup::expect_startup;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -228,10 +228,8 @@ async fn respond_environment_info(
             | PushedExecScenario::NezPathDisabledFeature
             | PushedExecScenario::NezPathWithExplicitOverride
     ) {
-        response["result"]["prependPathDirs"] = json!([
-            "file:///executor/nez-path",
-            "file:///executor/extra-tools",
-        ]);
+        response["result"]["prependPathDirs"] =
+            json!(["file:///executor/nez-path", "file:///executor/extra-tools",]);
     } else if matches!(scenario, PushedExecScenario::UnusableNezPath) {
         response["result"]["prependPathDirs"] = json!(["file:///executor/nez%3Apath"]);
     }

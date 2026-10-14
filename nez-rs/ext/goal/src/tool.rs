@@ -513,9 +513,7 @@ fn protocol_status_from_state(status: nez_state::ThreadGoalStatus) -> ThreadGoal
     }
 }
 
-pub(crate) fn state_status_from_protocol(
-    status: ThreadGoalStatus,
-) -> nez_state::ThreadGoalStatus {
+pub(crate) fn state_status_from_protocol(status: ThreadGoalStatus) -> nez_state::ThreadGoalStatus {
     match status {
         ThreadGoalStatus::Active => nez_state::ThreadGoalStatus::Active,
         ThreadGoalStatus::Paused => nez_state::ThreadGoalStatus::Paused,

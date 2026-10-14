@@ -1,11 +1,11 @@
 //! Instruction refresh and compaction with an unchanged model and tool catalog.
 
 use super::*;
+use core_test_support::responses;
 use nez_models_manager::manager::RefreshStrategy;
 use nez_models_manager::model_info::model_info_from_slug;
 use nez_protocol::openai_models::ModelVisibility;
 use nez_protocol::openai_models::ModelsResponse;
-use core_test_support::responses;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn catalog_refresh_replaces_instructions_and_compaction_installs_latest_base() -> Result<()> {

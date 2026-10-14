@@ -1,5 +1,9 @@
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_target_windows;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::test_nez;
 use nez_config::CloudConfigBundleLoader;
 use nez_config::LoaderOverrides;
 use nez_config::test_support::CloudConfigBundleFixture;
@@ -13,10 +17,6 @@ use nez_protocol::protocol::AskForApproval;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::sandbox::SandboxType;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_target_windows;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -93,12 +93,7 @@ async fn refreshed_cloud_bundle_updates_later_sessions() -> Result<()> {
         AskForApproval::Never
     );
     assert_eq!(
-        initial
-            .nez
-            .config()
-            .await
-            .developer_instructions
-            .as_deref(),
+        initial.nez.config().await.developer_instructions.as_deref(),
         Some("initial managed instructions")
     );
 
@@ -108,9 +103,7 @@ async fn refreshed_cloud_bundle_updates_later_sessions() -> Result<()> {
     .add_enterprise_config(r#"developer_instructions = "refreshed managed instructions""#)
     .into_bundle();
 
-    let mut refreshed_builder = test_nez()
-        .with_home(home)
-        .with_cloud_config_bundle(loader);
+    let mut refreshed_builder = test_nez().with_home(home).with_cloud_config_bundle(loader);
     let refreshed = refreshed_builder.build_with_auto_env(&server).await?;
     assert_eq!(
         refreshed.session_configured.approval_policy,

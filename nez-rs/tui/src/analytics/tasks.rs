@@ -1,5 +1,6 @@
 //! Consumer task queries preserve missing amounts and require complete descendant groups.
 use super::client::Live;
+use futures::StreamExt;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::RequestId;
@@ -8,7 +9,6 @@ use nez_app_server_protocol::ThreadListParams;
 use nez_app_server_protocol::ThreadListResponse;
 use nez_backend_client::TaskUsage;
 use nez_backend_client::TaskUsageThread;
-use futures::StreamExt;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;

@@ -8,6 +8,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
+use http::HeaderMap;
 use nez_api::Provider;
 use nez_api::RealtimeEventParser;
 use nez_api::RealtimeOutputModality;
@@ -18,7 +19,6 @@ use nez_api::RetryConfig;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
 use nez_protocol::protocol::RealtimeVoice;
-use http::HeaderMap;
 use pretty_assertions::assert_eq;
 
 const ADDRESS_ENV: &str = "NEZ_TEST_REALTIME_TLS_ADDRESS";

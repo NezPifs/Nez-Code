@@ -2,17 +2,17 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
+use futures::FutureExt;
+use http::HeaderMap;
+use http::HeaderName;
+use http::HeaderValue;
+use http::StatusCode;
 use nez_api::AuthProvider;
 use nez_api::SharedAuthProvider;
 use nez_http_client::ClientRouteClass;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::HttpResponse;
 use nez_http_client::RouteAwareClientPool;
-use futures::FutureExt;
-use http::HeaderMap;
-use http::HeaderName;
-use http::HeaderValue;
-use http::StatusCode;
 use serde::Deserialize;
 use tokio::time::sleep;
 use tokio::time::timeout_at;
@@ -945,10 +945,10 @@ fn preview_error_body(body: &str) -> Option<String> {
 mod tests {
     use std::sync::Arc;
 
-    use nez_api::AuthProvider;
-    use nez_http_client::OutboundProxyPolicy;
     use http::HeaderMap;
     use http::HeaderValue;
+    use nez_api::AuthProvider;
+    use nez_http_client::OutboundProxyPolicy;
     use opentelemetry::trace::TracerProvider as _;
     use opentelemetry_sdk::trace::SdkTracerProvider;
     use pretty_assertions::assert_eq;

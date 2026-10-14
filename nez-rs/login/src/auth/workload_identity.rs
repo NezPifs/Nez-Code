@@ -20,10 +20,10 @@ use thiserror::Error;
 use url::Url;
 
 use super::AuthConfig;
-use super::NezAuth;
 use super::ExternalAuth;
 use super::ExternalAuthFuture;
 use super::ExternalAuthRefreshContext;
+use super::NezAuth;
 use super::RefreshTokenError;
 use super::RefreshTokenFailedError;
 use super::RefreshTokenFailedReason;
@@ -224,15 +224,11 @@ fn classify_auth_environment(
         | "https://chat.openai.com"
         | "https://chat.openai.com/backend-api"
         | "https://chat.openai.com/nez"
-        | "https://chat.openai.com/backend-api/nez" => {
-            Ok(WorkloadIdentityEnvironment::Production)
-        }
+        | "https://chat.openai.com/backend-api/nez" => Ok(WorkloadIdentityEnvironment::Production),
         "https://chatgpt-staging.com"
         | "https://chatgpt-staging.com/backend-api"
         | "https://chatgpt-staging.com/nez"
-        | "https://chatgpt-staging.com/backend-api/nez" => {
-            Ok(WorkloadIdentityEnvironment::Staging)
-        }
+        | "https://chatgpt-staging.com/backend-api/nez" => Ok(WorkloadIdentityEnvironment::Staging),
         _ => Err(invalid_config(
             "workload identity auth supports only trusted production and staging app routing",
         )),

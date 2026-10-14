@@ -236,7 +236,10 @@ mod tests {
     fn server_version_notice_uses_client_release_policy() {
         assert_eq!(
             server_version_notice("0.153.0", Some("0.152.1")),
-            Some("A background Nez service is running v0.152.1, older than your Nez-Code v0.153.0.".to_string())
+            Some(
+                "A background Nez service is running v0.152.1, older than your Nez-Code v0.153.0."
+                    .to_string()
+            )
         );
         assert_eq!(server_version_notice("0.153.0", Some("0.153.0")), None);
         assert_eq!(

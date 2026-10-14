@@ -33,6 +33,7 @@ use self::protocol::normalize_remote_control_url;
 use super::CHANNEL_CAPACITY;
 use super::TransportEvent;
 use super::next_connection_id;
+use gethostname::gethostname;
 use nez_app_server_protocol::RemoteControlClientsListParams;
 use nez_app_server_protocol::RemoteControlClientsListResponse;
 use nez_app_server_protocol::RemoteControlClientsRevokeParams;
@@ -45,7 +46,6 @@ use nez_app_server_protocol::RemoteControlPairingStatusResponse;
 use nez_app_server_protocol::RemoteControlStatusChangedNotification;
 use nez_login::AuthManager;
 use nez_state::StateRuntime;
-use gethostname::gethostname;
 use std::error::Error;
 use std::fmt;
 use std::io;
@@ -84,8 +84,7 @@ pub enum RemoteControlStartupMode {
 }
 
 /// Internal marker used by the daemon to disable remote control without requiring a new CLI flag.
-pub const REMOTE_CONTROL_DISABLED_ENV_VAR: &str =
-    "NEZ_INTERNAL_APP_SERVER_REMOTE_CONTROL_DISABLED";
+pub const REMOTE_CONTROL_DISABLED_ENV_VAR: &str = "NEZ_INTERNAL_APP_SERVER_REMOTE_CONTROL_DISABLED";
 
 /// Reads and removes the daemon's internal disabled-start marker before worker threads start.
 pub fn take_remote_control_disabled_env() -> bool {

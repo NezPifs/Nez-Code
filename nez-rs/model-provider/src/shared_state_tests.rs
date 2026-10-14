@@ -6,6 +6,9 @@ use crate::AgentIdentitySessionFallback;
 use crate::ProviderAuthScope;
 use crate::create_model_provider;
 use crate::test_support::seed_gateway_auth;
+use http::HeaderMap;
+use http::HeaderName;
+use http::HeaderValue;
 use nez_api::Compression;
 use nez_api::ResponsesClient;
 use nez_http_client::ClientRouteClass;
@@ -22,9 +25,6 @@ use nez_model_provider_info::GatewayOAuthDelivery;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_models_manager::manager::RefreshStrategy;
 use nez_protocol::protocol::SessionSource;
-use http::HeaderMap;
-use http::HeaderName;
-use http::HeaderValue;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use wiremock::Mock;
@@ -556,10 +556,7 @@ async fn gateway_login_states_stop_request_retries() {
     let error = provider.api_auth().await.err().expect("login required");
     assert_eq!(
         (error.to_string(), error.retry_delay(/*retry_count*/ 1)),
-        (
-            nez_login::GatewayAuthError::LoginRequired.to_string(),
-            None
-        ),
+        (nez_login::GatewayAuthError::LoginRequired.to_string(), None),
     );
     let cancel = tokio::sync::Notify::new();
     let (url_tx, url_rx) = tokio::sync::oneshot::channel();

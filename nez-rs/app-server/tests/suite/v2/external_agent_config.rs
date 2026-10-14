@@ -8,6 +8,7 @@ use app_test_support::TestAppServer;
 use app_test_support::create_mock_responses_server_repeating_assistant;
 use app_test_support::start_analytics_events_server;
 use app_test_support::write_chatgpt_auth;
+use core_test_support::responses;
 #[cfg(unix)]
 use nez_app_server_protocol::ConfigReadParams;
 #[cfg(unix)]
@@ -47,7 +48,6 @@ use nez_app_server_protocol::UserInput;
 #[cfg(unix)]
 use nez_app_server_protocol::WriteStatus;
 use nez_config::types::AuthCredentialsStoreMode;
-use core_test_support::responses;
 use pretty_assertions::assert_eq;
 use std::path::Path;
 use std::path::PathBuf;
@@ -1499,10 +1499,7 @@ async fn external_agent_config_import_reports_session_config_error_subtype() -> 
         .with_env_overrides(&[("HOME", Some(home_dir.as_str()))])
         .build_initialized_with_timeout(DEFAULT_TIMEOUT)
         .await?;
-    std::fs::write(
-        nez_home.path().join("config.toml"),
-        "chatgpt_base_url = [",
-    )?;
+    std::fs::write(nez_home.path().join("config.toml"), "chatgpt_base_url = [")?;
 
     let request_id = mcp
         .send_raw_request(
@@ -1835,8 +1832,8 @@ async fn external_agent_config_import_creates_session_rollouts() -> Result<()> {
         chrono::DateTime::parse_from_rfc3339(source_updated_at_text)?.timestamp();
     let session_dir = external_agent_home(nez_home.path()).join("projects/repo");
     let session_path = session_dir.join("session.jsonl");
-    let manifest_dir = connector_metadata_root(nez_home.path())
-        .join("claude-code-sessions/account/organization");
+    let manifest_dir =
+        connector_metadata_root(nez_home.path()).join("claude-code-sessions/account/organization");
     let control_request = "<ide_selection>src/auth.rs:1-5</ide_selection>";
     let first_request = "Fix auth flow";
     std::fs::create_dir_all(&project_root)?;

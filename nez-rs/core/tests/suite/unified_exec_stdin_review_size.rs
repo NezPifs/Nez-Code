@@ -1,16 +1,6 @@
 //! Stdin approval must cover the complete input before any bytes reach a terminal.
 
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_features::Feature;
-use nez_protocol::approvals::ExecApprovalKind;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ReviewDecision;
-use nez_protocol::protocol::SandboxPolicy;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_function_call;
 use core_test_support::responses::mount_sse_sequence;
@@ -21,6 +11,16 @@ use core_test_support::skip_if_sandbox;
 use core_test_support::skip_if_target_windows;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_features::Feature;
+use nez_protocol::approvals::ExecApprovalKind;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ReviewDecision;
+use nez_protocol::protocol::SandboxPolicy;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

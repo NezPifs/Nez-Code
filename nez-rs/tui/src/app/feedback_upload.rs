@@ -2,6 +2,9 @@
 //! Log consent gates all staging; cleanup runs after staging or upload failures too.
 
 use crate::app_server_session::fs::AppServerFileSystem;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
+use color_eyre::eyre::eyre;
 use nez_app_server_client::AppServerPath;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_protocol::ClientRequest;
@@ -9,9 +12,6 @@ use nez_app_server_protocol::FeedbackUploadParams;
 use nez_app_server_protocol::FeedbackUploadResponse;
 use nez_app_server_protocol::RequestId;
 use nez_feedback::NezFeedback;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
-use color_eyre::eyre::eyre;
 use std::path::PathBuf;
 use uuid::Uuid;
 

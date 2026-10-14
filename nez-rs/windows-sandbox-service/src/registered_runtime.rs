@@ -347,9 +347,6 @@ pub(crate) fn validate_target(
             sandbox_member = true;
         }
     }
-    ensure!(
-        sandbox_member,
-        "runtime account is not in NezSandboxUsers"
-    );
+    ensure!(sandbox_member, "runtime account is not in NezSandboxUsers");
     Ok(user_sid)
 }

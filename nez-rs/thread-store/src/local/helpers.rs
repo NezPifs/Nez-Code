@@ -251,8 +251,7 @@ pub(super) async fn resolve_thread_names(
         })
         .collect::<HashSet<_>>();
     let mut names =
-        match find_thread_names_by_ids(store.config.nez_home.as_path(), &legacy_thread_ids).await
-        {
+        match find_thread_names_by_ids(store.config.nez_home.as_path(), &legacy_thread_ids).await {
             Ok(names) => names,
             Err(err) if use_state_db_only => {
                 return Err(ThreadStoreError::Internal {

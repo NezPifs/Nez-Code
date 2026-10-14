@@ -16,6 +16,43 @@ mod worktree;
 pub use cli::Cli;
 pub use cli::Command;
 pub use cli::ReviewArgs;
+use event_processor_with_human_output::EventProcessorWithHumanOutput;
+pub use event_processor_with_jsonl_output::CollectedThreadEvents;
+pub use event_processor_with_jsonl_output::EventProcessorWithJsonOutput;
+pub use event_processor_with_jsonl_output::NezStatus;
+pub use exec_events::AgentMessageItem;
+pub use exec_events::CollabAgentState;
+pub use exec_events::CollabAgentStatus;
+pub use exec_events::CollabTool;
+pub use exec_events::CollabToolCallItem;
+pub use exec_events::CollabToolCallStatus;
+pub use exec_events::CommandExecutionItem;
+pub use exec_events::CommandExecutionStatus;
+pub use exec_events::ErrorItem;
+pub use exec_events::FileChangeItem;
+pub use exec_events::FileUpdateChange;
+pub use exec_events::ItemCompletedEvent;
+pub use exec_events::ItemStartedEvent;
+pub use exec_events::ItemUpdatedEvent;
+pub use exec_events::McpToolCallItem;
+pub use exec_events::McpToolCallItemError;
+pub use exec_events::McpToolCallItemResult;
+pub use exec_events::McpToolCallStatus;
+pub use exec_events::PatchApplyStatus;
+pub use exec_events::PatchChangeKind;
+pub use exec_events::ReasoningItem;
+pub use exec_events::ThreadErrorEvent;
+pub use exec_events::ThreadEvent;
+pub use exec_events::ThreadItem as ExecThreadItem;
+pub use exec_events::ThreadItemDetails;
+pub use exec_events::ThreadStartedEvent;
+pub use exec_events::TodoItem;
+pub use exec_events::TodoListItem;
+pub use exec_events::TurnCompletedEvent;
+pub use exec_events::TurnFailedEvent;
+pub use exec_events::TurnStartedEvent;
+pub use exec_events::Usage;
+pub use exec_events::WebSearchItem;
 use nez_app_server_client::DEFAULT_IN_PROCESS_CHANNEL_CAPACITY;
 use nez_app_server_client::EnvironmentManager;
 use nez_app_server_client::ExecServerRuntimeOptions;
@@ -112,43 +149,6 @@ use nez_utils_oss::get_default_model_for_oss_provider;
 use nez_worktree::CreateWorktree;
 use nez_worktree::WorktreeManager;
 use nez_worktree::WorktreeSettings;
-use event_processor_with_human_output::EventProcessorWithHumanOutput;
-pub use event_processor_with_jsonl_output::NezStatus;
-pub use event_processor_with_jsonl_output::CollectedThreadEvents;
-pub use event_processor_with_jsonl_output::EventProcessorWithJsonOutput;
-pub use exec_events::AgentMessageItem;
-pub use exec_events::CollabAgentState;
-pub use exec_events::CollabAgentStatus;
-pub use exec_events::CollabTool;
-pub use exec_events::CollabToolCallItem;
-pub use exec_events::CollabToolCallStatus;
-pub use exec_events::CommandExecutionItem;
-pub use exec_events::CommandExecutionStatus;
-pub use exec_events::ErrorItem;
-pub use exec_events::FileChangeItem;
-pub use exec_events::FileUpdateChange;
-pub use exec_events::ItemCompletedEvent;
-pub use exec_events::ItemStartedEvent;
-pub use exec_events::ItemUpdatedEvent;
-pub use exec_events::McpToolCallItem;
-pub use exec_events::McpToolCallItemError;
-pub use exec_events::McpToolCallItemResult;
-pub use exec_events::McpToolCallStatus;
-pub use exec_events::PatchApplyStatus;
-pub use exec_events::PatchChangeKind;
-pub use exec_events::ReasoningItem;
-pub use exec_events::ThreadErrorEvent;
-pub use exec_events::ThreadEvent;
-pub use exec_events::ThreadItem as ExecThreadItem;
-pub use exec_events::ThreadItemDetails;
-pub use exec_events::ThreadStartedEvent;
-pub use exec_events::TodoItem;
-pub use exec_events::TodoListItem;
-pub use exec_events::TurnCompletedEvent;
-pub use exec_events::TurnFailedEvent;
-pub use exec_events::TurnStartedEvent;
-pub use exec_events::Usage;
-pub use exec_events::WebSearchItem;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::future::Future;
@@ -1515,9 +1515,7 @@ fn sandbox_mode_from_permission_profile(
     cwd: &Path,
 ) -> Option<nez_app_server_protocol::SandboxMode> {
     match permission_profile {
-        PermissionProfile::Disabled => {
-            Some(nez_app_server_protocol::SandboxMode::DangerFullAccess)
-        }
+        PermissionProfile::Disabled => Some(nez_app_server_protocol::SandboxMode::DangerFullAccess),
         PermissionProfile::External { .. } => None,
         PermissionProfile::Managed { .. } => {
             let file_system_policy = permission_profile.file_system_sandbox_policy();
@@ -1828,8 +1826,7 @@ async fn parse_latest_turn_context_cwd(path: &Path) -> Option<PathBuf> {
     let path = path.to_path_buf();
     let (stop, keep_running) = tokio::sync::oneshot::channel::<()>();
     let result = tokio::task::spawn_blocking(move || {
-        let reader =
-            nez_rollout::open_rollout_seekable_reader(&path, || stop.is_closed()).ok()?;
+        let reader = nez_rollout::open_rollout_seekable_reader(&path, || stop.is_closed()).ok()?;
         let mut scanner = nez_rollout::ReverseJsonlScanner::new(reader).ok()?;
         while let Some(outcome) = scanner.scan_next_rollout_line().ok()? {
             if let nez_rollout::ScanOutcome::Parsed(RolloutLine {

@@ -4,6 +4,10 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use anyhow::Result;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::environment_config_for_selection;
+use core_test_support::test_nez::test_nez;
 use nez_core::StartThreadOptions;
 use nez_core::config::Config;
 use nez_extension_api::ExtensionFuture;
@@ -18,10 +22,6 @@ use nez_protocol::capabilities::SelectedCapabilityRoot;
 use nez_protocol::protocol::EnvironmentConfigState;
 use nez_protocol::protocol::TurnEnvironmentRequest;
 use nez_protocol::protocol::TurnEnvironmentSelection;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::environment_config_for_selection;
-use core_test_support::test_nez::test_nez;
 use pretty_assertions::assert_eq;
 
 #[derive(Default)]

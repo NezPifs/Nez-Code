@@ -1,5 +1,12 @@
 #![cfg(not(target_os = "windows"))]
 
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::TurnStartOptions;
 use nez_protocol::config_types::CollaborationMode;
@@ -10,13 +17,6 @@ use nez_protocol::protocol::AskForApproval;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use responses::ev_assistant_message;
 use responses::ev_completed;
@@ -76,33 +76,32 @@ async fn nez_returns_json_result(model: String) -> anyhow::Result<()> {
         turn_permission_fields(PermissionProfile::Disabled, cwd.as_path());
 
     // 1) Normal user input – should hit server once.
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello world".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
-            })
-            .on_start(TurnStartOptions {
-                final_output_json_schema: Some(serde_json::from_str(SCHEMA)?),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello world".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        })
+        .on_start(TurnStartOptions {
+            final_output_json_schema: Some(serde_json::from_str(SCHEMA)?),
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let message = wait_for_event(&nez, |ev| matches!(ev, EventMsg::AgentMessage(_))).await;
     if let EventMsg::AgentMessage(message) = message {

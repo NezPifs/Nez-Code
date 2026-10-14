@@ -46,8 +46,8 @@ pub use parser::parse_skill_frontmatter_metadata;
 pub use selection::ExplicitSkillLookup;
 pub use selection::collect_explicit_skill_mentions;
 
-use nez_utils_absolute_path::AbsolutePathBuf;
 use include_dir::Dir;
+use nez_utils_absolute_path::AbsolutePathBuf;
 use std::collections::hash_map::DefaultHasher;
 use std::fs;
 use std::hash::Hash;
@@ -64,9 +64,7 @@ const SYSTEM_SKILLS_MARKER_SALT: &str = "v1";
 
 /// Returns the on-disk cache location for embedded system skills from an absolute NEZ_HOME.
 pub fn system_cache_root_dir(nez_home: &AbsolutePathBuf) -> AbsolutePathBuf {
-    nez_home
-        .join(SKILLS_DIR_NAME)
-        .join(SYSTEM_SKILLS_DIR_NAME)
+    nez_home.join(SKILLS_DIR_NAME).join(SYSTEM_SKILLS_DIR_NAME)
 }
 
 /// Installs embedded system skills into `NEZ_HOME/skills/.system`.

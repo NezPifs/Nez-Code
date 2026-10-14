@@ -1,3 +1,5 @@
+use http::HeaderMap;
+use http::HeaderValue;
 use nez_api::SearchClient;
 use nez_api::SearchCommands;
 use nez_api::SearchQuery;
@@ -30,8 +32,6 @@ use nez_tools::ResponsesApiNamespace;
 use nez_tools::ResponsesApiNamespaceTool;
 use nez_tools::ToolExposure;
 use nez_tools::default_namespace_description;
-use http::HeaderMap;
-use http::HeaderValue;
 use url::Url;
 
 use crate::history::recent_input;

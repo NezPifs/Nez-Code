@@ -19,12 +19,12 @@ use super::parse_keybinding;
 use super::runtime_action_bindings;
 use crate::key_hint::KeyBinding;
 use crate::key_hint::ctrl;
-use nez_config::types::KeybindingsSpec;
-use nez_config::types::TuiKeymap;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
+use nez_config::types::KeybindingsSpec;
+use nez_config::types::TuiKeymap;
 use std::time::Duration;
 use tokio::time::Instant;
 

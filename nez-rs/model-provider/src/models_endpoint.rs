@@ -5,6 +5,7 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 
+use http::HeaderMap;
 use nez_api::AgentIdentityTelemetry;
 use nez_api::ModelsClient;
 use nez_api::RequestTelemetry;
@@ -18,8 +19,8 @@ use nez_http_client::ClientRouteClass;
 use nez_http_client::HttpClientFactory;
 use nez_login::AuthEnvTelemetry;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::GatewayAuthManager;
+use nez_login::NezAuth;
 use nez_login::collect_auth_env_telemetry;
 use nez_login::default_client::ClientRedirectPolicy;
 use nez_login::default_client::create_client_for_route_async;
@@ -33,7 +34,6 @@ use nez_protocol::error::NezErr;
 use nez_protocol::error::Result as CoreResult;
 use nez_response_debug_context::extract_response_debug_context;
 use nez_response_debug_context::telemetry_transport_error_message;
-use http::HeaderMap;
 use tokio::time::timeout;
 
 use crate::auth::ResolvedProviderAuth;
@@ -94,15 +94,14 @@ impl OpenAiModelsEndpoint {
         http_client_factory: HttpClientFactory,
     ) -> CoreResult<ModelsEndpointResponse> {
         let auth = self.auth().await;
-        let metric_auth_mode = if self.has_provider_api_key()
-            || auth.as_ref().is_some_and(NezAuth::is_api_key_auth)
-        {
-            "api_key"
-        } else if auth.is_some() {
-            "chatgpt"
-        } else {
-            "none"
-        };
+        let metric_auth_mode =
+            if self.has_provider_api_key() || auth.as_ref().is_some_and(NezAuth::is_api_key_auth) {
+                "api_key"
+            } else if auth.is_some() {
+                "chatgpt"
+            } else {
+                "none"
+            };
         let _timer = nez_otel::start_global_timer(
             "nez.remote_models.fetch_update.duration_ms",
             &[("auth_mode", metric_auth_mode)],
@@ -519,10 +518,7 @@ mod tests {
 
     #[tokio::test]
     async fn provider_api_key_without_endpoint_overrides_uses_nez_backend() {
-        for auth in [
-            None,
-            Some(NezAuth::create_dummy_chatgpt_auth_for_testing()),
-        ] {
+        for auth in [None, Some(NezAuth::create_dummy_chatgpt_auth_for_testing())] {
             let capture = Arc::new(CaptureModelsUrl(Mutex::new(/*t*/ None)));
             let auth_manager = auth.map(AuthManager::from_auth_for_testing);
             let endpoint = Arc::new(OpenAiModelsEndpoint {

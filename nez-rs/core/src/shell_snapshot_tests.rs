@@ -9,6 +9,8 @@ use crate::tools::runtimes::RuntimePathPrepends;
 use crate::tools::runtimes::maybe_wrap_shell_lc_with_snapshot;
 #[cfg(unix)]
 use crate::tools::runtimes::prepare_brokered_shell_snapshot_env;
+use core_test_support::PathBufExt;
+use core_test_support::PathExt;
 #[cfg(unix)]
 use nez_network_proxy::CredentialProviderConfig;
 #[cfg(unix)]
@@ -19,8 +21,6 @@ use nez_protocol::config_types::EnvironmentVariablePattern;
 use nez_protocol::models::PermissionProfile;
 #[cfg(unix)]
 use nez_protocol::sandbox::SandboxOverride;
-use core_test_support::PathBufExt;
-use core_test_support::PathExt;
 use pretty_assertions::assert_eq;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
@@ -1914,11 +1914,7 @@ async fn windows_powershell_snapshot_includes_sections() -> Result<()> {
 }
 
 async fn write_rollout_stub(nez_home: &Path, session_id: ThreadId) -> Result<PathBuf> {
-    let dir = nez_home
-        .join("sessions")
-        .join("2025")
-        .join("01")
-        .join("01");
+    let dir = nez_home.join("sessions").join("2025").join("01").join("01");
     fs::create_dir_all(&dir).await?;
     let path = dir.join(format!("rollout-2025-01-01T00-00-00-{session_id}.jsonl"));
     fs::write(&path, "").await?;

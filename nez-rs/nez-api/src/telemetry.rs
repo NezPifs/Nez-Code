@@ -1,4 +1,5 @@
 use crate::error::ApiError;
+use http::StatusCode;
 use nez_client::Request;
 use nez_client::RequestTelemetry;
 use nez_client::Response;
@@ -6,7 +7,6 @@ use nez_client::RetryPolicy;
 use nez_client::StreamResponse;
 use nez_client::TransportError;
 use nez_client::run_with_retry;
-use http::StatusCode;
 use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;

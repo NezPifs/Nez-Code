@@ -3,15 +3,6 @@
 //! adding bearer credentials.
 
 use anyhow::Result;
-use nez_login::AuthHeaders;
-use nez_login::NezAuth;
-use nez_protocol::protocol::NezResponseHandoffMode;
-use nez_protocol::protocol::ConversationStartParams;
-use nez_protocol::protocol::ConversationStartTransport;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::RealtimeConversationVersion;
-use nez_protocol::protocol::RealtimeOutputModality;
 use core_test_support::responses::start_mock_server;
 use core_test_support::responses::start_websocket_server;
 use core_test_support::skip_if_no_network;
@@ -20,6 +11,15 @@ use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
 use http::HeaderMap;
 use http::HeaderValue;
+use nez_login::AuthHeaders;
+use nez_login::NezAuth;
+use nez_protocol::protocol::ConversationStartParams;
+use nez_protocol::protocol::ConversationStartTransport;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezResponseHandoffMode;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::RealtimeConversationVersion;
+use nez_protocol::protocol::RealtimeOutputModality;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;

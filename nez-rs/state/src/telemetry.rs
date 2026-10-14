@@ -164,11 +164,7 @@ pub(crate) fn record_reclamation(
     telemetry.counter("nez.sqlite.reclamation.count", /*inc*/ 1, &tags);
     telemetry.record_duration("nez.sqlite.reclamation.duration_ms", duration, &tags);
     if let Ok(pass) = result {
-        telemetry.histogram(
-            "nez.sqlite.reclamation.pages",
-            i64::from(pass.pages),
-            &tags,
-        );
+        telemetry.histogram("nez.sqlite.reclamation.pages", i64::from(pass.pages), &tags);
     }
 }
 

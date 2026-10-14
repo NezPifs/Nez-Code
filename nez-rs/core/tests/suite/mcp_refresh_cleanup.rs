@@ -3,16 +3,16 @@ use std::fs;
 use std::sync::Arc;
 use std::time::Duration;
 
-use nez_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID;
-use nez_config::types::McpServerConfig;
-use nez_config::types::McpServerTransportConfig;
-use nez_protocol::protocol::Op;
 use core_test_support::process::wait_for_pid_file;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::stdio_server_bin;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_mcp_server;
+use nez_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID;
+use nez_config::types::McpServerConfig;
+use nez_config::types::McpServerTransportConfig;
+use nez_protocol::protocol::Op;
 
 struct McpServerProcess {
     pid: String,
@@ -187,17 +187,16 @@ async fn refresh_keeps_superseded_mcp_server_alive_for_in_flight_calls() -> anyh
         let nez = Arc::clone(&fixture.nez);
         let barrier = barrier.clone();
         async move {
-            nez
-                .call_mcp_tool(
-                    "refresh_cleanup",
-                    "sync",
-                    Some(serde_json::json!({
-                        "barrier": barrier,
-                        "sleep_after_ms": 300_000
-                    })),
-                    /*meta*/ None,
-                )
-                .await
+            nez.call_mcp_tool(
+                "refresh_cleanup",
+                "sync",
+                Some(serde_json::json!({
+                    "barrier": barrier,
+                    "sleep_after_ms": 300_000
+                })),
+                /*meta*/ None,
+            )
+            .await
         }
     });
     fixture

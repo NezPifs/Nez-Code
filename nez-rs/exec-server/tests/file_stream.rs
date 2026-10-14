@@ -3,6 +3,7 @@ mod common;
 #[cfg(unix)]
 use anyhow::Context;
 use anyhow::Result;
+use futures::TryStreamExt;
 use nez_exec_server::Environment;
 use nez_exec_server::ExecServerClient;
 use nez_exec_server::ExecServerError;
@@ -18,7 +19,6 @@ use nez_exec_server::RemoteExecServerConnectArgs;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
 use nez_utils_path_uri::PathUri;
-use futures::TryStreamExt;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 #[cfg(any(unix, windows))]

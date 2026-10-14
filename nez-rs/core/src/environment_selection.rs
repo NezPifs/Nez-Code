@@ -8,6 +8,9 @@ use std::sync::OnceLock;
 use std::sync::PoisonError;
 
 use async_channel::Sender;
+use futures::FutureExt;
+use futures::future::BoxFuture;
+use futures::future::Shared;
 use nez_exec_server::Environment;
 use nez_exec_server::EnvironmentConnectionState;
 use nez_exec_server::EnvironmentInfo;
@@ -31,9 +34,6 @@ use nez_protocol::protocol::TurnEnvironmentSelection;
 use nez_skills_extension::EnvironmentSkillRequirements;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use futures::FutureExt;
-use futures::future::BoxFuture;
-use futures::future::Shared;
 use tokio::sync::watch;
 use tokio_util::task::AbortOnDropHandle;
 use tracing::Instrument;
@@ -1303,6 +1303,8 @@ mod tests {
     use std::time::Duration;
 
     use crate::config::PermissionProfileSnapshot;
+    use futures::SinkExt;
+    use futures::StreamExt;
     use nez_exec_server::Environment;
     use nez_exec_server::ExecServerRuntimeOptions;
     use nez_exec_server::LOCAL_ENVIRONMENT_ID;
@@ -1319,8 +1321,6 @@ mod tests {
     use nez_protocol::sandbox::SandboxType;
     use nez_utils_absolute_path::AbsolutePathBuf;
     use nez_utils_path_uri::PathUri;
-    use futures::SinkExt;
-    use futures::StreamExt;
     use pretty_assertions::assert_eq;
     use serde_json::Value;
     use tokio::net::TcpListener;

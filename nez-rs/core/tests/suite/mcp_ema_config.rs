@@ -3,6 +3,10 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event_match;
 use nez_config::LoaderOverrides;
 use nez_config::McpServerAuth;
 use nez_config::test_support::CloudConfigBundleFixture;
@@ -12,10 +16,6 @@ use nez_core::config::set_project_trust_level;
 use nez_login::NezAuth;
 use nez_protocol::config_types::TrustLevel;
 use nez_protocol::protocol::EventMsg;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use tempfile::tempdir;
 use test_case::test_case;

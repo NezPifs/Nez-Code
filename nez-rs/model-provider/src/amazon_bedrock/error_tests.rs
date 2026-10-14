@@ -1,6 +1,9 @@
 use std::num::NonZeroU64;
 use std::time::Duration;
 
+use http::HeaderMap;
+use http::HeaderValue;
+use http::StatusCode;
 use nez_api::ApiError;
 use nez_api::TransportError;
 use nez_http_client::RetryAfter;
@@ -8,9 +11,6 @@ use nez_model_provider_info::AwsCredentialExportConfig;
 use nez_model_provider_info::ModelProviderAwsAuthInfo;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_protocol::error::NezErrorDetails;
-use http::HeaderMap;
-use http::HeaderValue;
-use http::StatusCode;
 use pretty_assertions::assert_eq;
 
 use super::AmazonBedrockModelProvider;

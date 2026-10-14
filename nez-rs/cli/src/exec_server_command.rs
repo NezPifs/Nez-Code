@@ -174,12 +174,10 @@ impl ExecServerCommand {
             .nez_self_exe
             .clone()
             .ok_or_else(|| anyhow::anyhow!("Nez executable path is not configured"))?;
-        let mut runtime_paths = ExecServerRuntimeOptions::new(
-            nez_self_exe,
-            arg0_paths.nez_linux_sandbox_exe.clone(),
-        )?
-        .with_linux_sandbox_pid_namespace(self.linux_sandbox_pid_namespace)
-        .with_proxy_private_ips_via_upstream(self.proxy_private_ips_via_upstream);
+        let mut runtime_paths =
+            ExecServerRuntimeOptions::new(nez_self_exe, arg0_paths.nez_linux_sandbox_exe.clone())?
+                .with_linux_sandbox_pid_namespace(self.linux_sandbox_pid_namespace)
+                .with_proxy_private_ips_via_upstream(self.proxy_private_ips_via_upstream);
         // Config loading below owns error handling (non-strict stdio can proceed
         // without config). Never retain other startup flags in the executor.
         if let Ok(overrides) = root_config_overrides.parse_overrides() {
@@ -291,14 +289,13 @@ impl ExecServerCommand {
             };
             let (_otel, telemetry) = exec_server_telemetry::init(config.as_ref());
             #[cfg(target_os = "macos")]
-            let runtime_paths = runtime_paths.with_allowed_symlinked_nez_home(
-                config.as_ref().and_then(|config| {
+            let runtime_paths =
+                runtime_paths.with_allowed_symlinked_nez_home(config.as_ref().and_then(|config| {
                     nez_config::allowed_symlinked_nez_home(
                         &config.config_layer_stack,
                         &config.nez_home,
                     )
-                }),
-            );
+                }));
             let http_client_factory = config
                 .as_ref()
                 .map(Config::http_client_factory)

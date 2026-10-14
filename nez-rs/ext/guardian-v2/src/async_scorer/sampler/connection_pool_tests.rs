@@ -7,6 +7,8 @@ use super::super::tests::sample_request;
 use super::super::tests::sampler_config;
 use super::*;
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
 use nez_login::AuthManager;
 use nez_login::WorkspaceRouting;
 use nez_login::WorkspaceRoutingRequest;
@@ -14,8 +16,6 @@ use nez_login::WorkspaceRoutingResolver;
 use nez_model_provider::ModelProviderFuture;
 use nez_model_provider::create_model_provider;
 use nez_model_provider_info::ModelProviderInfo;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
 use pretty_assertions::assert_eq;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
@@ -496,8 +496,7 @@ impl WorkspaceRoutingResolver for RoutingPolicy {
 #[tokio::test]
 async fn http_cache_preserves_no_constraint_redirect_policy_and_configured_headers() -> Result<()> {
     let base_url = "https://localhost:9/backend-api/nez".to_owned();
-    let auth =
-        AuthManager::from_auth_for_testing(NezAuth::create_dummy_chatgpt_auth_for_testing());
+    let auth = AuthManager::from_auth_for_testing(NezAuth::create_dummy_chatgpt_auth_for_testing());
     let resolver = Arc::new(RoutingPolicy(Mutex::new(None)));
     let routing_owner: Arc<dyn WorkspaceRoutingResolver> = resolver.clone();
     auth.set_workspace_routing_resolver(Arc::downgrade(&routing_owner));

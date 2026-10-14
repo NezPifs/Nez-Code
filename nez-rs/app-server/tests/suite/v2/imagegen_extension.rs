@@ -7,6 +7,8 @@ use app_test_support::ChatGptAuthFixture;
 use app_test_support::MockResponsesConfig;
 use app_test_support::TestAppServer;
 use app_test_support::write_chatgpt_auth;
+use core_test_support::responses;
+use core_test_support::skip_if_remote;
 use nez_app_server_protocol::ImageGenerationFailure;
 use nez_app_server_protocol::ImageGenerationItem;
 use nez_app_server_protocol::ImageReference as V2ImageReference;
@@ -23,8 +25,6 @@ use nez_app_server_protocol::TurnStartResponse;
 use nez_app_server_protocol::UserInput as V2UserInput;
 use nez_config::types::AuthCredentialsStoreMode;
 use nez_features::Feature;
-use core_test_support::responses;
-use core_test_support::skip_if_remote;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tempfile::TempDir;
@@ -214,12 +214,9 @@ async fn standalone_image_generation_returns_saved_path_hint_to_model(
         "standalone image generation should not emit the legacy developer-message hint"
     );
 
-    let event = wait_for_analytics_event(
-        &server,
-        DEFAULT_READ_TIMEOUT,
-        "nez_image_generation_event",
-    )
-    .await?;
+    let event =
+        wait_for_analytics_event(&server, DEFAULT_READ_TIMEOUT, "nez_image_generation_event")
+            .await?;
     assert_eq!(
         event["event_params"]["imagegen_request_id"],
         json!("req-imagegen-123")
@@ -568,12 +565,9 @@ async fn standalone_image_generation_failure_emits_terminal_item() -> Result<()>
         )
     );
 
-    let event = wait_for_analytics_event(
-        &server,
-        DEFAULT_READ_TIMEOUT,
-        "nez_image_generation_event",
-    )
-    .await?;
+    let event =
+        wait_for_analytics_event(&server, DEFAULT_READ_TIMEOUT, "nez_image_generation_event")
+            .await?;
     assert_eq!(
         event["event_params"]["imagegen_request_id"],
         json!("req-imagegen-failed-123")

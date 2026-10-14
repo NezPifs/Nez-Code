@@ -5,6 +5,8 @@ use app_test_support::TestAppServer;
 use app_test_support::create_final_assistant_message_sse_response;
 use app_test_support::create_request_permissions_sse_response;
 use app_test_support::write_models_cache_with_models;
+use core_test_support::responses;
+use core_test_support::skip_if_wine_exec;
 use nez_app_server_protocol::AdditionalPermissionProfile;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::CommandExecutionApprovalDecision;
@@ -33,8 +35,6 @@ use nez_protocol::request_permissions::RequestPermissionProfile;
 use nez_protocol::request_permissions::RequestPermissionsResponse;
 use nez_utils_path_uri::LegacyAppPathString;
 use nez_utils_path_uri::PathUri;
-use core_test_support::responses;
-use core_test_support::skip_if_wine_exec;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;
@@ -67,8 +67,7 @@ async fn code_mode_uses_permissions_approved_in_the_same_cell(
         .enable_feature(Feature::CodeModeOnly)
         .enable_feature(Feature::GuardianApproval)
         .write(nez_home.path())?;
-    write_models_cache_with_models(nez_home.path(), vec![model_info_from_slug("gpt-5.4")])
-        .await?;
+    write_models_cache_with_models(nez_home.path(), vec![model_info_from_slug("gpt-5.4")]).await?;
     let mut app = TestAppServer::builder()
         .with_nez_home(nez_home.path())
         .build_initialized()

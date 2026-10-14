@@ -1,7 +1,7 @@
 //! Request-scoped interception of model response streams.
+use futures::stream::BoxStream;
 pub use nez_api::ApiError as ModelResponseError;
 pub use nez_api::ResponseEvent;
-use futures::stream::BoxStream;
 use std::collections::HashMap;
 
 /// Model response events owned by an interceptor or its downstream consumer.

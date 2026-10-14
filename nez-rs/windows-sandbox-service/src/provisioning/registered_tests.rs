@@ -158,9 +158,7 @@ fn native_successful_sibling_validation() -> Result<()> {
                                 if query_failed {
                                     Err(anyhow!("fixture PackageManager query failed"))
                                 } else {
-                                    Ok(vec![
-                                        "Nez.SandboxFixture_1.0.0.0_x64__8wekyb3d8bbwe".into(),
-                                    ])
+                                    Ok(vec!["Nez.SandboxFixture_1.0.0.0_x64__8wekyb3d8bbwe".into()])
                                 }
                             } else {
                                 registered_packages(sid, family)

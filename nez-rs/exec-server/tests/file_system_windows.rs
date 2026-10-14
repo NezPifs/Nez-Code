@@ -16,6 +16,7 @@ use std::time::Duration;
 
 use anyhow::Context as _;
 use anyhow::Result;
+use futures::TryStreamExt;
 use nez_exec_server::CreateDirectoryOptions;
 use nez_exec_server::FileSystemSandboxContext;
 use nez_exec_server::GetMetadataOptions;
@@ -34,7 +35,6 @@ use nez_protocol::protocol::SandboxPolicy;
 use nez_sandboxing::SandboxType;
 use nez_utils_path_uri::PathUri;
 use nez_windows_sandbox_test_support::WindowsSandboxAccountTestGuard;
-use futures::TryStreamExt;
 use pretty_assertions::assert_eq;
 use test_case::test_case;
 use tokio::net::windows::named_pipe::ServerOptions;

@@ -50,10 +50,7 @@ pub(crate) const BUILT_IN_DANGER_FULL_ACCESS_PROFILE: &str =
 
 /// Keep the active apply_patch aliases readable without granting access to other
 /// sessions or the rest of NEZ_HOME. Preserve the alias directory, not its target.
-pub(super) fn active_arg0_helper_dir(
-    nez_home: &Path,
-    path_env: &OsStr,
-) -> Option<AbsolutePathBuf> {
+pub(super) fn active_arg0_helper_dir(nez_home: &Path, path_env: &OsStr) -> Option<AbsolutePathBuf> {
     let arg0_root = nez_home
         .join("tmp")
         .join(format!("arg0-{}", std::env::consts::OS));

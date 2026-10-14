@@ -28,8 +28,8 @@ use serde::Serialize;
 use std::time::Duration;
 
 use crate::AgentThreadId;
-use crate::NezTurnId;
 use crate::ExecutionStatus;
+use crate::NezTurnId;
 use crate::RawTraceEventPayload;
 
 pub(crate) struct NezTurnTraceEvent {

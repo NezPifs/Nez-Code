@@ -121,11 +121,9 @@ impl TracingHarness {
         let server = create_mock_responses_server_repeating_assistant("Done").await;
         let nez_home = TempDir::new()?;
         let config = Arc::new(build_test_config(nez_home.path(), &server.uri()).await?);
-        let auth_manager = AuthManager::shared_from_config(
-            config.as_ref(),
-            /*enable_nez_api_key_env*/ false,
-        )
-        .await?;
+        let auth_manager =
+            AuthManager::shared_from_config(config.as_ref(), /*enable_nez_api_key_env*/ false)
+                .await?;
         let (processor, outgoing_rx) = build_test_processor(config, auth_manager).await;
         let tracing = init_test_tracing();
         tracing.exporter.reset();

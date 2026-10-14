@@ -1,11 +1,11 @@
 //! Exercises thread cleanup when startup or child creation outlives the client connection.
 
-use nez_app_server_protocol::TurnStartResponse;
-use nez_features::Feature;
-use nez_protocol::protocol::AgentStatus;
 use core_test_support::responses;
 use core_test_support::streaming_sse::StreamingSseChunk;
 use core_test_support::streaming_sse::start_streaming_sse_server;
+use nez_app_server_protocol::TurnStartResponse;
+use nez_features::Feature;
+use nez_protocol::protocol::AgentStatus;
 use pretty_assertions::assert_eq;
 use test_case::test_case;
 use tokio::sync::oneshot;
@@ -23,6 +23,9 @@ use anyhow::Context;
 use anyhow::Result;
 use app_test_support::MockResponsesConfig;
 use app_test_support::create_mock_responses_server_sequence_unchecked;
+use core_test_support::fs_wait::wait_for_path_exists;
+use core_test_support::process::wait_for_pid_file;
+use core_test_support::stdio_server_bin;
 use nez_app_server_protocol::InitializeResponse;
 use nez_app_server_protocol::RequestId;
 use nez_app_server_protocol::ServerNotification;
@@ -31,9 +34,6 @@ use nez_app_server_protocol::ThreadLoadedListResponse;
 use nez_app_server_protocol::ThreadStartResponse;
 use nez_core::config::ConfigBuilder;
 use nez_login::AuthManager;
-use core_test_support::fs_wait::wait_for_path_exists;
-use core_test_support::process::wait_for_pid_file;
-use core_test_support::stdio_server_bin;
 use serde_json::json;
 use std::sync::Arc;
 use std::time::Duration;
@@ -71,8 +71,7 @@ MCP_TEST_PID_FILE = {}
             .await?,
     );
     let auth =
-        AuthManager::shared_from_config(config.as_ref(), /*enable_nez_api_key_env*/ false)
-            .await?;
+        AuthManager::shared_from_config(config.as_ref(), /*enable_nez_api_key_env*/ false).await?;
     let (processor, mut outgoing) = build_test_processor(config, auth).await;
     let owner_id = ConnectionId(1);
     let owner = Arc::new(ConnectionSessionState::new(ConnectionOrigin::WebSocket));
@@ -309,8 +308,7 @@ async fn disconnected_v2_child_lifecycle(unload_delay_secs: u64, ephemeral: bool
             .await?,
     );
     let auth =
-        AuthManager::shared_from_config(config.as_ref(), /*enable_nez_api_key_env*/ false)
-            .await?;
+        AuthManager::shared_from_config(config.as_ref(), /*enable_nez_api_key_env*/ false).await?;
     let (processor, mut outgoing) = build_test_processor(config, auth).await;
     let mut created = processor.thread_created_receiver();
     let owner_id = ConnectionId(1);

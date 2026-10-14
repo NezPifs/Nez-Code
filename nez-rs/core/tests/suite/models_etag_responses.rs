@@ -1,22 +1,11 @@
 #![cfg(not(target_os = "windows"))]
 
-use nez_core::TurnInputRequest;
 use core_test_support::test_nez::local_requests;
+use nez_core::TurnInputRequest;
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use nez_features::Feature;
-use nez_login::NezAuth;
-use nez_protocol::config_types::CollaborationMode;
-use nez_protocol::config_types::ModeKind;
-use nez_protocol::config_types::Settings;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::openai_models::ModelsResponse;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::user_input::UserInput;
 use core_test_support::TempDirExt;
 use core_test_support::responses;
 use core_test_support::responses::ev_assistant_message;
@@ -29,6 +18,17 @@ use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::test_nez::turn_permission_fields;
 use core_test_support::wait_for_event_with_timeout;
+use nez_features::Feature;
+use nez_login::NezAuth;
+use nez_protocol::config_types::CollaborationMode;
+use nez_protocol::config_types::ModeKind;
+use nez_protocol::config_types::Settings;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::openai_models::ModelsResponse;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use wiremock::MockServer;
 
@@ -109,29 +109,28 @@ async fn refresh_models_on_models_etag_mismatch_and_avoid_duplicate_models_fetch
     )
     .await;
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please run a tool".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please run a tool".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let _ = wait_for_event_with_timeout(
         &nez,

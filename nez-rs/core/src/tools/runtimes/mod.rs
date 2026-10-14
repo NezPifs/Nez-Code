@@ -17,10 +17,10 @@ use nez_core_plugins::PLUGIN_METRICS_OUTPUT_ENV_VAR;
 use nez_file_system::WindowsSandboxSelection;
 #[cfg(unix)]
 use nez_install_context::InstallContext;
-#[cfg(target_os = "macos")]
-use nez_network_proxy::NEZ_PROXY_GIT_SSH_COMMAND_MARKER;
 use nez_network_proxy::CREDENTIAL_BROKER_ACTIVE_ENV_KEY;
 use nez_network_proxy::CUSTOM_CA_ENV_KEYS;
+#[cfg(target_os = "macos")]
+use nez_network_proxy::NEZ_PROXY_GIT_SSH_COMMAND_MARKER;
 use nez_network_proxy::PROXY_ACTIVE_ENV_KEY;
 use nez_network_proxy::PROXY_ENV_KEYS;
 #[cfg(target_os = "macos")]
@@ -322,8 +322,7 @@ pub(crate) fn maybe_wrap_shell_lc_with_snapshot(
         && command[0] == shell_path.as_ref()
         && matches!(session_shell.shell_type, ShellType::Bash | ShellType::Zsh);
     let original_shell_is_zsh = command_uses_session_zsh
-        || nez_shell_command::shell_detect::detect_shell_type(&command[0])
-            == Some(ShellType::Zsh);
+        || nez_shell_command::shell_detect::detect_shell_type(&command[0]) == Some(ShellType::Zsh);
     let brokered_zsh_flag = if flag == "-lc" { "-lfc" } else { "-fc" };
     let original_shell_flag = if brokered && original_shell_is_zsh {
         brokered_zsh_flag

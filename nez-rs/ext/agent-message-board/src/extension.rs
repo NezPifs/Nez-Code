@@ -7,6 +7,7 @@
 use crate::AgentMessageBoard;
 use crate::LocalBoardConnection;
 use crate::tools::message_board_tools_with_descriptions;
+use futures::future::BoxFuture;
 use nez_extension_api::ExtensionData;
 use nez_extension_api::ExtensionEventSink;
 use nez_extension_api::ExtensionFuture;
@@ -23,7 +24,6 @@ use nez_protocol::error::Result;
 use nez_protocol::openai_models::MultiAgentToolMessages;
 use nez_tools::ToolCall;
 use nez_tools::ToolExecutor;
-use futures::future::BoxFuture;
 use std::sync::Arc;
 
 type BoardFactory<C> = dyn for<'a> Fn(
@@ -52,14 +52,10 @@ impl<C: Sync> ThreadLifecycleContributor<C> for BoardExtension<C> {
     fn on_thread_start<'a>(&'a self, input: ThreadStartInput<'a, C>) -> ExtensionFuture<'a, ()> {
         Box::pin(async move {
             let result = async {
-                let tree =
-                    SessionId::from_string(input.session_store.level_id()).map_err(|_| {
-                        NezErr::InvalidRequest("invalid board session identity".into())
-                    })?;
-                let caller =
-                    ThreadId::from_string(input.thread_store.level_id()).map_err(|_| {
-                        NezErr::InvalidRequest("invalid board caller identity".into())
-                    })?;
+                let tree = SessionId::from_string(input.session_store.level_id())
+                    .map_err(|_| NezErr::InvalidRequest("invalid board session identity".into()))?;
+                let caller = ThreadId::from_string(input.thread_store.level_id())
+                    .map_err(|_| NezErr::InvalidRequest("invalid board caller identity".into()))?;
                 if let Some(board) = (self.open)(&input, tree, caller).await? {
                     let connection = input.thread_store.get::<LocalBoardConnection>();
                     let expected = connection

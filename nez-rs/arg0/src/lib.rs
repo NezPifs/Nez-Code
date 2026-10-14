@@ -513,9 +513,9 @@ mod tests {
     use super::run_main_with_arg0_guard;
     #[cfg(unix)]
     use anyhow::ensure;
-    use nez_install_context::NezPackageLayout;
     use nez_install_context::InstallContext;
     use nez_install_context::InstallMethod;
+    use nez_install_context::NezPackageLayout;
     use nez_utils_absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use std::fs;

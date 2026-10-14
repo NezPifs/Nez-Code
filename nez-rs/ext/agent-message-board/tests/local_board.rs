@@ -16,6 +16,7 @@ use std::sync::atomic::Ordering;
 
 use chrono::DateTime;
 use chrono::Utc;
+use futures::future::BoxFuture;
 use nez_agent_message_board_extension::*;
 use nez_protocol::AgentPath;
 use nez_protocol::SessionId;
@@ -23,7 +24,6 @@ use nez_protocol::ThreadId;
 use nez_protocol::error::NezErr;
 use nez_protocol::error::Result;
 use nez_state::SqliteConfig;
-use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 
 struct Host {

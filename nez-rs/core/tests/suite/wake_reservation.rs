@@ -5,6 +5,9 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
+use core_test_support::responses;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::config::Config;
 use nez_extension_api::ExtensionFuture;
@@ -29,9 +32,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::InterAgentCommunication;
 use nez_protocol::protocol::Op;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use tokio::sync::Notify;
 use tokio::sync::TryLockError;
@@ -158,28 +158,26 @@ async fn interrupt_during_wake_context_construction_does_not_start_turn() -> any
         .build_with_auto_env(&server)
         .await?;
     let nez = &test.nez;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "wait for the worker".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "wait for the worker".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     sleeping_turn.stop.entered.notified().await;
 
     // Queue mail while the completed turn still owns the reservation, so its
     // completion starts the wake independently of the submission loop.
-    nez
-        .submit(Op::InterAgentCommunication {
-            communication: InterAgentCommunication::new(
-                AgentPath::try_from("/root/worker").expect("valid worker path"),
-                AgentPath::root(),
-                Vec::new(),
-                "worker completed".to_string(),
-                /*trigger_turn*/ false,
-            ),
-            start_options: Default::default(),
-        })
-        .await?;
+    nez.submit(Op::InterAgentCommunication {
+        communication: InterAgentCommunication::new(
+            AgentPath::try_from("/root/worker").expect("valid worker path"),
+            AgentPath::root(),
+            Vec::new(),
+            "worker completed".to_string(),
+            /*trigger_turn*/ false,
+        ),
+        start_options: Default::default(),
+    })
+    .await?;
     nez.submit(Op::RealtimeConversationListVoices).await?;
     wait_for_event(nez, |event| {
         matches!(event, EventMsg::RealtimeConversationListVoicesResponse(_))

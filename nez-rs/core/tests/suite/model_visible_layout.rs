@@ -1,11 +1,27 @@
+use core_test_support::test_nez::local_requests;
 use nez_protocol::protocol::TurnEnvironmentRequest;
 use nez_protocol::protocol::TurnEnvironmentRequests;
-use core_test_support::test_nez::local_requests;
 use std::fs;
 use std::sync::Arc;
 use std::sync::Mutex;
 
 use anyhow::Result;
+use core_test_support::PathBufExt;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::context_snapshot::SnapshotEntry;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
 use nez_config::types::Personality;
 use nez_core::TurnInputRequest;
 use nez_core::config::Config;
@@ -31,22 +47,6 @@ use nez_protocol::user_input::UserInput;
 use nez_skills_extension::SkillsExtensionConfig;
 use nez_skills_extension::install;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathBufExt;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::context_snapshot::SnapshotEntry;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 
@@ -507,12 +507,13 @@ async fn snapshot_model_visible_layout_resume_with_personality_change() -> Resul
     skip_if_no_network!(Ok(()));
 
     let server = start_mock_server().await;
-    let mut initial_builder = test_nez()
-        .with_extensions(skills_extensions())
-        .with_config(|config| {
-            config.update_plan_enabled = true;
-            config.model = Some("gpt-5.5".to_string());
-        });
+    let mut initial_builder =
+        test_nez()
+            .with_extensions(skills_extensions())
+            .with_config(|config| {
+                config.update_plan_enabled = true;
+                config.model = Some("gpt-5.5".to_string());
+            });
     let initial = initial_builder.build(&server).await?;
     let nez = Arc::clone(&initial.nez);
 
@@ -525,12 +526,11 @@ async fn snapshot_model_visible_layout_resume_with_personality_change() -> Resul
         ]),
     )
     .await;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "seed resume history".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "seed resume history".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     let initial_request = initial_mock.single_request();
 
@@ -615,12 +615,13 @@ async fn snapshot_model_visible_layout_resume_override_matches_rollout_model() -
     skip_if_no_network!(Ok(()));
 
     let server = start_mock_server().await;
-    let mut initial_builder = test_nez()
-        .with_extensions(skills_extensions())
-        .with_config(|config| {
-            config.update_plan_enabled = true;
-            config.model = Some("gpt-5.2".to_string());
-        });
+    let mut initial_builder =
+        test_nez()
+            .with_extensions(skills_extensions())
+            .with_config(|config| {
+                config.update_plan_enabled = true;
+                config.model = Some("gpt-5.2".to_string());
+            });
     let initial = initial_builder.build(&server).await?;
     let nez = Arc::clone(&initial.nez);
 
@@ -633,12 +634,11 @@ async fn snapshot_model_visible_layout_resume_override_matches_rollout_model() -
         ]),
     )
     .await;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "seed resume history".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "seed resume history".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     let initial_request = initial_mock.single_request();
 

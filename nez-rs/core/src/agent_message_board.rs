@@ -11,6 +11,7 @@ use crate::context::ContextualUserFragment;
 use crate::tools::MULTI_AGENT_V2_NAMESPACE_DESCRIPTION;
 use chrono::DateTime;
 use chrono::Utc;
+use futures::future::BoxFuture;
 use nez_agent_message_board_client::AccessToken;
 use nez_agent_message_board_client::RemoteAgentMessageBoard;
 use nez_agent_message_board_extension::AgentMessageBoard;
@@ -31,7 +32,6 @@ use nez_protocol::error::NezErr;
 use nez_protocol::error::NezErrorDetails;
 use nez_protocol::error::Result;
 use nez_protocol::protocol::InterAgentCommunication;
-use futures::future::BoxFuture;
 use std::sync::Arc;
 use std::sync::Weak;
 

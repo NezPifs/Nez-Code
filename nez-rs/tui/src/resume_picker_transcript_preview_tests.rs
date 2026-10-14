@@ -2,6 +2,7 @@ use super::*;
 use crate::legacy_core::config::ConfigBuilder;
 use app_test_support::create_mock_responses_server_sequence;
 use app_test_support::write_mock_responses_config_toml;
+use core_test_support::responses;
 use nez_app_server_client::AppServerEvent;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::ImageReference;
@@ -20,7 +21,6 @@ use nez_protocol::protocol::ThreadRolledBackEvent;
 use nez_protocol::protocol::UserMessageEvent;
 use nez_rollout::CompactedItem;
 use nez_rollout::RolloutLine;
-use core_test_support::responses;
 use pretty_assertions::assert_eq;
 use tempfile::tempdir;
 

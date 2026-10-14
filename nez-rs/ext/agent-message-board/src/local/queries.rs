@@ -31,10 +31,10 @@ use crate::ThreadQuery;
 use crate::ThreadSort;
 use crate::ThreadSummary;
 use caseless::default_case_fold_str;
+use futures::future::BoxFuture;
 use nez_protocol::SessionId;
 use nez_protocol::ThreadId;
 use nez_protocol::error::Result;
-use futures::future::BoxFuture;
 use sqlx::QueryBuilder;
 
 impl AgentMessageBoard for LocalAgentMessageBoard {

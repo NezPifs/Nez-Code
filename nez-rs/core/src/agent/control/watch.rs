@@ -4,11 +4,11 @@
 use super::LocalAgentControl;
 use crate::agent::api::AgentInfo;
 use crate::agent::types::LiveAgent;
-use nez_protocol::ThreadId;
-use nez_protocol::error::Result as NezResult;
 use futures::StreamExt;
 use futures::stream;
 use futures::stream::BoxStream;
+use nez_protocol::ThreadId;
+use nez_protocol::error::Result as NezResult;
 use std::sync::Arc;
 
 /// An initial runtime snapshot followed by coalesced status changes. The stream ends

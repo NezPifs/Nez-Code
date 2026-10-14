@@ -9,13 +9,13 @@ use super::start_control_socket_acceptor;
 use super::unix_socket::acquire_removable_app_server_startup_lock;
 #[cfg(unix)]
 use super::unix_socket::try_acquire_removable_app_server_startup_lock;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server_protocol::JSONRPCMessage;
 use nez_app_server_protocol::JSONRPCNotification;
 use nez_core::config::find_nez_home;
 use nez_uds::UnixStream;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use std::io::Result as IoResult;
 use std::path::Path;
@@ -413,11 +413,7 @@ async fn control_socket_file_is_private_after_bind() {
     let physical_path = std::fs::read_link(socket_path.as_path()).expect("rendezvous symlink");
     assert_eq!(
         physical_path.parent(),
-        Some(
-            nez_uds::shared_daemon_socket_directory()
-                .unwrap()
-                .as_path()
-        )
+        Some(nez_uds::shared_daemon_socket_directory().unwrap().as_path())
     );
     assert!(physical_path.with_extension("lock").exists());
 

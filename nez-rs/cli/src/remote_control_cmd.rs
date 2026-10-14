@@ -84,8 +84,7 @@ pub(crate) async fn run(
                 command.json,
                 "Starting app-server daemon with remote control enabled...",
             )?;
-            let daemon = match nez_app_server_daemon::start_with_features(&Default::default())
-                .await
+            let daemon = match nez_app_server_daemon::start_with_features(&Default::default()).await
             {
                 Ok(daemon) => daemon,
                 #[cfg(windows)]

@@ -4,14 +4,14 @@ use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
+use http::HeaderMap;
+use keyring::Error as KeyringError;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_config::types::OAuthCredentialsStoreMode;
 use nez_exec_server::RouteAwareHttpClient;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
 use nez_keyring_store::DefaultKeyringStore;
-use http::HeaderMap;
-use keyring::Error as KeyringError;
 use oauth2::AccessToken;
 use oauth2::RefreshToken;
 use oauth2::TokenResponse;

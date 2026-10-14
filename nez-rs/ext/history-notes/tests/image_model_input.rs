@@ -2,6 +2,9 @@
 
 use std::sync::Arc;
 
+use core_test_support::responses;
+use core_test_support::test_nez::test_nez;
+use http::HeaderMap;
 use nez_core::config::Config;
 use nez_core::config::TokenBudgetConfig;
 use nez_extension_api::ExtensionRegistryBuilder;
@@ -9,9 +12,6 @@ use nez_history_notes_extension::install;
 use nez_login::AuthHeaders;
 use nez_login::AuthManager;
 use nez_login::NezAuth;
-use core_test_support::responses;
-use core_test_support::test_nez::test_nez;
-use http::HeaderMap;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use wiremock::Mock;

@@ -6,6 +6,35 @@ use std::time::Duration;
 use std::time::Instant;
 
 use anyhow::Result;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::ev_tool_search_call;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::namespace_child_tool;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+#[cfg(unix)]
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_target_windows;
+use core_test_support::stdio_server_bin;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
 use nez_analytics::AnalyticsEventsClient;
 use nez_analytics::PluginMeasurementRow;
 use nez_analytics::PluginMeasurementsInput;
@@ -39,35 +68,6 @@ use nez_protocol::user_input::UserInput;
 use nez_skills_extension::HostSkillsLoadInput;
 use nez_skills_extension::SkillsExtensionConfig;
 use nez_skills_extension::install;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::ev_tool_search_call;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::namespace_child_tool;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-#[cfg(unix)]
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_target_windows;
-use core_test_support::stdio_server_bin;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use test_case::test_case;
@@ -525,29 +525,28 @@ async fn persisted_remote_plugin_command_attribution_flows_through_turn_context(
     let session_model = test_nez.session_configured.model.clone();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::read_only(), cwd.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![nez_protocol::user_input::UserInput::Text {
-                text: "run the remote plugin script".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![nez_protocol::user_input::UserInput::Text {
+            text: "run the remote plugin script".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let begin = wait_for_event_match(&nez, |event| match event {
         EventMsg::ExecCommandBegin(event) if event.call_id == call_id => Some(event.clone()),
@@ -1064,10 +1063,7 @@ async fn agent_plugin_skills_use_shared_catalog_and_direct_child_discovery() -> 
         )
     })
     .await;
-    wait_for_event(&test_nez.nez, |ev| {
-        matches!(ev, EventMsg::TurnComplete(_))
-    })
-    .await;
+    wait_for_event(&test_nez.nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let developer_text = resp_mock
         .single_request()
@@ -1214,10 +1210,7 @@ async fn legacy_plugin_skill_prompt_remains_complete() -> Result<()> {
             path: skill_path,
         }]))
         .await?;
-    wait_for_event(&test_nez.nez, |ev| {
-        matches!(ev, EventMsg::TurnComplete(_))
-    })
-    .await;
+    wait_for_event(&test_nez.nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let user_text = resp_mock
         .single_request()
@@ -1397,9 +1390,7 @@ async fn agent_plugin_root_mcp_stdio_tool_round_trip_expands_reserved_paths_and_
     .await;
     let nez_home = Arc::new(TempDir::new()?);
     write_agent_plugin_skill_plugin(nez_home.as_ref());
-    let plugin_root = nez_home
-        .path()
-        .join("plugins/cache/test/acme.tools/local");
+    let plugin_root = nez_home.path().join("plugins/cache/test/acme.tools/local");
     let stdio_server = match stdio_server_bin() {
         Ok(path) => path,
         Err(err) => {
@@ -1786,19 +1777,17 @@ async fn explicit_plugin_mentions_use_apps_for_chatgpt_dual_surface_plugins(
     )?;
 
     let test_nez =
-        build_apps_enabled_plugin_test_nez(&server, nez_home, apps_server.chatgpt_base_url)
-            .await?;
+        build_apps_enabled_plugin_test_nez(&server, nez_home, apps_server.chatgpt_base_url).await?;
     let nez = Arc::clone(&test_nez.nez);
     wait_for_mcp_server(&nez, NEZ_APPS_MCP_SERVER_NAME).await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![
-            nez_protocol::user_input::UserInput::Mention {
-                name: "sample".into(),
-                path: format!("plugin://{SAMPLE_PLUGIN_CONFIG_NAME}"),
-            },
-        ]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![
+        nez_protocol::user_input::UserInput::Mention {
+            name: "sample".into(),
+            path: format!("plugin://{SAMPLE_PLUGIN_CONFIG_NAME}"),
+        },
+    ]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let requests = mock.requests();
@@ -1873,19 +1862,17 @@ async fn explicit_plugin_mentions_keep_non_conflicting_mcp_for_chatgpt_auth() ->
     write_plugin_app_plugin_with_name(nez_home.as_ref(), "sample_app");
 
     let test_nez =
-        build_apps_enabled_plugin_test_nez(&server, nez_home, apps_server.chatgpt_base_url)
-            .await?;
+        build_apps_enabled_plugin_test_nez(&server, nez_home, apps_server.chatgpt_base_url).await?;
     let nez = Arc::clone(&test_nez.nez);
     wait_for_mcp_server(&nez, "sample").await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![
-            nez_protocol::user_input::UserInput::Mention {
-                name: "sample".into(),
-                path: format!("plugin://{SAMPLE_PLUGIN_CONFIG_NAME}"),
-            },
-        ]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![
+        nez_protocol::user_input::UserInput::Mention {
+            name: "sample".into(),
+            path: format!("plugin://{SAMPLE_PLUGIN_CONFIG_NAME}"),
+        },
+    ]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let requests = mock.requests();
@@ -2090,8 +2077,7 @@ async fn explicitly_requested_mcp_waits_for_startup(request: ExplicitMcpRequest)
             text_elements: Vec::new(),
         },
     };
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![input]))
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![input]))
         .await?;
     tokio::time::sleep(Duration::from_millis(1200)).await;
     assert!(
@@ -2165,15 +2151,14 @@ async fn explicit_plugin_mentions_track_plugin_used_analytics() -> Result<()> {
     let test_nez = build_analytics_plugin_test_nez(&server, nez_home).await?;
     let nez = Arc::clone(&test_nez.nez);
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![nez_protocol::user_input::UserInput::Mention {
-                name: "sample".into(),
-                path: format!("plugin://{SAMPLE_PLUGIN_CONFIG_NAME}"),
-            }])
-            .with_responses_metadata(Some(std::collections::HashMap::from([]))),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![nez_protocol::user_input::UserInput::Mention {
+            name: "sample".into(),
+            path: format!("plugin://{SAMPLE_PLUGIN_CONFIG_NAME}"),
+        }])
+        .with_responses_metadata(Some(std::collections::HashMap::from([]))),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let event = wait_for_analytics_event(&server, "nez_plugin_used").await;
@@ -2217,12 +2202,11 @@ async fn explicit_plugin_skill_invocation_tracks_remote_plugin_id() -> Result<()
     let test_nez = build_analytics_plugin_test_nez(&server, nez_home).await?;
     let nez = Arc::clone(&test_nez.nez);
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Skill {
-            name: "sample:sample-search".into(),
-            path: skill_path,
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Skill {
+        name: "sample:sample-search".into(),
+        path: skill_path,
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let event = wait_for_analytics_event(&server, "skill_invocation").await;
@@ -2296,12 +2280,11 @@ async fn implicit_plugin_skill_invocation_tracks_remote_plugin_id(
     let test_nez = build_analytics_plugin_test_nez(&server, nez_home).await?;
     let nez = Arc::clone(&test_nez.nez);
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "inspect the sample skill".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "inspect the sample skill".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let event = wait_for_analytics_event(&server, "skill_invocation").await;

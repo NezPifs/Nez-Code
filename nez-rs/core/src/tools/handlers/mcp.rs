@@ -23,6 +23,7 @@ use crate::tools::registry::PostToolUsePayload;
 use crate::tools::registry::PreToolUsePayload;
 use crate::tools::registry::ToolExecutor;
 use crate::tools::registry::ToolTelemetryTags;
+use futures::future::BoxFuture;
 use nez_extension_api::McpToolContext;
 use nez_mcp::ToolInfo;
 use nez_protocol::mcp::is_node_repl_backed_connector;
@@ -39,7 +40,6 @@ use nez_utils_image::PromptImageMode;
 use nez_utils_image::load_data_url_for_prompt_uncached;
 use nez_utils_output_truncation::TruncationPolicy;
 use nez_utils_string::take_bytes_at_char_boundary;
-use futures::future::BoxFuture;
 use serde_json::Map;
 use serde_json::Value;
 
@@ -52,8 +52,7 @@ pub struct McpHandler {
     tool_info: ToolInfo,
     agent_plugin: bool,
     spec: Arc<ToolSpec>,
-    code_mode_tool_definitions:
-        OnceLock<(Option<usize>, bool, Vec<nez_code_mode::ToolDefinition>)>,
+    code_mode_tool_definitions: OnceLock<(Option<usize>, bool, Vec<nez_code_mode::ToolDefinition>)>,
 }
 
 impl McpHandler {

@@ -2,6 +2,25 @@
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::managed_network_requirements_loader;
+use core_test_support::responses::ev_apply_patch_custom_tool_call;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_once_match;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_with_timeout;
 #[cfg(unix)]
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_config::types::ApprovalsReviewer;
@@ -39,25 +58,6 @@ use nez_protocol::protocol::ReviewDecision;
 use nez_protocol::protocol::SandboxPolicy;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::managed_network_requirements_loader;
-use core_test_support::responses::ev_apply_patch_custom_tool_call;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_once_match;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_with_timeout;
 use pretty_assertions::assert_eq;
 use regex_lite::Regex;
 use serde_json::Value;
@@ -780,10 +780,7 @@ fn parse_result(item: &Value) -> CommandResult {
     }
 }
 
-async fn expect_exec_approval(
-    test: &TestNez,
-    expected_command: &str,
-) -> ExecApprovalRequestEvent {
+async fn expect_exec_approval(test: &TestNez, expected_command: &str) -> ExecApprovalRequestEvent {
     let event = wait_for_event(&test.nez, |event| {
         matches!(
             event,
@@ -1972,24 +1969,22 @@ async fn run_scenario(scenario: &ScenarioSpec) -> Result<()> {
     let policy_src = scenario.action.policy_src();
     let thread_store_id = format!("approval-scenario-{}", scenario.name);
 
-    let mut builder = test_nez()
-        .with_model("gpt-5.5")
-        .with_config(move |config| {
-            // These scenarios assert tool behavior, not rollout persistence.
-            config.experimental_thread_store = ThreadStoreConfig::InMemory {
-                id: thread_store_id,
-            };
-            config.permissions.approval_policy = Constrained::allow_any(approval_policy);
+    let mut builder = test_nez().with_model("gpt-5.5").with_config(move |config| {
+        // These scenarios assert tool behavior, not rollout persistence.
+        config.experimental_thread_store = ThreadStoreConfig::InMemory {
+            id: thread_store_id,
+        };
+        config.permissions.approval_policy = Constrained::allow_any(approval_policy);
+        config
+            .set_legacy_sandbox_policy(sandbox_policy.clone())
+            .expect("set sandbox policy");
+        for feature in features {
             config
-                .set_legacy_sandbox_policy(sandbox_policy.clone())
-                .expect("set sandbox policy");
-            for feature in features {
-                config
-                    .features
-                    .enable(feature)
-                    .expect("test config should allow feature update");
-            }
-        });
+                .features
+                .enable(feature)
+                .expect("test config should allow feature update");
+        }
+    });
     if let Some(policy_src) = policy_src {
         builder = builder.with_pre_build_hook(move |home| {
             let rules_dir = home.join("rules");
@@ -2152,15 +2147,13 @@ async fn approving_apply_patch_for_session_skips_future_prompts_for_same_file() 
     let sandbox_policy = SandboxPolicy::DangerFullAccess;
     let sandbox_policy_for_config = sandbox_policy.clone();
 
-    let mut builder = test_nez()
-        .with_model("gpt-5.5")
-        .with_config(move |config| {
-            config.permissions.approval_policy = Constrained::allow_any(approval_policy);
-            config
-                .set_legacy_sandbox_policy(sandbox_policy_for_config)
-                .expect("set sandbox policy");
-            config.approvals_reviewer = ApprovalsReviewer::User;
-        });
+    let mut builder = test_nez().with_model("gpt-5.5").with_config(move |config| {
+        config.permissions.approval_policy = Constrained::allow_any(approval_policy);
+        config
+            .set_legacy_sandbox_policy(sandbox_policy_for_config)
+            .expect("set sandbox policy");
+        config.approvals_reviewer = ApprovalsReviewer::User;
+    });
     let test = builder.build(&server).await?;
 
     let target = TargetPath::OutsideWorkspace("apply_patch_allow_session.txt");
@@ -2780,12 +2773,10 @@ async fn shell_startup_credentials_are_brokered(
         let Some(zsh) = nez_core::shell::get_shell(nez_core::shell::ShellType::Zsh) else {
             return Ok(());
         };
-        test_nez()
-            .with_user_shell(zsh)
-            .with_config(move |config| {
-                config.permissions.approval_policy = Constrained::allow_any(approval_policy);
-                config.features.enable(Feature::ShellTool).unwrap();
-            })
+        test_nez().with_user_shell(zsh).with_config(move |config| {
+            config.permissions.approval_policy = Constrained::allow_any(approval_policy);
+            config.features.enable(Feature::ShellTool).unwrap();
+        })
     };
 
     let outside_dir = tempfile::tempdir_in(std::env::current_dir()?)?;

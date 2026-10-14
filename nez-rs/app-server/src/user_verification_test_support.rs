@@ -125,11 +125,9 @@ impl Harness {
                 .build()
                 .await?,
         );
-        let auth = AuthManager::shared_from_config(
-            config.as_ref(),
-            /*enable_nez_api_key_env*/ false,
-        )
-        .await?;
+        let auth =
+            AuthManager::shared_from_config(config.as_ref(), /*enable_nez_api_key_env*/ false)
+                .await?;
         let provider = Arc::new(BlockingProvider::default());
         let factory_provider = Arc::clone(&provider);
         let service = Arc::new(Service {

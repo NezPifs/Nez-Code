@@ -7,11 +7,11 @@
 use std::sync::Arc;
 
 use crate::http_client_selector::HttpClientSelector;
+use http::Method;
 use nez_http_client::ClientRouteClass;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::RequestBuilder;
 use nez_http_client::RouteAwareClientPool;
-use http::Method;
 
 pub(super) struct StartupSyncHttpClient(Arc<dyn HttpClientSelector>);
 

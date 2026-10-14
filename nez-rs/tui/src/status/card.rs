@@ -114,10 +114,7 @@ impl StatusHistoryHandle {
         state.refreshing_rate_limits = false;
     }
 
-    pub(crate) fn set_thread_usage(
-        &self,
-        estimate: Option<nez_app_server_protocol::ThreadUsage>,
-    ) {
+    pub(crate) fn set_thread_usage(&self, estimate: Option<nez_app_server_protocol::ThreadUsage>) {
         self.card.thread_usage.set_estimate(estimate);
     }
 }

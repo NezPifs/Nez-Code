@@ -10,6 +10,8 @@ use crate::line_truncation::line_width;
 use crate::render::highlight::MAX_HIGHLIGHT_LINE_BYTES;
 use crate::session_state::ThreadSessionState;
 use crate::wrapping::word_wrap_lines;
+use dirs::home_dir;
+use http::StatusCode;
 use nez_app_server_protocol::AskForApproval;
 use nez_app_server_protocol::McpAuthStatus;
 use nez_config::types::McpServerConfig;
@@ -20,8 +22,6 @@ use nez_protocol::account::PlanType;
 use nez_protocol::error::UnexpectedResponseError;
 use nez_protocol::parse_command::ParsedCommand;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use dirs::home_dir;
-use http::StatusCode;
 use pretty_assertions::assert_eq;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -40,10 +40,8 @@ const SMALL_PNG_BASE64: &str = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAA
 fn connected_server_version_notice_snapshot() {
     let target = crate::AppServerTarget::Remote {
         endpoint: crate::RemoteAppServerEndpoint::UnixSocket {
-            socket_path: AbsolutePathBuf::from_absolute_path(
-                std::env::temp_dir().join("nez.sock"),
-            )
-            .expect("absolute socket path"),
+            socket_path: AbsolutePathBuf::from_absolute_path(std::env::temp_dir().join("nez.sock"))
+                .expect("absolute socket path"),
         },
     };
     let settings = nez_config::types::Tui {
@@ -68,10 +66,8 @@ fn local_daemon_version_notice_snapshot() {
     let target = crate::AppServerTarget::LocalDaemon {
         allow_embedded_fallback: true,
         endpoint: crate::RemoteAppServerEndpoint::UnixSocket {
-            socket_path: AbsolutePathBuf::from_absolute_path(
-                std::env::temp_dir().join("nez.sock"),
-            )
-            .expect("absolute socket path"),
+            socket_path: AbsolutePathBuf::from_absolute_path(std::env::temp_dir().join("nez.sock"))
+                .expect("absolute socket path"),
         },
     };
     let settings = nez_config::types::Tui {

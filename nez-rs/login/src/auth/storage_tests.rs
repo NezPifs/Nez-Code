@@ -11,8 +11,8 @@ use pretty_assertions::assert_eq;
 use serde_json::json;
 use tempfile::tempdir;
 
-use nez_keyring_store::tests::MockKeyringStore;
 use keyring::Error as KeyringError;
+use nez_keyring_store::tests::MockKeyringStore;
 
 #[tokio::test]
 async fn file_storage_load_returns_auth_dot_json() -> anyhow::Result<()> {

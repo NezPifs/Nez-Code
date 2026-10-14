@@ -1,10 +1,5 @@
 #![cfg(not(target_os = "windows"))]
 
-use nez_core::TurnInputRequest;
-use nez_features::Feature;
-use nez_login::NezAuth;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_response_created;
 use core_test_support::responses::mount_sse_once;
@@ -13,6 +8,11 @@ use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_features::Feature;
+use nez_login::NezAuth;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -38,12 +38,11 @@ async fn request_body_is_zstd_compressed_for_nez_backend_when_enabled() -> anyho
         });
     let nez = builder.build(&server).await?.nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "compress me".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "compress me".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     // Wait until the task completes so the request definitely hit the server.
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
@@ -82,12 +81,11 @@ async fn request_body_is_not_compressed_for_api_key_auth_even_when_enabled() -> 
     });
     let nez = builder.build(&server).await?.nez;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "do not compress".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "do not compress".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 

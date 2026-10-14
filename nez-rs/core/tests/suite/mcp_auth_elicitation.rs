@@ -1,6 +1,17 @@
 //! Verify MCP prompts and elicitation analytics through actual turns.
 
 use anyhow::Result;
+use core_test_support::PathExt;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_NAMESPACE;
+use core_test_support::apps_test_server::recorded_apps_tool_call_by_call_id;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::apps_test_server::search_capable_apps_builder;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_mcp_server;
 use nez_analytics::AnalyticsEventsClient;
 use nez_analytics::AppServerRpcTransport;
 use nez_app_server_protocol as app;
@@ -29,17 +40,6 @@ use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::PathExt;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_NAMESPACE;
-use core_test_support::apps_test_server::recorded_apps_tool_call_by_call_id;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::apps_test_server::search_capable_apps_builder;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

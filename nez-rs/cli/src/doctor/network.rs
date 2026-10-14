@@ -2,6 +2,8 @@ use std::env;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use http::HeaderMap;
+use http::Method;
 use nez_core::config::Config;
 #[cfg(target_os = "macos")]
 use nez_http_client::MacosSystemProxyConfiguration;
@@ -11,8 +13,6 @@ use nez_http_client::RouteFailureClass;
 #[cfg(target_os = "macos")]
 use nez_http_client::macos_system_proxy_configuration;
 use nez_login::default_client::create_client_without_request_logging;
-use http::HeaderMap;
-use http::Method;
 
 use super::CheckStatus;
 use super::DoctorCheck;

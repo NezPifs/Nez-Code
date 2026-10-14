@@ -3,6 +3,7 @@ use std::ffi::OsString;
 use std::sync::Arc;
 use std::time::Duration;
 
+use futures::FutureExt;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_config::types::OAuthCredentialsStoreMode;
 use nez_exec_server::Environment;
@@ -13,7 +14,6 @@ use nez_rmcp_client::LocalStdioServerLauncher;
 use nez_rmcp_client::McpProtocolMode;
 use nez_rmcp_client::RmcpClient;
 use nez_rmcp_client::StdioServerLauncher;
-use futures::FutureExt;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::Implementation;
 use rmcp::model::InitializeRequestParams;

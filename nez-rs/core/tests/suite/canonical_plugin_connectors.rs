@@ -3,12 +3,6 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_features::Feature;
-use nez_login::NezAuth;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::user_input::UserInput;
 use core_test_support::apps_test_server::AppsTestServer;
 use core_test_support::apps_test_server::SEARCH_CALENDAR_CREATE_TOOL;
 use core_test_support::responses::ev_completed;
@@ -21,6 +15,12 @@ use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_features::Feature;
+use nez_login::NezAuth;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use wiremock::Mock;

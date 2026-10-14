@@ -259,11 +259,7 @@ async fn root_ownership_survives_malformed_ancestor_manifests() {
             .unwrap(),
         PluginRootOwnership::Standalone
     );
-    write_manifest(
-        root.parent().unwrap(),
-        ".nez-plugin/plugin.json",
-        "{broken",
-    );
+    write_manifest(root.parent().unwrap(), ".nez-plugin/plugin.json", "{broken");
     assert_eq!(
         provider
             .root_ownership(&selected, /*discovery*/ None, /*sandbox*/ None)
@@ -623,9 +619,8 @@ async fn malformed_preferred_manifest_does_not_fall_through_to_alternate() {
         ".claude-plugin/plugin.json",
         MANIFEST_CONTENTS,
     );
-    let expected_path =
-        PathUri::from_host_native_path(plugin_root.join(".nez-plugin/plugin.json"))
-            .expect("manifest URI");
+    let expected_path = PathUri::from_host_native_path(plugin_root.join(".nez-plugin/plugin.json"))
+        .expect("manifest URI");
     let provider = ExecutorPluginProvider::new(Arc::new(EnvironmentManager::default_for_tests()));
 
     let err = provider

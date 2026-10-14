@@ -3,11 +3,11 @@
 use super::*;
 use crate::suite::settings_commits::COMMITTED_MODEL;
 use crate::suite::settings_commits::PauseAfterCommit;
+use core_test_support::ThreadIdle;
 use nez_core::config::Config;
 use nez_extension_api::ExtensionRegistryBuilder;
 use nez_protocol::protocol::AgentStatus;
 use nez_protocol::protocol::Op;
-use core_test_support::ThreadIdle;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::Mutex;

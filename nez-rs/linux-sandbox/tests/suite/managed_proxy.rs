@@ -675,15 +675,23 @@ async fn approved_command_with_denied_reads_preserves_standard_devices() {
         output_file.to_string_lossy().into_owned(),
     );
     let output = run_linux_sandbox_direct(
-        &["bash", "-c", concat!(
-            "set -e; printf test >/dev/null; ",
-            "head -c 1 /dev/zero >/dev/null; head -c 1 /dev/urandom >/dev/null; ",
-            "printf sink >\"$NEZ_TEST_OUTPUT\"; test \"$(cat \"$NEZ_TEST_OUTPUT\")\" = sink; ",
-            "if cat \"$NEZ_TEST_DENIED\" >\"$NEZ_TEST_OUTPUT\" 2>&1; then exit 1; fi; ",
-            "grep -q 'Permission denied' \"$NEZ_TEST_OUTPUT\"",
-        )],
-        &profile, /*allow_network_for_proxy*/ false, env, NETWORK_TIMEOUT_MS,
-    ).await;
+        &[
+            "bash",
+            "-c",
+            concat!(
+                "set -e; printf test >/dev/null; ",
+                "head -c 1 /dev/zero >/dev/null; head -c 1 /dev/urandom >/dev/null; ",
+                "printf sink >\"$NEZ_TEST_OUTPUT\"; test \"$(cat \"$NEZ_TEST_OUTPUT\")\" = sink; ",
+                "if cat \"$NEZ_TEST_DENIED\" >\"$NEZ_TEST_OUTPUT\" 2>&1; then exit 1; fi; ",
+                "grep -q 'Permission denied' \"$NEZ_TEST_OUTPUT\"",
+            ),
+        ],
+        &profile,
+        /*allow_network_for_proxy*/ false,
+        env,
+        NETWORK_TIMEOUT_MS,
+    )
+    .await;
     assert_eq!(
         output.status.code(),
         Some(0),

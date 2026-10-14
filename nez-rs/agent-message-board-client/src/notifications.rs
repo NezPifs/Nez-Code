@@ -2,6 +2,7 @@
 //! Provisioning and durable board ownership belong to the research host.
 
 use crate::RemoteAgentMessageBoard;
+use futures::channel::oneshot;
 use nez_agent_message_board_extension::MessageBoardHost;
 use nez_extension_api::ExtensionData;
 use nez_extension_api::ExtensionFuture;
@@ -14,7 +15,6 @@ use nez_extension_api::TurnStartPhase;
 use nez_extension_api::TurnStopInput;
 use nez_protocol::ThreadId;
 use nez_protocol::error::NezErrKind;
-use futures::channel::oneshot;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio_util::task::AbortOnDropHandle;

@@ -1345,20 +1345,17 @@ impl AccountRequestProcessor {
                     groups: usage
                         .groups
                         .into_iter()
-                        .map(
-                            |group| nez_app_server_protocol::ThreadUsageBreakdownGroup {
-                                model: group.model,
-                                reasoning_effort: group.reasoning_effort,
-                                speed: group.speed,
-                                estimated_usage_credits_micros: group
-                                    .estimated_usage_credits_micros,
-                                net_new_input_tokens: group.net_new_input_tokens,
-                                cached_input_tokens: group.cached_input_tokens,
-                                input_tokens: group.input_tokens,
-                                output_tokens: group.output_tokens,
-                                total_tokens: group.total_tokens,
-                            },
-                        )
+                        .map(|group| nez_app_server_protocol::ThreadUsageBreakdownGroup {
+                            model: group.model,
+                            reasoning_effort: group.reasoning_effort,
+                            speed: group.speed,
+                            estimated_usage_credits_micros: group.estimated_usage_credits_micros,
+                            net_new_input_tokens: group.net_new_input_tokens,
+                            cached_input_tokens: group.cached_input_tokens,
+                            input_tokens: group.input_tokens,
+                            output_tokens: group.output_tokens,
+                            total_tokens: group.total_tokens,
+                        })
                         .collect(),
                 }),
                 Err(err)
@@ -1578,9 +1575,9 @@ fn workspace_messages_feature_disabled(err: &BackendRequestError) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use http::StatusCode;
     use nez_backend_client::TokenUsageProfileDailyBucket;
     use nez_backend_client::TokenUsageProfileStats;
-    use http::StatusCode;
     use pretty_assertions::assert_eq;
 
     #[test]

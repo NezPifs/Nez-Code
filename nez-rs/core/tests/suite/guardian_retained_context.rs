@@ -7,8 +7,26 @@ use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
-use nez_core::NezThread;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_message_item_added;
+use core_test_support::responses::ev_output_text_delta;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once_match;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::ForkSnapshot;
+use nez_core::NezThread;
 use nez_core::TurnInputRequest;
 use nez_core::compact::content_items_to_text;
 use nez_core::config::Config;
@@ -48,24 +66,6 @@ use nez_protocol::user_input::UserInput;
 use nez_thread_store::ForkBoundary;
 use nez_thread_store::LoadThreadHistoryParams;
 use nez_thread_store::PrepareForkParams;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_message_item_added;
-use core_test_support::responses::ev_output_text_delta;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once_match;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;
@@ -1190,8 +1190,7 @@ async fn forked_parent_instructions_do_not_become_local_authorization(
                 nez_history::RetainedContextEntry::UserMessage(message) =>
                     Some(message.text.as_str()),
                 nez_history::RetainedContextEntry::AssistantMessage(_) => None,
-                nez_history::RetainedContextEntry::VerifiedAnswer(_) =>
-                    panic!("unexpected answer"),
+                nez_history::RetainedContextEntry::VerifiedAnswer(_) => panic!("unexpected answer"),
             })
             .collect::<Vec<_>>()),
         Some(vec![LOCAL_INSTRUCTION]),

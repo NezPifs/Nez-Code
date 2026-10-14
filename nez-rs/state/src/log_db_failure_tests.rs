@@ -10,8 +10,7 @@ use super::*;
 
 #[tokio::test]
 async fn failed_batch_is_reported_once_and_later_writes_recover() {
-    let nez_home =
-        std::env::temp_dir().join(format!("nez-state-log-failure-{}", Uuid::new_v4()));
+    let nez_home = std::env::temp_dir().join(format!("nez-state-log-failure-{}", Uuid::new_v4()));
     let _cleanup = scopeguard::guard(nez_home.clone(), |nez_home| {
         let _ = std::fs::remove_dir_all(nez_home);
     });

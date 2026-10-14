@@ -1,5 +1,10 @@
 //! Checks Guardian persistence boundaries without blocking unrelated turn progress.
 
+use core_test_support::responses;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::TurnInputSubmission;
 use nez_core::config::Constrained;
@@ -31,11 +36,6 @@ use nez_thread_store::ThreadPage;
 use nez_thread_store::ThreadStore;
 use nez_thread_store::ThreadStoreFuture;
 use nez_thread_store::UpdateThreadMetadataParams;
-use core_test_support::responses;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::any::Any;
@@ -307,8 +307,7 @@ async fn sender_history_read_does_not_block_turn_completion() -> anyhow::Result<
     }))?;
     let nez = Arc::clone(&test.nez);
     let admission = tokio::spawn(async move {
-        nez
-            .start_or_steer_turn(TurnInputRequest::new(TurnInput::ResponseItem(delivery)))
+        nez.start_or_steer_turn(TurnInputRequest::new(TurnInput::ResponseItem(delivery)))
             .await
     });
     let read = timeout(Duration::from_secs(/*secs*/ 3), pending_reads.recv())

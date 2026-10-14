@@ -20,6 +20,7 @@ use crate::agent_communication::AgentCommunicationKind;
 use crate::nez_thread::GuardianRootSnapshot;
 use crate::nez_thread::ThreadConfigSnapshot;
 use crate::rollout_budget::RolloutBudgetReminder;
+use futures::future::BoxFuture;
 use nez_protocol::AgentPath;
 use nez_protocol::SessionId;
 use nez_protocol::ThreadId;
@@ -29,7 +30,6 @@ use nez_protocol::protocol::MultiAgentVersion;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::TokenUsage;
 use nez_rollout_trace::ThreadTraceContext;
-use futures::future::BoxFuture;
 use std::collections::HashSet;
 
 impl AgentControl for LocalAgentControl {

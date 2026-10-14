@@ -1,9 +1,9 @@
 use super::GrpcCodeModeHost;
 use super::GrpcStream;
-use nez_code_mode_protocol::grpc as proto;
-use nez_code_mode_protocol::grpc::code_mode_host_server::CodeModeHost;
 use futures::FutureExt;
 use futures::StreamExt;
+use nez_code_mode_protocol::grpc as proto;
+use nez_code_mode_protocol::grpc::code_mode_host_server::CodeModeHost;
 use pretty_assertions::assert_eq;
 use tonic::Code;
 use tonic::Request;

@@ -5,9 +5,9 @@
 
 use crate::text_formatting::format_json_compact;
 use base64::Engine;
-use nez_protocol::mcp::CallToolResult;
 use image::DynamicImage;
 use image::ImageReader;
+use nez_protocol::mcp::CallToolResult;
 use rmcp::model::ContentBlock;
 use rmcp::model::ResourceContents;
 use serde::Deserialize;

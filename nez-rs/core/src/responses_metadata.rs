@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::io::ErrorKind;
 
+use http::HeaderMap as ApiHeaderMap;
+use http::HeaderValue;
 use nez_analytics::CompactionImplementation;
 use nez_analytics::CompactionPhase;
 use nez_analytics::CompactionReason;
@@ -15,8 +17,6 @@ use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::ThreadSource;
 use nez_utils_string::to_ascii_json_string;
 use nez_utils_string::to_json_string_bounded;
-use http::HeaderMap as ApiHeaderMap;
-use http::HeaderValue;
 use serde::Serialize;
 use serde_json::Value;
 use uuid::Uuid;

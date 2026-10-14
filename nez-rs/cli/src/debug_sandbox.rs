@@ -1117,8 +1117,8 @@ enabled = true
             .permissions
             .permission_profile()
             .file_system_sandbox_policy();
-        let expected = nez_protocol::models::PermissionProfile::workspace_write()
-            .file_system_sandbox_policy();
+        let expected =
+            nez_protocol::models::PermissionProfile::workspace_write().file_system_sandbox_policy();
         assert!(
             expected
                 .entries

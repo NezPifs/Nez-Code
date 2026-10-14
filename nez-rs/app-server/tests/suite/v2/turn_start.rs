@@ -17,6 +17,15 @@ use app_test_support::write_chatgpt_auth;
 use app_test_support::write_mock_responses_config_toml_with_chatgpt_base_url;
 use app_test_support::write_models_cache;
 use app_test_support::write_models_cache_with_models;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_LIST_TOOL;
+use core_test_support::apps_test_server::SEARCH_CALENDAR_NAMESPACE;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
 use nez_app_server::INPUT_TOO_LARGE_ERROR_CODE;
 use nez_app_server::INVALID_PARAMS_ERROR_CODE;
 use nez_app_server_protocol::AdditionalContextEntry;
@@ -91,15 +100,6 @@ use nez_protocol::openai_models::ReasoningEffort;
 use nez_protocol::protocol::MULTI_AGENT_MODE_OPEN_TAG;
 use nez_protocol::user_input::MAX_USER_INPUT_TEXT_CHARS;
 use nez_utils_absolute_path::test_support::PathExt;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_LIST_TOOL;
-use core_test_support::apps_test_server::SEARCH_CALENDAR_NAMESPACE;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -1589,12 +1589,9 @@ async fn code_mode_exec_emits_correlated_production_analytics() -> Result<()> {
         })
         .await?;
 
-    let event = wait_for_analytics_event(
-        &server,
-        DEFAULT_READ_TIMEOUT,
-        "nez_dynamic_tool_call_event",
-    )
-    .await?;
+    let event =
+        wait_for_analytics_event(&server, DEFAULT_READ_TIMEOUT, "nez_dynamic_tool_call_event")
+            .await?;
     assert_eq!(
         json!({
             "turnId": event["event_params"]["turn_id"],

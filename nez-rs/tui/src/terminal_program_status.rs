@@ -13,10 +13,10 @@ use std::io::stdout;
 use std::sync::Mutex;
 use std::sync::OnceLock;
 
+use crossterm::Command;
 use nez_terminal_detection::TerminalInfo;
 use nez_terminal_detection::TerminalName;
 use nez_terminal_detection::terminal_info;
-use crossterm::Command;
 use ratatui::crossterm::execute;
 
 const NO_EMITTED_STATUS: u8 = 0;

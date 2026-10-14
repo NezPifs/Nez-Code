@@ -10,6 +10,9 @@ use app_test_support::create_final_assistant_message_sse_response;
 use app_test_support::create_mock_responses_server_sequence;
 use app_test_support::encode_id_token;
 use app_test_support::write_models_cache;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_wine_exec;
 use nez_app_server_protocol::ApprovalsReviewer;
 use nez_app_server_protocol::AskForApproval;
 use nez_app_server_protocol::ClientInfo;
@@ -31,9 +34,6 @@ use nez_state::LogQuery;
 use nez_state::SqliteConfig;
 use nez_state::StateRuntime;
 use nez_utils_absolute_path::test_support::PathExt;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_wine_exec;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -558,8 +558,7 @@ async fn sqlite_log_metrics_exports_do_not_create_log_cycles() -> Result<()> {
 
                 if matches!(
                     name,
-                    nez_state::LOG_WRITE_BYTES_METRIC
-                        | nez_state::LOG_WRITE_MAX_ENTRY_BYTES_METRIC
+                    nez_state::LOG_WRITE_BYTES_METRIC | nez_state::LOG_WRITE_MAX_ENTRY_BYTES_METRIC
                 ) {
                     let bounds = point["explicitBounds"]
                         .as_array()

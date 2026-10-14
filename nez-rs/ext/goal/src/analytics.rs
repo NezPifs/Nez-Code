@@ -1,6 +1,6 @@
 use nez_analytics::AnalyticsEventsClient;
-use nez_analytics::NezGoalEvent;
 use nez_analytics::GoalEventKind;
+use nez_analytics::NezGoalEvent;
 
 #[derive(Clone)]
 pub(crate) struct GoalAnalytics {

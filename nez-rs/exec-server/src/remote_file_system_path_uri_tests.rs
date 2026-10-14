@@ -1,5 +1,7 @@
 #![allow(clippy::expect_used)]
 
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_exec_server_protocol::JSONRPCError;
 use nez_exec_server_protocol::JSONRPCErrorError;
 use nez_exec_server_protocol::JSONRPCMessage;
@@ -14,8 +16,6 @@ use nez_protocol::permissions::FileSystemSandboxPolicy;
 use nez_protocol::permissions::FileSystemSpecialPath;
 use nez_protocol::permissions::NetworkSandboxPolicy;
 use nez_utils_path_uri::PathUri;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use tokio::net::TcpListener;
 use tokio::net::TcpStream;

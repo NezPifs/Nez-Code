@@ -599,8 +599,7 @@ async fn assert_expired_token_refresh(
     }
     let status = command.status().await?;
     assert!(status.success(), "OAuth startup child failed: {status}");
-    let persisted_credentials =
-        std::fs::read_to_string(nez_home.path().join(".credentials.json"))?;
+    let persisted_credentials = std::fs::read_to_string(nez_home.path().join(".credentials.json"))?;
     assert!(!persisted_credentials.contains(CLIENT_SECRET));
     assert!(!persisted_credentials.contains("client_secret"));
     if with_headers_helper {

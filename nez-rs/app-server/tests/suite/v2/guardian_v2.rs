@@ -22,6 +22,12 @@ use axum::http::header;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::routing::post;
+use core_test_support::load_default_config_for_test;
+use core_test_support::responses;
+use core_test_support::responses::WebSocketConnectionConfig;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+use core_test_support::skip_if_wine_exec;
 use nez_app_server_protocol::ApprovalsReviewer;
 use nez_app_server_protocol::AskForApproval;
 use nez_app_server_protocol::ClientRequest;
@@ -52,12 +58,6 @@ use nez_app_server_protocol::UserInput;
 use nez_features::Feature;
 use nez_state::StateRuntime;
 use nez_utils_absolute_path::test_support::PathExt;
-use core_test_support::load_default_config_for_test;
-use core_test_support::responses;
-use core_test_support::responses::WebSocketConnectionConfig;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-use core_test_support::skip_if_wine_exec;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -2336,12 +2336,11 @@ async fn guardian_v2_trusts_invoked_user_skills_but_rejects_repository_forgery()
     // Finish the synchronous reviews before LOW can cancel reviewer startup.
     let expected_guardian_reviews = if cfg!(windows) { 2 } else { 1 };
     for _ in 0..expected_guardian_reviews {
-        let _: nez_app_server_protocol::ItemGuardianApprovalReviewCompletedNotification =
-            timeout(
-                TIMEOUT,
-                app_server.read_notification("item/autoApprovalReview/completed"),
-            )
-            .await??;
+        let _: nez_app_server_protocol::ItemGuardianApprovalReviewCompletedNotification = timeout(
+            TIMEOUT,
+            app_server.read_notification("item/autoApprovalReview/completed"),
+        )
+        .await??;
     }
     responses_state.allow_luna.notify_one();
 

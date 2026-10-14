@@ -1,3 +1,4 @@
+use multimap::MultiMap;
 use nez_execpolicy::Decision;
 use nez_execpolicy::Policy;
 use nez_execpolicy::RequirementsExecPolicy;
@@ -5,7 +6,6 @@ use nez_execpolicy::RuleRef;
 use nez_execpolicy::rule::PatternToken;
 use nez_execpolicy::rule::PrefixPattern;
 use nez_execpolicy::rule::PrefixRule;
-use multimap::MultiMap;
 use serde::Deserialize;
 use std::sync::Arc;
 use thiserror::Error;

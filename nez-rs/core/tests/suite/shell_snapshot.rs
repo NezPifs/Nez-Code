@@ -1,4 +1,24 @@
 use anyhow::Result;
+#[cfg(unix)]
+use core_test_support::hooks::trust_discovered_hooks;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+#[cfg(unix)]
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+#[cfg(unix)]
+use core_test_support::skip_if_remote;
+#[cfg(unix)]
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::TestNezHarness;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::TurnInputRequest;
 #[cfg(unix)]
 use nez_core::config::Constrained;
@@ -40,26 +60,6 @@ use nez_protocol::protocol::ExecCommandEndEvent;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-#[cfg(unix)]
-use core_test_support::hooks::trust_discovered_hooks;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-#[cfg(unix)]
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-#[cfg(unix)]
-use core_test_support::skip_if_remote;
-#[cfg(unix)]
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::TestNezHarness;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::HashMap;
@@ -194,29 +194,28 @@ async fn run_snapshot_command_with_options(
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "run unified exec with shell snapshot".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "run unified exec with shell snapshot".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let begin = wait_for_event_match(&nez, |ev| match ev {
         EventMsg::ExecCommandBegin(ev) if ev.call_id == call_id => Some(ev.clone()),
@@ -270,29 +269,28 @@ async fn run_tool_turn_on_harness(
     let cwd = test.config.cwd.clone();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: prompt.into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: prompt.into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event_match(&nez, |ev| match ev {
         EventMsg::ExecCommandBegin(ev) if ev.call_id == call_id => Some(ev.clone()),
@@ -367,12 +365,11 @@ async fn run_no_shell_turn(harness: &TestNezHarness) -> Result<()> {
     )
     .await;
     let nez = &harness.test().nez;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello".to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello".to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(nez, |event| {
         assert!(
             !matches!(event, EventMsg::ExecApprovalRequest(_) | EventMsg::Error(_)),
@@ -1004,12 +1001,11 @@ async fn shell_snapshot_v2_preserves_legacy_snapshots_for_user_shell() -> Result
     let snapshot_path = wait_for_snapshot(harness.test().home.path()).await?;
     assert_posix_snapshot_sections(&fs::read_to_string(snapshot_path).await?);
     let nez = &harness.test().nez;
-    nez
-        .submit(Op::RunUserShellCommand {
-            command: "printf legacy".to_string(),
-            timeout_ms: None,
-        })
-        .await?;
+    nez.submit(Op::RunUserShellCommand {
+        command: "printf legacy".to_string(),
+        timeout_ms: None,
+    })
+    .await?;
     let end = wait_for_event_match(nez, |event| match event {
         EventMsg::ExecCommandEnd(event) => Some(event.clone()),
         _ => None,
@@ -1134,29 +1130,28 @@ async fn unified_exec_snapshot_still_intercepts_apply_patch() -> Result<()> {
     let model = test.session_configured.model.clone();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "apply patch via unified_exec with snapshot".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd.clone())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "apply patch via unified_exec with snapshot".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd.clone())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let mut saw_patch_begin = false;
     let mut patch_end = None;

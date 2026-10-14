@@ -81,8 +81,7 @@ impl ManagedWorktreeTools {
                 &config.nez_home,
                 host.config_toml.desktop.as_ref(),
             )?),
-            source_config_builder: ConfigBuilder::default()
-                .nez_home(config.nez_home.to_path_buf()),
+            source_config_builder: ConfigBuilder::default().nez_home(config.nez_home.to_path_buf()),
             operations: Arc::default(),
         })
     }

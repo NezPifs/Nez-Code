@@ -1148,10 +1148,7 @@ impl ThreadHistoryBuilder {
         self.upsert_item_in_current_turn(item);
     }
 
-    fn handle_collab_resume_end(
-        &mut self,
-        payload: &nez_protocol::protocol::CollabResumeEndEvent,
-    ) {
+    fn handle_collab_resume_end(&mut self, payload: &nez_protocol::protocol::CollabResumeEndEvent) {
         let status = match &payload.status {
             AgentStatus::Errored(_) | AgentStatus::NotFound => CollabAgentToolCallStatus::Failed,
             _ => CollabAgentToolCallStatus::Completed,
@@ -1793,7 +1790,6 @@ mod tests {
     use nez_protocol::protocol::AgentReasoningEvent;
     use nez_protocol::protocol::AgentReasoningRawContentEvent;
     use nez_protocol::protocol::ApplyPatchApprovalRequestEvent;
-    use nez_protocol::protocol::NezErrorInfo;
     use nez_protocol::protocol::DynamicToolCallResponseEvent;
     use nez_protocol::protocol::EnteredReviewModeEvent;
     use nez_protocol::protocol::ExecCommandBeginEvent;
@@ -1803,6 +1799,7 @@ mod tests {
     use nez_protocol::protocol::ItemStartedEvent;
     use nez_protocol::protocol::McpInvocation;
     use nez_protocol::protocol::McpToolCallEndEvent;
+    use nez_protocol::protocol::NezErrorInfo;
     use nez_protocol::protocol::PatchApplyBeginEvent;
     use nez_protocol::protocol::ReviewTarget;
     use nez_protocol::protocol::SubAgentActivityKind as CoreSubAgentActivityKind;
@@ -3359,16 +3356,14 @@ mod tests {
                 local_images: Vec::new(),
                 ..Default::default()
             }),
-            EventMsg::DynamicToolCallRequest(
-                nez_protocol::dynamic_tools::DynamicToolCallRequest {
-                    call_id: "dyn-1".into(),
-                    turn_id: "turn-1".into(),
-                    started_at_ms: 0,
-                    namespace: Some("nez_app".into()),
-                    tool: "lookup_ticket".into(),
-                    arguments: serde_json::json!({"id":"ABC-123"}),
-                },
-            ),
+            EventMsg::DynamicToolCallRequest(nez_protocol::dynamic_tools::DynamicToolCallRequest {
+                call_id: "dyn-1".into(),
+                turn_id: "turn-1".into(),
+                started_at_ms: 0,
+                namespace: Some("nez_app".into()),
+                tool: "lookup_ticket".into(),
+                arguments: serde_json::json!({"id":"ABC-123"}),
+            }),
             EventMsg::DynamicToolCallResponse(DynamicToolCallResponseEvent {
                 call_id: "dyn-1".into(),
                 turn_id: "turn-1".into(),
@@ -4449,9 +4444,7 @@ mod tests {
                         misalignment: None,
                         message: "Selected model is at capacity. Please try a different model."
                             .into(),
-                        nez_error_info: Some(
-                            crate::protocol::v2::NezErrorInfo::ServerOverloaded,
-                        ),
+                        nez_error_info: Some(crate::protocol::v2::NezErrorInfo::ServerOverloaded,),
                         additional_details: None,
                     }),
                     started_at: Some(10),

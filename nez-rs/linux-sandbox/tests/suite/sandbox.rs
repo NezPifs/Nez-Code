@@ -259,9 +259,7 @@ fn expect_denied(
             output
         }
         Err(err) => match err.details() {
-            NezErrorDetails::Sandbox(SandboxErr::Denied { output, .. }) => {
-                output.as_ref().clone()
-            }
+            NezErrorDetails::Sandbox(SandboxErr::Denied { output, .. }) => output.as_ref().clone(),
             details => panic!("{context}: {details:?}"),
         },
     }
@@ -856,9 +854,7 @@ async fn assert_network_blocked(cmd: &[&str]) {
     let output = match result {
         Ok(output) => output,
         Err(err) => match err.details() {
-            NezErrorDetails::Sandbox(SandboxErr::Denied { output, .. }) => {
-                output.as_ref().clone()
-            }
+            NezErrorDetails::Sandbox(SandboxErr::Denied { output, .. }) => output.as_ref().clone(),
             details => panic!("expected sandbox denied error, got: {details:?}"),
         },
     };
@@ -1009,9 +1005,7 @@ async fn sandbox_reports_nez_symlink_build_failure_without_panicking() {
     .await
     {
         Err(err) => match err.details() {
-            NezErrorDetails::Sandbox(SandboxErr::Denied { output, .. }) => {
-                output.as_ref().clone()
-            }
+            NezErrorDetails::Sandbox(SandboxErr::Denied { output, .. }) => output.as_ref().clone(),
             details => panic!(".nez symlink build failure should deny: {details:?}"),
         },
         Ok(output) => panic!(".nez symlink build failure should deny: {output:?}"),
@@ -1053,9 +1047,9 @@ async fn sandbox_rejects_symlinked_synthetic_mount_registry() {
     let registry_target = workspace.join("registry");
     std::fs::create_dir_all(&registry_target).expect("create registry target");
     let effective_uid = unsafe { libc::geteuid() };
-    let registry = temp.path().join(format!(
-        "nez-bwrap-synthetic-mount-targets-{effective_uid}"
-    ));
+    let registry = temp
+        .path()
+        .join(format!("nez-bwrap-synthetic-mount-targets-{effective_uid}"));
     std::os::unix::fs::symlink(&registry_target, &registry).expect("symlink registry");
 
     let cwd = AbsolutePathBuf::try_from(workspace).expect("absolute workspace");

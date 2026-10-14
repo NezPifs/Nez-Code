@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+use futures::StreamExt;
 use nez_exec_server::EnvironmentAccess;
 use nez_exec_server::EnvironmentManager;
 use nez_exec_server::FileSystemEnvironmentAccessor;
@@ -12,7 +13,6 @@ use nez_protocol::protocol::SkillScope;
 use nez_skills::EnvironmentSkillMetadata;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use futures::StreamExt;
 
 use crate::catalog::SkillAuthority;
 use crate::catalog::SkillCatalog;

@@ -9,8 +9,8 @@ use nez_api::Provider;
 use nez_api::SharedAuthProvider;
 use nez_api::TransportError;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::GatewayAuthManager;
+use nez_login::NezAuth;
 use nez_login::WorkspaceRoutingRequest;
 use nez_login::default_client::ClientRedirectPolicy;
 use nez_model_provider_info::ModelProviderInfo;
@@ -258,9 +258,7 @@ pub trait ModelProvider: fmt::Debug + Send + Sync {
     }
 
     /// Returns the auth provider used to attach request credentials.
-    fn api_auth(
-        &self,
-    ) -> ModelProviderFuture<'_, nez_protocol::error::Result<SharedAuthProvider>> {
+    fn api_auth(&self) -> ModelProviderFuture<'_, nez_protocol::error::Result<SharedAuthProvider>> {
         Box::pin(async move {
             let auth = self.auth().await;
             resolve_provider_auth(auth.as_ref(), self.info())
@@ -469,9 +467,7 @@ impl ModelProvider for ConfiguredModelProvider {
         })
     }
 
-    fn api_auth(
-        &self,
-    ) -> ModelProviderFuture<'_, nez_protocol::error::Result<SharedAuthProvider>> {
+    fn api_auth(&self) -> ModelProviderFuture<'_, nez_protocol::error::Result<SharedAuthProvider>> {
         Box::pin(async move {
             let auth = self.auth().await;
             let primary = resolve_provider_auth(auth.as_ref(), &self.info)?;
@@ -1205,8 +1201,7 @@ printf '%s\n' '{"AccessKeyId":"exported","SecretAccessKey":"secret"}'
             ModelProviderInfo::create_amazon_bedrock_provider(/*aws*/ None),
             /*auth_manager*/ None,
         );
-        let manager =
-            provider.models_manager(test_nez_home(), /*config_model_catalog*/ None);
+        let manager = provider.models_manager(test_nez_home(), /*config_model_catalog*/ None);
         let uncached_manager =
             provider.models_manager_without_cache(/*config_model_catalog*/ None);
 
@@ -1368,10 +1363,7 @@ printf '%s\n' '{"AccessKeyId":"exported","SecretAccessKey":"secret"}'
             nez_login::default_client::RESIDENCY_HEADER_NAME.to_string(),
             "us".into(),
         )]));
-        for auth in [
-            None,
-            Some(NezAuth::create_dummy_chatgpt_auth_for_testing()),
-        ] {
+        for auth in [None, Some(NezAuth::create_dummy_chatgpt_auth_for_testing())] {
             // Disabled discovery must ignore the catalog cached by the enabled run.
             for enabled in [true, false] {
                 let provider = create_model_provider(

@@ -15,16 +15,16 @@ use axum::response::IntoResponse;
 use axum::response::sse::Event;
 use axum::response::sse::Sse;
 use axum::routing::post;
+use futures::StreamExt;
 use nez_config::McpServerTransportConfig;
 use nez_core::config::ConfigBuilder;
 use nez_core::plugins_manager_for_config;
 use nez_exec_server_test_support::environment_manager_without_environments;
 use nez_login::AuthManager;
-use nez_login::NezAuth;
 use nez_login::ExternalAuth;
 use nez_login::ExternalAuthFuture;
 use nez_login::ExternalAuthRefreshContext;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
+use nez_login::NezAuth;
 use nez_mcp::EffectiveMcpServer;
 use nez_mcp::McpEventNotification;
 use nez_mcp::McpResourceClient;
@@ -33,8 +33,8 @@ use nez_mcp::McpRuntimeContext;
 use nez_mcp::McpRuntimeInput;
 use nez_mcp::McpServerRegistration;
 use nez_mcp::McpStartupPolicy;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::ResolvedMcpCatalog;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -217,13 +217,11 @@ async fn event_connections_open_after_runtime_shutdown_with_current_auth() -> Re
 
     fixture
         .auth
-        .set_external_auth(Arc::new(StaticAuth(
-            NezAuth::from_external_chatgpt_tokens(
-                "header.e30.refreshed",
-                "account",
-                /*chatgpt_plan_type*/ None,
-            )?,
-        )))
+        .set_external_auth(Arc::new(StaticAuth(NezAuth::from_external_chatgpt_tokens(
+            "header.e30.refreshed",
+            "account",
+            /*chatgpt_plan_type*/ None,
+        )?)))
         .await?;
     let mut stream = opener
         .open("test.event", &json!({}), /*request_meta*/ None)

@@ -39,12 +39,11 @@ fn collect(history: &History, images: &[ContentItem]) -> CollectedTranscript {
         kind: PlannedActionKind::Command,
         reason: None,
     };
-    let reviews =
-        PreviousReviews::try_from_fragments(vec![nez_guardian_context::PreviousReview {
-            id: ResponseItemId::from_server("review-readme".to_owned()),
-            fragment: "Approved reading README.md only.".to_owned(),
-        }])
-        .unwrap();
+    let reviews = PreviousReviews::try_from_fragments(vec![nez_guardian_context::PreviousReview {
+        id: ResponseItemId::from_server("review-readme".to_owned()),
+        fragment: "Approved reading README.md only.".to_owned(),
+    }])
+    .unwrap();
     TranscriptConfig::default()
         .collect_context(ContextInput {
             target: ContextTarget::Async,

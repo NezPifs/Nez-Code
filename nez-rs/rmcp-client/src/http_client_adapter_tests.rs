@@ -1,9 +1,9 @@
 use std::io::ErrorKind;
 
-use nez_exec_server::HttpRedirectPolicy;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::header::AUTHORIZATION;
+use nez_exec_server::HttpRedirectPolicy;
 use pretty_assertions::assert_eq;
 
 use super::HttpHeader;

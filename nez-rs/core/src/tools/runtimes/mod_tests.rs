@@ -5,12 +5,13 @@ use crate::sandboxing::ExecOptions;
 use crate::shell::ShellType;
 use crate::tools::sandboxing::SandboxAttempt;
 use crate::tools::sandboxing::managed_network_for_sandbox_permissions;
-#[cfg(target_os = "macos")]
-use nez_network_proxy::NEZ_PROXY_GIT_SSH_COMMAND_MARKER;
+use core_test_support::PathBufExt;
 use nez_network_proxy::CUSTOM_CA_ENV_KEYS;
 use nez_network_proxy::ConfigReloader;
 use nez_network_proxy::ConfigReloaderFuture;
 use nez_network_proxy::ConfigState;
+#[cfg(target_os = "macos")]
+use nez_network_proxy::NEZ_PROXY_GIT_SSH_COMMAND_MARKER;
 use nez_network_proxy::NetworkProxy;
 use nez_network_proxy::NetworkProxyConfig;
 use nez_network_proxy::NetworkProxyConstraints;
@@ -26,7 +27,6 @@ use nez_sandboxing::SandboxManager;
 use nez_sandboxing::SandboxType;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathBufExt;
 use pretty_assertions::assert_eq;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
@@ -510,8 +510,7 @@ fn maybe_wrap_shell_lc_with_snapshot_restores_nez_metadata_from_env() {
     let command = vec![
         "/bin/bash".to_string(),
         "-lc".to_string(),
-        "printf '%s|%s|%s' \"$NEZ_THREAD_ID\" \"$NEZ_TOOL_CALL_ID\" \"$NEZ_VERSION\""
-            .to_string(),
+        "printf '%s|%s|%s' \"$NEZ_THREAD_ID\" \"$NEZ_TOOL_CALL_ID\" \"$NEZ_VERSION\"".to_string(),
     ];
     let env = HashMap::from([
         ("NEZ_THREAD_ID".to_string(), "nested-thread".to_string()),

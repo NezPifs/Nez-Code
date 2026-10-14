@@ -192,8 +192,7 @@ async fn feedback_upload_recovers_persisted_evidence_and_reports_sqlite_failures
     MockResponsesConfig::new(&models.uri()).write(home.path())?;
     let thread_id = nez_protocol::ThreadId::new();
     let sqlite = SqliteConfig::new_for_testing(home.path().abs());
-    let state =
-        nez_state::StateRuntime::init(sqlite.clone(), "mock_provider".to_string()).await?;
+    let state = nez_state::StateRuntime::init(sqlite.clone(), "mock_provider".to_string()).await?;
     let review = json!({
         "reviewed_thread_id": thread_id,
         "status": "denied",

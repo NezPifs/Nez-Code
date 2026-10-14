@@ -55,10 +55,7 @@ pub struct MetricsConfig {
 }
 
 impl MetricsConfig {
-    pub fn with_http_client_factory(
-        mut self,
-        factory: nez_http_client::HttpClientFactory,
-    ) -> Self {
+    pub fn with_http_client_factory(mut self, factory: nez_http_client::HttpClientFactory) -> Self {
         self.http_client_factory = factory;
         self
     }

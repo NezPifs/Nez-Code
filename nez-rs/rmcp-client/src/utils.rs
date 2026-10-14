@@ -1,12 +1,12 @@
 use anyhow::Result;
 use anyhow::anyhow;
-use nez_config::types::McpServerEnvVar;
-use nez_network_proxy::CUSTOM_CA_ENV_KEYS;
-use nez_protocol::shell_environment::is_non_inheritable_env_var;
 use http::HeaderMap;
 use http::HeaderName;
 use http::HeaderValue;
 use http::header::USER_AGENT;
+use nez_config::types::McpServerEnvVar;
+use nez_network_proxy::CUSTOM_CA_ENV_KEYS;
+use nez_protocol::shell_environment::is_non_inheritable_env_var;
 use std::collections::HashMap;
 use std::env;
 use std::ffi::OsString;
@@ -175,8 +175,7 @@ pub(crate) const DEFAULT_ENV_VARS: &[&str] = &[
 ];
 
 #[cfg(windows)]
-pub(crate) const DEFAULT_ENV_VARS: &[&str] =
-    nez_protocol::shell_environment::WINDOWS_CORE_ENV_VARS;
+pub(crate) const DEFAULT_ENV_VARS: &[&str] = nez_protocol::shell_environment::WINDOWS_CORE_ENV_VARS;
 
 #[cfg(test)]
 mod tests {

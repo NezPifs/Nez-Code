@@ -15,6 +15,9 @@ use async_channel::Sender;
 use async_channel::TrySendError;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use http::HeaderMap;
+use http::HeaderValue;
+use http::header::AUTHORIZATION;
 use nez_api::ApiError;
 use nez_api::Provider as ApiProvider;
 use nez_api::RealtimeAudioFrame;
@@ -41,8 +44,6 @@ use nez_protocol::auth::AuthMode;
 use nez_protocol::error::NezErr;
 use nez_protocol::error::Result as NezResult;
 use nez_protocol::models::MessagePhase;
-use nez_protocol::protocol::NezErrorInfo;
-use nez_protocol::protocol::NezResponseHandoffMode;
 use nez_protocol::protocol::ConversationAudioParams;
 use nez_protocol::protocol::ConversationSpeechParams;
 use nez_protocol::protocol::ConversationStartParams;
@@ -52,6 +53,8 @@ use nez_protocol::protocol::ConversationTextRole;
 use nez_protocol::protocol::ErrorEvent;
 use nez_protocol::protocol::Event;
 use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezErrorInfo;
+use nez_protocol::protocol::NezResponseHandoffMode;
 use nez_protocol::protocol::RealtimeConversationClosedEvent;
 use nez_protocol::protocol::RealtimeConversationRealtimeEvent;
 use nez_protocol::protocol::RealtimeConversationSdpEvent;
@@ -65,9 +68,6 @@ use nez_utils_output_truncation::approx_bytes_for_tokens;
 use nez_utils_string::approx_token_count;
 use nez_utils_string::take_bytes_at_char_boundary;
 use nez_utils_string::to_ascii_json_string;
-use http::HeaderMap;
-use http::HeaderValue;
-use http::header::AUTHORIZATION;
 use serde_json::json;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -958,10 +958,7 @@ impl RealtimeConversationManager {
         let phase = if handoff.routes_handoff_by_bem()
             && !matches!(phase, Some(MessagePhase::PartialAnswer))
         {
-            match bem_message_phase(
-                &output_text,
-                &handoff.nez_response_handoff_channel_prefixes,
-            ) {
+            match bem_message_phase(&output_text, &handoff.nez_response_handoff_channel_prefixes) {
                 Some(phase) => Some(phase),
                 None => {
                     warn!("BEM output did not contain a recognized channel header");
@@ -1096,11 +1093,7 @@ impl RealtimeConversationManager {
         }
     }
 
-    pub(crate) async fn stream_handoff_delta(
-        &self,
-        item_id: &str,
-        delta: String,
-    ) -> NezResult<()> {
+    pub(crate) async fn stream_handoff_delta(&self, item_id: &str, delta: String) -> NezResult<()> {
         if delta.is_empty() {
             return Ok(());
         }
@@ -1883,8 +1876,7 @@ pub(crate) async fn handle_audio(
         if sess.conversation.running_state().await.is_some() {
             warn!("realtime audio input failed while the session was already ending");
         } else {
-            send_conversation_error(sess, sub_id, err.to_string(), NezErrorInfo::BadRequest)
-                .await;
+            send_conversation_error(sess, sub_id, err.to_string(), NezErrorInfo::BadRequest).await;
         }
     }
 }
@@ -2005,8 +1997,7 @@ pub(crate) async fn handle_text(
         if sess.conversation.running_state().await.is_some() {
             warn!("realtime text input failed while the session was already ending");
         } else {
-            send_conversation_error(sess, sub_id, err.to_string(), NezErrorInfo::BadRequest)
-                .await;
+            send_conversation_error(sess, sub_id, err.to_string(), NezErrorInfo::BadRequest).await;
         }
     }
 }
@@ -2022,8 +2013,7 @@ pub(crate) async fn handle_speech(
         if sess.conversation.running_state().await.is_some() {
             warn!("realtime speech append failed while the session was already ending");
         } else {
-            send_conversation_error(sess, sub_id, err.to_string(), NezErrorInfo::BadRequest)
-                .await;
+            send_conversation_error(sess, sub_id, err.to_string(), NezErrorInfo::BadRequest).await;
         }
     }
 }

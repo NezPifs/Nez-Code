@@ -165,10 +165,7 @@ impl std::fmt::Debug for ToolCall<'_> {
             .field("call_id", &self.call_id)
             .field("tool_name", &self.tool_name)
             .field("model", &self.model)
-            .field(
-                "has_nez_turn_metadata",
-                &self.nez_turn_metadata.is_some(),
-            )
+            .field("has_nez_turn_metadata", &self.nez_turn_metadata.is_some())
             .field("truncation_policy", &self.truncation_policy)
             .field("source", &self.source)
             .field("conversation_history", &self.conversation_history)

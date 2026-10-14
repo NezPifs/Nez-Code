@@ -2,6 +2,8 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
+use http::HeaderMap;
+use http::HeaderValue;
 use nez_agent_identity::AgentIdentityKey;
 use nez_agent_identity::authorization_header_for_agent_task;
 use nez_api::AgentIdentityTelemetry;
@@ -18,8 +20,6 @@ use nez_login::auth::AgentIdentityAuthPolicy;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_protocol::error::NezErr;
 use nez_protocol::protocol::SessionSource;
-use http::HeaderMap;
-use http::HeaderValue;
 
 use crate::bearer_auth_provider::BearerAuthProvider;
 
@@ -306,9 +306,7 @@ fn bearer_auth_for_provider(
 /// Builds request-header auth for a first-party Nez auth snapshot.
 pub fn auth_provider_from_auth(auth: &NezAuth) -> SharedAuthProvider {
     match auth {
-        NezAuth::AgentIdentity(auth) => {
-            Arc::new(AgentIdentityAuthProvider { auth: auth.clone() })
-        }
+        NezAuth::AgentIdentity(auth) => Arc::new(AgentIdentityAuthProvider { auth: auth.clone() }),
         NezAuth::Headers(auth) => Arc::new(HeaderAuthProvider { auth: auth.clone() }),
         NezAuth::BedrockApiKey(_) | NezAuth::BedrockAccessKeys(_) => {
             unreachable!("{BEDROCK_API_KEY_UNSUPPORTED_MESSAGE}")
@@ -341,6 +339,7 @@ pub fn auth_provider_from_auth_manager(
 
 #[cfg(test)]
 mod tests {
+    use http::header::AUTHORIZATION;
     use nez_agent_identity::generate_agent_key_material;
     use nez_login::AuthCredentialsStoreMode;
     use nez_login::AuthKeyringBackendKind;
@@ -352,7 +351,6 @@ mod tests {
     use nez_protocol::account::PlanType;
     use nez_protocol::config_types::ModelProviderAuthInfo;
     use nez_protocol::error::NezErrorDetails;
-    use http::header::AUTHORIZATION;
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use std::num::NonZeroU64;
@@ -678,9 +676,8 @@ mod tests {
 
     #[tokio::test]
     async fn first_party_run_scope_uses_agent_assertion_and_exposes_telemetry() {
-        let auth = NezAuth::AgentIdentity(
-            agent_identity_auth(/*chatgpt_account_is_fedramp*/ false).await,
-        );
+        let auth =
+            NezAuth::AgentIdentity(agent_identity_auth(/*chatgpt_account_is_fedramp*/ false).await);
         let provider = ModelProviderInfo::create_openai_provider(/*base_url*/ None);
 
         let auth = resolve_provider_auth_for_scope(

@@ -1,5 +1,12 @@
 //! Trusted reasoning-effort updates follow surviving history and the next turn's selected settings.
 
+use core_test_support::responses;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::skip_if_no_network;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::ForkSnapshot;
 use nez_core::RecoverTurnRequest;
@@ -25,13 +32,6 @@ use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::ThreadSource;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::skip_if_no_network;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use std::sync::Arc;
@@ -503,10 +503,7 @@ async fn reasoning_effort_override_recovery_reuses_trusted_tail_update() -> anyh
     let resumed = resume_builder
         .resume(&recovery_server, Arc::clone(&test.home), rollout_path)
         .await?;
-    resumed
-        .nez
-        .restore_thread_settings(thread_settings)
-        .await?;
+    resumed.nez.restore_thread_settings(thread_settings).await?;
     assert_eq!(
         resumed
             .nez

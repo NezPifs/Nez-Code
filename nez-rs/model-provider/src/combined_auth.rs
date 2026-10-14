@@ -3,6 +3,9 @@
 use std::sync::Arc;
 
 use crate::auth::ResolvedProviderAuth;
+use http::HeaderMap;
+use http::HeaderName;
+use http::HeaderValue;
 use nez_api::AuthError;
 use nez_api::AuthHeadersFuture;
 use nez_api::AuthProvider;
@@ -15,9 +18,6 @@ use nez_model_provider_info::GatewayOAuthDelivery;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_protocol::error::NezErr;
 use nez_protocol::error::Result;
-use http::HeaderMap;
-use http::HeaderName;
-use http::HeaderValue;
 
 pub(crate) async fn compose_auth(
     provider: &ModelProviderInfo,

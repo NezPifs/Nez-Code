@@ -2059,8 +2059,7 @@ mod tests {
             .await
             .expect("upsert current");
 
-        let mut fresh =
-            test_thread_metadata(&nez_home, fresh_thread_id, nez_home.join("fresh"));
+        let mut fresh = test_thread_metadata(&nez_home, fresh_thread_id, nez_home.join("fresh"));
         fresh.created_at = fresh_at;
         fresh.updated_at = fresh_at;
         runtime.upsert_thread(&fresh).await.expect("upsert fresh");
@@ -2147,11 +2146,8 @@ mod tests {
             .await
             .expect("upsert current thread");
 
-        let mut up_to_date = test_thread_metadata(
-            &nez_home,
-            up_to_date_thread_id,
-            nez_home.join("up-to-date"),
-        );
+        let mut up_to_date =
+            test_thread_metadata(&nez_home, up_to_date_thread_id, nez_home.join("up-to-date"));
         up_to_date.created_at = eligible_newer_at;
         up_to_date.updated_at = eligible_newer_at;
         runtime
@@ -2188,8 +2184,7 @@ mod tests {
             "seed stage1 success should complete for up-to-date thread"
         );
 
-        let mut stale =
-            test_thread_metadata(&nez_home, stale_thread_id, nez_home.join("stale"));
+        let mut stale = test_thread_metadata(&nez_home, stale_thread_id, nez_home.join("stale"));
         stale.created_at = eligible_older_at;
         stale.updated_at = eligible_older_at;
         runtime
@@ -2280,11 +2275,8 @@ mod tests {
             .await
             .expect("disable thread memory mode");
 
-        let mut paginated = test_thread_metadata(
-            &nez_home,
-            paginated_thread_id,
-            nez_home.join("paginated"),
-        );
+        let mut paginated =
+            test_thread_metadata(&nez_home, paginated_thread_id, nez_home.join("paginated"));
         paginated.created_at = eligible_at;
         paginated.updated_at = eligible_at;
         paginated.history_mode = ThreadHistoryMode::Paginated;
@@ -2475,11 +2467,8 @@ mod tests {
 
         for idx in 0..total_candidates {
             let thread_id = ThreadId::from_string(&Uuid::new_v4().to_string()).expect("thread id");
-            let mut metadata = test_thread_metadata(
-                &nez_home,
-                thread_id,
-                nez_home.join(format!("thread-{idx}")),
-            );
+            let mut metadata =
+                test_thread_metadata(&nez_home, thread_id, nez_home.join(format!("thread-{idx}")));
             metadata.created_at = eligible_at - Duration::seconds(idx as i64);
             metadata.updated_at = eligible_at - Duration::seconds(idx as i64);
             runtime
@@ -2599,11 +2588,8 @@ WHERE kind = 'memory_stage1'
         let eligible_at = Utc::now() - Duration::hours(13);
         for idx in 0..200 {
             let thread_id = ThreadId::from_string(&Uuid::new_v4().to_string()).expect("thread id");
-            let mut metadata = test_thread_metadata(
-                &nez_home,
-                thread_id,
-                nez_home.join(format!("thread-{idx}")),
-            );
+            let mut metadata =
+                test_thread_metadata(&nez_home, thread_id, nez_home.join(format!("thread-{idx}")));
             metadata.created_at = eligible_at - Duration::seconds(idx as i64);
             metadata.updated_at = eligible_at - Duration::seconds(idx as i64);
             runtime
@@ -3434,8 +3420,7 @@ VALUES (?, ?, ?, ?, ?)
             (thread_id_enabled, "workspace-enabled"),
             (thread_id_polluted, "workspace-polluted"),
         ] {
-            let mut metadata =
-                test_thread_metadata(&nez_home, thread_id, nez_home.join(workspace));
+            let mut metadata = test_thread_metadata(&nez_home, thread_id, nez_home.join(workspace));
             metadata.history_mode = ThreadHistoryMode::Paginated;
             runtime
                 .upsert_thread(&metadata)

@@ -11,8 +11,7 @@ pub struct TestNezExecBuilder {
 impl TestNezExecBuilder {
     pub fn cmd(&self) -> assert_cmd::Command {
         let mut cmd = assert_cmd::Command::new(
-            nez_utils_cargo_bin::cargo_bin("nez-exec")
-                .expect("should find binary for nez-exec"),
+            nez_utils_cargo_bin::cargo_bin("nez-exec").expect("should find binary for nez-exec"),
         );
         cmd.current_dir(self.cwd.path())
             .env("NEZ_HOME", self.home.path())

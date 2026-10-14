@@ -1,3 +1,4 @@
+use core_test_support::test_nez::local_requests;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::EnvironmentConfig;
 use nez_core::TurnInputRequest;
@@ -6,7 +7,6 @@ use nez_features::Feature;
 use nez_protocol::approvals::ExecApprovalKind;
 use nez_protocol::protocol::ReviewDecision;
 use nez_protocol::protocol::SandboxPolicy;
-use core_test_support::test_nez::local_requests;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
@@ -14,28 +14,6 @@ use std::sync::OnceLock;
 
 use anyhow::Context;
 use anyhow::Result;
-use nez_exec_server::CreateDirectoryOptions;
-use nez_protocol::config_types::CollaborationMode;
-use nez_protocol::config_types::EnvironmentVariablePattern;
-use nez_protocol::config_types::ModeKind;
-use nez_protocol::config_types::Settings;
-use nez_protocol::config_types::ShellEnvironmentPolicy;
-use nez_protocol::config_types::ShellEnvironmentPolicyInherit;
-use nez_protocol::config_types::WindowsSandboxLevel;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::models::PermissionProfileSnapshot;
-use nez_protocol::models::ResponseItem;
-use nez_protocol::permissions::NetworkSandboxPolicy;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ExecCommandSource;
-use nez_protocol::protocol::ExecCommandStatus;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::shell_environment::NEZ_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
-use nez_protocol::user_input::UserInput;
-use nez_utils_output_truncation::approx_tokens_from_byte_count;
-use nez_utils_path_uri::PathUri;
 use core_test_support::TempDirExt;
 use core_test_support::assert_regex_match;
 use core_test_support::managed_network_requirements_loader;
@@ -61,6 +39,28 @@ use core_test_support::test_nez::turn_permission_fields;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
 use core_test_support::wait_for_event_with_timeout;
+use nez_exec_server::CreateDirectoryOptions;
+use nez_protocol::config_types::CollaborationMode;
+use nez_protocol::config_types::EnvironmentVariablePattern;
+use nez_protocol::config_types::ModeKind;
+use nez_protocol::config_types::Settings;
+use nez_protocol::config_types::ShellEnvironmentPolicy;
+use nez_protocol::config_types::ShellEnvironmentPolicyInherit;
+use nez_protocol::config_types::WindowsSandboxLevel;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::models::PermissionProfileSnapshot;
+use nez_protocol::models::ResponseItem;
+use nez_protocol::permissions::NetworkSandboxPolicy;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ExecCommandSource;
+use nez_protocol::protocol::ExecCommandStatus;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::shell_environment::NEZ_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
+use nez_protocol::user_input::UserInput;
+use nez_utils_output_truncation::approx_tokens_from_byte_count;
+use nez_utils_path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use regex_lite::Regex;
 use serde_json::Value;
@@ -532,10 +532,7 @@ async fn exec_command_uses_installed_environment_shell_policy_with_explicit_over
             r#set: HashMap::from([
                 ("KEEP".to_string(), "preserved".to_string()),
                 ("DROP".to_string(), "filtered".to_string()),
-                (
-                    "NEZ_VERSION".to_string(),
-                    "configured-version".to_string(),
-                ),
+                ("NEZ_VERSION".to_string(), "configured-version".to_string()),
             ]),
             ..Default::default()
         };
@@ -666,29 +663,28 @@ async fn unified_exec_intercepts_apply_patch_exec_command() -> Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, &cwd);
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "apply patch via unified exec".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "apply patch via unified exec".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let mut saw_patch_begin = false;
     let mut patch_end = None;
@@ -2951,29 +2947,28 @@ async fn unified_exec_keeps_long_running_session_after_turn_end() -> Result<()> 
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, turn_cwd.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "keep unified exec process after turn end".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(turn_cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "keep unified exec process after turn end".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(turn_cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let begin_event = wait_for_event_match(&nez, |msg| match msg {
         EventMsg::ExecCommandBegin(ev) if ev.call_id == call_id => Some(ev.clone()),
@@ -3045,29 +3040,28 @@ async fn unified_exec_interrupt_preserves_long_running_session() -> Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, turn_cwd.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "interrupt long-running unified exec".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(turn_cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "interrupt long-running unified exec".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(turn_cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let _begin_event = wait_for_event_match(&nez, |msg| match msg {
         EventMsg::ExecCommandBegin(ev) if ev.call_id == call_id => Some(ev.clone()),
@@ -3500,10 +3494,7 @@ shell_tool = true
     let pid = wait_for_pid_file(&pid_path).await?;
 
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
     wait_for_process_exit(&pid).await?;
 
     Ok(())
@@ -3646,29 +3637,28 @@ async fn unified_exec_runs_under_sandbox() -> Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::read_only(), turn_cwd.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "summarize large output".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(turn_cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "summarize large output".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(turn_cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
@@ -3762,29 +3752,28 @@ async fn unified_exec_enforces_glob_deny_read_policy() -> Result<()> {
     let turn_cwd = cwd.abs();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::read_only(), turn_cwd.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "read the fixture files".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(turn_cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "read the fixture files".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(turn_cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
@@ -3891,29 +3880,28 @@ async fn unified_exec_python_prompt_under_seatbelt() -> Result<()> {
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::read_only(), turn_cwd.as_path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "start python under seatbelt".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(turn_cwd)),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "start python under seatbelt".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(turn_cwd)),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 

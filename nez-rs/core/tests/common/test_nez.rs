@@ -15,6 +15,7 @@ use std::time::Duration;
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
+use futures::future::BoxFuture;
 use nez_analytics::AnalyticsEventsClient;
 use nez_attachment_store::AttachmentStore;
 use nez_config::CloudConfigBundleLoader;
@@ -75,7 +76,6 @@ use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::LegacyAppPathString;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use futures::future::BoxFuture;
 use serde_json::Value;
 use tempfile::TempDir;
 use wiremock::MockServer;
@@ -227,8 +227,7 @@ impl TestEnv {
             },
             None => local(cwd.clone()),
         };
-        let environment =
-            nez_exec_server::Environment::create_for_tests(exec_server_url.clone())?;
+        let environment = nez_exec_server::Environment::create_for_tests(exec_server_url.clone())?;
         Ok(Self {
             environment,
             exec_server_url,
@@ -724,11 +723,7 @@ impl TestNezBuilder {
         .await
     }
 
-    pub async fn restart(
-        &mut self,
-        server: &MockServer,
-        previous: &TestNez,
-    ) -> Result<TestNez> {
+    pub async fn restart(&mut self, server: &MockServer, previous: &TestNez) -> Result<TestNez> {
         let rollout_path = previous
             .session_configured
             .rollout_path

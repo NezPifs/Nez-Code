@@ -10,6 +10,7 @@ use crate::tools::approvals::ApprovalAction;
 use crate::tools::approvals::ApprovalContext;
 use crate::tools::events::truncate_rejection_message;
 use crate::tools::sandboxing::ToolError;
+use indexmap::IndexMap;
 use nez_network_proxy::BlockedRequest;
 use nez_network_proxy::BlockedRequestObserver;
 use nez_network_proxy::EnvironmentNetworkPolicy;
@@ -33,7 +34,6 @@ use nez_protocol::protocol::WarningEvent;
 use nez_sandboxing::record_network_sandbox_violation;
 use nez_tools::ToolName;
 use nez_utils_path_uri::Platform;
-use indexmap::IndexMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io;
@@ -1211,9 +1211,9 @@ pub(crate) async fn begin_network_approval(
             fallback_policy_decider,
         )
         .map_err(|err| {
-            ToolError::Nez(nez_protocol::error::NezErr::Io(io::Error::other(
-                format!("failed to create execution-scoped network proxy: {err}"),
-            )))
+            ToolError::Nez(nez_protocol::error::NezErr::Io(io::Error::other(format!(
+                "failed to create execution-scoped network proxy: {err}"
+            ))))
         })?;
     let cancellation_token = CancellationToken::new();
     session

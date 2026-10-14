@@ -4,10 +4,10 @@ use crate::error::ApiError;
 use crate::provider::Provider;
 use crate::search::SearchRequest;
 use crate::search::SearchResponse;
-use nez_client::HttpTransport;
-use nez_client::RequestTelemetry;
 use http::HeaderMap;
 use http::Method;
+use nez_client::HttpTransport;
+use nez_client::RequestTelemetry;
 use serde_json::to_value;
 use std::sync::Arc;
 
@@ -64,6 +64,7 @@ mod tests {
     use crate::search::SearchInput;
     use crate::search::SearchQuery;
     use crate::search::SearchSettings;
+    use http::StatusCode;
     use nez_client::Request;
     use nez_client::RequestBody;
     use nez_client::Response;
@@ -73,7 +74,6 @@ mod tests {
     use nez_protocol::models::ContentItem;
     use nez_protocol::models::ImageReference;
     use nez_protocol::models::ResponseItem;
-    use http::StatusCode;
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use std::sync::Mutex;

@@ -1,6 +1,25 @@
 use anyhow::Context;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::TempDirExt;
+use core_test_support::responses;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::strip_metadata;
+use core_test_support::responses::strip_response_item_id;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use image::GenericImageView;
+use image::ImageBuffer;
+use image::Rgba;
 use nez_attachment_store::AttachmentStore;
 use nez_attachment_store::AttachmentStoreError;
 use nez_attachment_store::AttachmentStoreErrorKind;
@@ -32,25 +51,6 @@ use nez_protocol::user_input::ByteRange;
 use nez_protocol::user_input::TextElement;
 use nez_protocol::user_input::UserInput;
 use nez_utils_image::data_url_from_bytes;
-use core_test_support::TempDirExt;
-use core_test_support::responses;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::strip_metadata;
-use core_test_support::responses::strip_response_item_id;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use image::GenericImageView;
-use image::ImageBuffer;
-use image::Rgba;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use std::fs;
@@ -175,35 +175,34 @@ async fn copy_paste_local_image_persists_rollout_request_shape() -> anyhow::Resu
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![
-                UserInput::LocalImage {
-                    path: abs_path.clone(),
-                    detail: None,
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![
+            UserInput::LocalImage {
+                path: abs_path.clone(),
+                detail: None,
+            },
+            UserInput::Text {
+                text: "pasted image".to_string(),
+                text_elements: Vec::new(),
+            },
+        ])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd.abs())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
                 },
-                UserInput::Text {
-                    text: "pasted image".to_string(),
-                    text_elements: Vec::new(),
-                },
-            ])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd.abs())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     nez.submit(Op::Shutdown).await?;
@@ -273,37 +272,36 @@ async fn drag_drop_image_persists_rollout_request_shape() -> anyhow::Result<()> 
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![
-                UserInput::Image {
-                    image: ImageReference::Inline {
-                        image_url: image_url.clone(),
-                    },
-                    detail: None,
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![
+            UserInput::Image {
+                image: ImageReference::Inline {
+                    image_url: image_url.clone(),
                 },
-                UserInput::Text {
-                    text: "dropped image".to_string(),
-                    text_elements: Vec::new(),
+                detail: None,
+            },
+            UserInput::Text {
+                text: "dropped image".to_string(),
+                text_elements: Vec::new(),
+            },
+        ])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd.abs())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: session_model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
                 },
-            ])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd.abs())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: session_model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     nez.submit(Op::Shutdown).await?;

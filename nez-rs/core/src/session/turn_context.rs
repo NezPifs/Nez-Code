@@ -13,6 +13,9 @@ use crate::shell_snapshot::ShellSnapshotSandbox;
 use crate::tools::sandboxing::configured_windows_sandbox_selection;
 use crate::tools::sandboxing::executor_windows_sandbox_selection;
 use arc_swap::ArcSwap;
+use futures::FutureExt;
+use futures::future::BoxFuture;
+use futures::future::Shared;
 use nez_core_plugins::PluginCommandAttribution;
 use nez_core_plugins::ResolvedPluginMetricsOperation;
 use nez_core_plugins::TrustedPluginRoots;
@@ -43,9 +46,6 @@ use nez_skills_extension::HostSkillsSnapshot;
 use nez_skills_extension::SkillLoadOutcome;
 use nez_utils_path_uri::PathUri;
 use nez_utils_plugins::PluginIdentity;
-use futures::FutureExt;
-use futures::future::BoxFuture;
-use futures::future::Shared;
 use std::path::PathBuf;
 use std::sync::Mutex as StdMutex;
 use std::sync::atomic::AtomicBool;
@@ -761,9 +761,7 @@ impl TurnContext {
             .auth_manager
             .as_deref()
             .is_some_and(AuthManager::current_auth_uses_nez_backend);
-        self.config
-            .features
-            .apps_enabled_for_auth(uses_nez_backend)
+        self.config.features.apps_enabled_for_auth(uses_nez_backend)
             && self.config.orchestrator_mcp_enabled
     }
 

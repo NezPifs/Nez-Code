@@ -110,8 +110,8 @@ async fn create_process_context(use_remote: bool) -> Result<ProcessContext> {
 #[cfg(target_os = "macos")]
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn nez_home_symlink_opt_out_respects_host_config_and_scope() -> Result<()> {
-    use nez_exec_server::WriteFileOptions;
     use common::exec_server::exec_server_with_env;
+    use nez_exec_server::WriteFileOptions;
     use std::os::unix::fs::symlink;
 
     let workspace = TempDir::new()?;
@@ -441,8 +441,7 @@ async fn exec_metadata_overrides_policy_and_cached_snapshot(
                 argv: vec![
                     "/bin/bash".into(),
                     "-lc".into(),
-                    "printf '%s|%s' \"$NEZ_THREAD_ID\" \"${NEZ_TOOL_CALL_ID-unset}\""
-                        .to_string(),
+                    "printf '%s|%s' \"$NEZ_THREAD_ID\" \"${NEZ_TOOL_CALL_ID-unset}\"".to_string(),
                 ],
                 cwd: cwd.clone(),
                 env_policy: Some(policy.clone()),

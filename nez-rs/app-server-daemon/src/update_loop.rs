@@ -11,10 +11,10 @@ use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
+use futures::FutureExt;
 use nez_http_client::ClientRouteClass;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::RouteAwareClientPool;
-use futures::FutureExt;
 #[cfg(unix)]
 use std::os::unix::process::CommandExt;
 use tokio::io::AsyncReadExt;
@@ -426,8 +426,7 @@ async fn update_once(
         return Ok((UpdateLoopControl::Continue, None));
     }
 
-    let managed_nez_bin =
-        resolved_managed_nez_bin(&daemon.current_managed_nez_bin()?).await?;
+    let managed_nez_bin = resolved_managed_nez_bin(&daemon.current_managed_nez_bin()?).await?;
     crate::diagnostics::event(
         "package_selected",
         serde_json::json!({

@@ -50,9 +50,7 @@ impl RealtimeFailureCause {
 impl From<nez_realtime_webrtc::ConnectionError> for RealtimeFailureCause {
     fn from(error: nez_realtime_webrtc::ConnectionError) -> Self {
         match error {
-            nez_realtime_webrtc::ConnectionError::NegotiationTimedOut => {
-                Self::NegotiationTimedOut
-            }
+            nez_realtime_webrtc::ConnectionError::NegotiationTimedOut => Self::NegotiationTimedOut,
             nez_realtime_webrtc::ConnectionError::Failed => Self::ConnectionUnknown,
             nez_realtime_webrtc::ConnectionError::HelperStartup => Self::HelperStartup,
             nez_realtime_webrtc::ConnectionError::RuntimeInitialization => {

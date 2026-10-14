@@ -58,13 +58,11 @@ fn authorize_runtime_client_process(process: &AuthorizedClientProcess) -> Result
     let service = std::env::current_exe()?.canonicalize()?;
     let directory = service.parent().context("service image has no directory")?;
     anyhow::ensure!(
-        ["nez.exe", "nez-code-mode-host.exe"]
-            .iter()
-            .any(|name| {
-                image
-                    .as_os_str()
-                    .eq_ignore_ascii_case(directory.join(name).as_os_str())
-            }),
+        ["nez.exe", "nez-code-mode-host.exe"].iter().any(|name| {
+            image
+                .as_os_str()
+                .eq_ignore_ascii_case(directory.join(name).as_os_str())
+        }),
         "registered Core caller is not from this installed service version"
     );
     Ok(())

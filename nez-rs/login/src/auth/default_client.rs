@@ -4,6 +4,9 @@
 //! Use [`crate::default_client`] or [`nez_login::default_client`] from other crates in this
 //! workspace.
 
+use http::HeaderMap;
+use http::HeaderValue;
+use http::header::USER_AGENT;
 use nez_http_client::BuildRouteAwareHttpClientError;
 use nez_http_client::ClientRouteClass;
 use nez_http_client::HttpClient;
@@ -14,9 +17,6 @@ pub use nez_http_client::RequestBuilder as NezRequestBuilder;
 use nez_http_client::ReqwestTransport;
 use nez_http_client::RouteAwareClientPool;
 use nez_terminal_detection::user_agent;
-use http::HeaderMap;
-use http::HeaderValue;
-use http::header::USER_AGENT;
 use std::sync::LazyLock;
 use std::sync::Mutex;
 use std::sync::RwLock;

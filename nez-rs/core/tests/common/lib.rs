@@ -2,9 +2,9 @@
 
 use anyhow::Context as _;
 use anyhow::ensure;
+use ctor::ctor;
 use nez_arg0::Arg0PathEntryGuard;
 use nez_utils_cargo_bin::CargoBinError;
-use ctor::ctor;
 use std::sync::OnceLock;
 use tempfile::TempDir;
 
@@ -34,9 +34,9 @@ pub mod process;
 pub mod responses;
 pub mod startup;
 pub mod streaming_sse;
+mod test_environment;
 pub mod test_nez;
 pub mod test_nez_exec;
-mod test_environment;
 pub mod tracing;
 
 pub(crate) use test_environment::TestEnvironment;
@@ -262,10 +262,7 @@ pub fn find_nez_linux_sandbox_exe() -> Result<PathBuf, CargoBinError> {
     nez_utils_cargo_bin::cargo_bin("nez-linux-sandbox")
 }
 
-pub async fn wait_for_event<F>(
-    nez: &NezThread,
-    predicate: F,
-) -> nez_protocol::protocol::EventMsg
+pub async fn wait_for_event<F>(nez: &NezThread, predicate: F) -> nez_protocol::protocol::EventMsg
 where
     F: FnMut(&nez_protocol::protocol::EventMsg) -> bool,
 {
@@ -418,8 +415,7 @@ pub fn format_with_current_shell_display(command: &str) -> String {
 }
 
 pub fn format_with_current_shell_non_login(command: &str) -> Vec<String> {
-    nez_core::shell::default_user_shell()
-        .derive_exec_args(command, /*use_login_shell*/ false)
+    nez_core::shell::default_user_shell().derive_exec_args(command, /*use_login_shell*/ false)
 }
 
 pub fn format_with_current_shell_display_non_login(command: &str) -> String {

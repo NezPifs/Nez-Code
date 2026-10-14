@@ -11,6 +11,7 @@ use super::LunaSamplerError;
 use super::MAX_OUTPUT_BYTES;
 use super::connection_pool::RequestMode;
 use super::response::PendingResponse;
+use http::StatusCode;
 use nez_api::ApiError;
 use nez_api::ResponseEvent;
 use nez_api::ResponsesApiRequest;
@@ -22,7 +23,6 @@ use nez_protocol::models::ContentItem;
 use nez_protocol::models::ResponseItem;
 use nez_protocol::protocol::TokenUsage;
 use nez_protocol::turn_input::CyberAccessProgram;
-use http::StatusCode;
 use serde_json::json;
 use std::collections::HashMap;
 use std::future::Future;
@@ -33,8 +33,7 @@ use std::sync::atomic::Ordering;
 use tokio::sync::oneshot;
 
 const MAX_SAMPLING_RETRIES: usize = 2;
-const RESPONSES_LITE_METADATA_KEY: &str =
-    "ws_request_header_x_openai_internal_nez_responses_lite";
+const RESPONSES_LITE_METADATA_KEY: &str = "ws_request_header_x_openai_internal_nez_responses_lite";
 const TURN_METADATA_KEY: &str = "x-nez-turn-metadata";
 
 pub(super) struct SamplingExecution {

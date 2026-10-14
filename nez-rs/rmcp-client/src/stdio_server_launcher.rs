@@ -31,6 +31,8 @@ use std::time::Duration;
 
 use anyhow::Result;
 use anyhow::anyhow;
+use futures::FutureExt;
+use futures::future::BoxFuture;
 use nez_config::types::McpServerEnvVar;
 use nez_exec_server::ExecBackend;
 use nez_exec_server::ExecEnvPolicy;
@@ -47,8 +49,6 @@ use nez_utils_pty::ProcessMode;
 use nez_utils_pty::process_group::kill_process_group;
 #[cfg(unix)]
 use nez_utils_pty::process_group::terminate_process_group;
-use futures::FutureExt;
-use futures::future::BoxFuture;
 use rmcp::service::RoleClient;
 use rmcp::service::RxJsonRpcMessage;
 use rmcp::service::TxJsonRpcMessage;
@@ -343,18 +343,19 @@ impl LocalStdioServerLauncher {
             None => (transport, stderr, process_id, None),
         };
         #[cfg(windows)]
-        let terminator = match job {
-            Some(job) => Some(LocalProcessTerminator::Job(job)),
-            None => process_id.and_then(|process_id| {
-                match nez_utils_pty::JobObject::open_process_handle(process_id) {
-                    Ok(handle) => Some(LocalProcessTerminator::Process(handle)),
-                    Err(error) => {
-                        warn!("Windows MCP process handle unavailable: {error}");
-                        None
+        let terminator =
+            match job {
+                Some(job) => Some(LocalProcessTerminator::Job(job)),
+                None => process_id.and_then(|process_id| {
+                    match nez_utils_pty::JobObject::open_process_handle(process_id) {
+                        Ok(handle) => Some(LocalProcessTerminator::Process(handle)),
+                        Err(error) => {
+                            warn!("Windows MCP process handle unavailable: {error}");
+                            None
+                        }
                     }
-                }
-            }),
-        };
+                }),
+            };
         #[cfg(not(windows))]
         let terminator = process_id.map(LocalProcessTerminator::new);
         let stderr_reader = stderr.map(|stderr| {

@@ -15,7 +15,6 @@ use uuid::Uuid;
 use super::oneshot::Completion;
 use super::process::OutputDrainPolicy;
 
-use crate::nez_thread::BackgroundTerminalInfo;
 use crate::exec_env::NEZ_PERMISSION_PROFILE_ENV_VAR;
 use crate::exec_env::NEZ_THREAD_ID_ENV_VAR;
 use crate::exec_env::NEZ_VERSION_ENV_VAR;
@@ -26,6 +25,7 @@ use crate::exec_env::inject_session_env;
 use crate::exec_env::set_tool_call_id_env_var;
 use crate::exec_policy::ExecApprovalRequest;
 use crate::guardian::GuardianReviewContext;
+use crate::nez_thread::BackgroundTerminalInfo;
 use crate::plugins::metrics::finish_and_track_measurements;
 use crate::sandboxing::ExecOptions;
 use crate::sandboxing::ExecRequest;

@@ -1,6 +1,11 @@
 //! Verifies registration telemetry on real sampling requests, including stream retries.
 
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::responses::namespace_child_tool;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::StartThreadOptions;
 use nez_core::TurnInputRequest;
 use nez_features::Feature;
@@ -15,11 +20,6 @@ use nez_protocol::dynamic_tools::DynamicToolSpec;
 use nez_protocol::openai_models::ToolMode;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::responses::namespace_child_tool;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use opentelemetry_sdk::metrics::InMemoryMetricExporter;
 use opentelemetry_sdk::metrics::data::AggregatedMetrics;
 use opentelemetry_sdk::metrics::data::MetricData;

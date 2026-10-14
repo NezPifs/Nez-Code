@@ -11,6 +11,7 @@ use app_test_support::rollout_path;
 use app_test_support::test_absolute_path;
 use chrono::DateTime;
 use chrono::Utc;
+use core_test_support::responses;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::GitInfo as ApiGitInfo;
 use nez_app_server_protocol::JSONRPCError;
@@ -48,7 +49,6 @@ use nez_rollout::append_rollout_item_to_path;
 use nez_rollout::read_session_meta_line;
 use nez_state::DirectionalThreadSpawnEdgeStatus;
 use nez_utils_absolute_path::test_support::PathExt;
-use core_test_support::responses;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::cmp::Reverse;
@@ -763,12 +763,7 @@ async fn thread_list_respects_cwd_filters() -> Result<()> {
         &first_target_cwd,
     )?;
     set_rollout_cwd(
-        rollout_path(
-            nez_home.path(),
-            "2025-01-02T12-00-00",
-            &second_filtered_id,
-        )
-        .as_path(),
+        rollout_path(nez_home.path(), "2025-01-02T12-00-00", &second_filtered_id).as_path(),
         &second_target_cwd,
     )?;
 

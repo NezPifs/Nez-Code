@@ -1,4 +1,5 @@
 // Aggregates all former standalone integration tests as modules.
+use ctor::ctor;
 use nez_apply_patch::NEZ_CORE_APPLY_PATCH_ARG1;
 #[cfg(unix)]
 use nez_exec_server::NEZ_ARG0_EXEC_HELPER_ARG1;
@@ -7,7 +8,6 @@ use nez_sandboxing::landlock::NEZ_LINUX_SANDBOX_ARG0;
 use nez_test_binary_support::TestBinaryDispatchGuard;
 use nez_test_binary_support::TestBinaryDispatchMode;
 use nez_test_binary_support::configure_test_binary_dispatch;
-use ctor::ctor;
 
 // This code runs before any other tests are run.
 // It allows the test binary to behave like nez and dispatch to apply_patch and nez-linux-sandbox
@@ -68,8 +68,6 @@ mod cloud_config;
 mod code_mode;
 mod code_mode_elicitation;
 mod code_mode_model_messages;
-mod nez_apps_protocol;
-mod nez_delegate;
 mod collaboration_instructions;
 mod compact;
 mod compact_remote;
@@ -95,6 +93,8 @@ mod guardian_authorization_refresh;
 mod guardian_cached_score;
 #[path = "guardian_checkpoint_migration_tests.rs"]
 mod guardian_checkpoint_migration;
+mod nez_apps_protocol;
+mod nez_delegate;
 // Uses the same command-approval harness as guardian_review below.
 mod canonical_plugin_connectors;
 mod gateway_auth;

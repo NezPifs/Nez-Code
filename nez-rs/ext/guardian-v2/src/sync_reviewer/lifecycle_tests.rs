@@ -1,12 +1,6 @@
 //! Exercises Guardian registration and denial cleanup through real turns.
 
 use super::*;
-use nez_core::TurnInputRequest;
-use nez_protocol::openai_models::ModelInfo;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::TurnAbortReason;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_response_created;
 use core_test_support::responses::sse;
@@ -16,6 +10,12 @@ use core_test_support::streaming_sse::start_streaming_sse_server;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
+use nez_core::TurnInputRequest;
+use nez_protocol::openai_models::ModelInfo;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::TurnAbortReason;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 

@@ -1,10 +1,10 @@
 use crate::error_subtype::http_status_sub_error_type;
 use crate::remote::RemotePluginServiceConfig;
+use http::Method;
+use http::StatusCode;
 use nez_http_client::RouteAwareRequestError;
 use nez_login::NezAuth;
 use nez_protocol::protocol::Product;
-use http::Method;
-use http::StatusCode;
 use serde::Deserialize;
 use std::time::Duration;
 use url::Url;
@@ -179,9 +179,7 @@ pub async fn uninstall_remote_plugin(
     Ok(())
 }
 
-fn ensure_nez_backend_auth(
-    auth: Option<&NezAuth>,
-) -> Result<&NezAuth, RemotePluginMutationError> {
+fn ensure_nez_backend_auth(auth: Option<&NezAuth>) -> Result<&NezAuth, RemotePluginMutationError> {
     let Some(auth) = auth else {
         return Err(RemotePluginMutationError::AuthRequired);
     };

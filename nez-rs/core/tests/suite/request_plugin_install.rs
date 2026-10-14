@@ -2,6 +2,24 @@
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_config::types::ToolSuggestDisabledTool;
 use nez_config::types::ToolSuggestDiscoverable;
 use nez_config::types::ToolSuggestDiscoverableType;
@@ -33,24 +51,6 @@ use nez_protocol::protocol::SubAgentSource;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
 use nez_utils_path_uri::PathUri;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -706,10 +706,7 @@ async fn interrupting_concurrent_step_preparation_prevents_sampling() -> Result<
     let barrier = start_gated_step_preparation(&test, &server).await?;
     assert!(response.requests().is_empty());
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
     assert!(
         response.requests().is_empty(),
         "cancelling concurrent step preparation must prevent model sampling"

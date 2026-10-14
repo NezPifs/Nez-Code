@@ -1,10 +1,26 @@
-use nez_core::TurnInputRequest;
 use core_test_support::test_nez::local_requests;
+use nez_core::TurnInputRequest;
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::TempDirExt;
+use core_test_support::responses::ev_apply_patch_custom_tool_call;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_sandbox;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_with_timeout;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::config::Constrained;
 use nez_extension_api::ApprovalReviewContributor;
@@ -33,22 +49,6 @@ use nez_protocol::request_permissions::PermissionGrantScope;
 use nez_protocol::request_permissions::RequestPermissionProfile;
 use nez_protocol::request_permissions::RequestPermissionsResponse;
 use nez_protocol::user_input::UserInput;
-use core_test_support::TempDirExt;
-use core_test_support::responses::ev_apply_patch_custom_tool_call;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_sandbox;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_with_timeout;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;
@@ -531,21 +531,20 @@ async fn remote_model_override_uses_catalog_model_for_strict_auto_review() -> Re
     let cwd_path = cwd.abs();
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::read_only(), cwd_path.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "run the Guardian model override check".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd_path)),
-                approval_policy: Some(AskForApproval::OnRequest),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "run the Guardian model override check".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd_path)),
+            approval_policy: Some(AskForApproval::OnRequest),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let permissions_request = wait_for_event(&nez, |event| {
         matches!(
@@ -558,16 +557,15 @@ async fn remote_model_override_uses_catalog_model_for_strict_auto_review() -> Re
         panic!("expected request_permissions before completion");
     };
     assert_eq!(permissions_request.call_id, permissions_call_id);
-    nez
-        .submit(Op::RequestPermissionsResponse {
-            id: permissions_request.call_id,
-            response: RequestPermissionsResponse {
-                permissions: permissions_request.permissions,
-                scope: PermissionGrantScope::Turn,
-                strict_auto_review: true,
-            },
-        })
-        .await?;
+    nez.submit(Op::RequestPermissionsResponse {
+        id: permissions_request.call_id,
+        response: RequestPermissionsResponse {
+            permissions: permissions_request.permissions,
+            scope: PermissionGrantScope::Turn,
+            strict_auto_review: true,
+        },
+    })
+    .await?;
 
     wait_for_event_with_timeout(
         &nez,

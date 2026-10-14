@@ -1,13 +1,6 @@
 //! Exercises board tools through the runtime, including resume and active-only notices.
 
 use anyhow::Context;
-use nez_agent_message_board_extension::PostMetadata;
-use nez_core::TurnInputRequest;
-use nez_features::Feature;
-use nez_protocol::items::TurnItem;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::MultiAgentVersion;
-use nez_protocol::user_input::UserInput;
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::context_snapshot::SnapshotEntry;
@@ -24,6 +17,13 @@ use core_test_support::streaming_sse::start_streaming_sse_server;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
+use nez_agent_message_board_extension::PostMetadata;
+use nez_core::TurnInputRequest;
+use nez_features::Feature;
+use nez_protocol::items::TurnItem;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::MultiAgentVersion;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -1106,8 +1106,7 @@ async fn nez_instances_share_board_with_fixed_access() -> anyhow::Result<()> {
     let writer = &instances[0];
     let guardian = &instances[1];
     // A same-tree internal runtime has no board access unless its host supplies a connection.
-    let writer_id =
-        nez_protocol::ThreadId::from_string(writer.thread_extension_data().level_id())?;
+    let writer_id = nez_protocol::ThreadId::from_string(writer.thread_extension_data().level_id())?;
     let mut options = test.start_thread_options().await;
     options.session_source = Some(SessionSource::Internal(InternalSessionSource::Guardian));
     options.reserved_thread_id = Some(nez_protocol::ThreadId::from_string(

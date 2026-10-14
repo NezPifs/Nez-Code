@@ -37,14 +37,14 @@ use crate::transport::remote_control::server_api::remote_control_retry_delay;
 use crate::transport::remote_control::server_api::retry_after_with_jitter;
 use axum::http::HeaderValue;
 use base64::Engine;
-use nez_app_server_protocol::RemoteControlConnectionStatus;
-use nez_app_server_protocol::RemoteControlStatusChangedNotification;
-use nez_state::StateRuntime;
-use nez_utils_rustls_provider::ensure_rustls_crypto_provider;
 use futures::SinkExt;
 use futures::StreamExt;
 use futures::stream::SplitSink;
 use futures::stream::SplitStream;
+use nez_app_server_protocol::RemoteControlConnectionStatus;
+use nez_app_server_protocol::RemoteControlStatusChangedNotification;
+use nez_state::StateRuntime;
+use nez_utils_rustls_provider::ensure_rustls_crypto_provider;
 use rand::Rng;
 use std::collections::HashMap;
 use std::collections::VecDeque;
@@ -1850,6 +1850,7 @@ mod tests {
     use crate::transport::remote_control::protocol::StreamId;
     use crate::transport::remote_control::protocol::normalize_remote_control_url;
     use chrono::Utc;
+    use futures::StreamExt;
     use nez_app_server_protocol::ConfigWarningNotification;
     use nez_app_server_protocol::JSONRPCMessage;
     use nez_app_server_protocol::JSONRPCNotification;
@@ -1867,7 +1868,6 @@ mod tests {
     use nez_protocol::auth::AuthMode;
     use nez_state::StateRuntime;
     use nez_utils_absolute_path::test_support::PathExt;
-    use futures::StreamExt;
     use pretty_assertions::assert_eq;
     use std::sync::Arc;
     use tempfile::TempDir;
@@ -3536,11 +3536,9 @@ mod tests {
             .expect("listener should bind");
         let url = format!("ws://{}", listener.local_addr().expect("local address"));
         let connect_task = tokio::spawn(async move {
-            nez_websocket_client::WebSocketConnector::new(
-                &nez_http_client::HttpClientFactory::new(
-                    nez_http_client::OutboundProxyPolicy::ReqwestDefault,
-                ),
-            )
+            nez_websocket_client::WebSocketConnector::new(&nez_http_client::HttpClientFactory::new(
+                nez_http_client::OutboundProxyPolicy::ReqwestDefault,
+            ))
             .unwrap()
             .connect(
                 url.into_client_request().unwrap(),

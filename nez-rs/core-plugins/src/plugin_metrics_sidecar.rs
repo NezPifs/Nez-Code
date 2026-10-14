@@ -1,4 +1,5 @@
 use crate::ResolvedPluginMetricsOperation;
+use futures::StreamExt;
 use nez_analytics::PluginMeasurementRow;
 use nez_exec_server::CreateDirectoryOptions;
 use nez_exec_server::Environment;
@@ -11,7 +12,6 @@ use nez_protocol::models::FileSystemPermissions;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathConvention;
 use nez_utils_path_uri::PathUri;
-use futures::StreamExt;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;

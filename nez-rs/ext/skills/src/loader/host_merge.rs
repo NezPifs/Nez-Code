@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+use futures::FutureExt;
+use futures::StreamExt;
 use nez_exec_server::ExecutorFileSystem;
 use nez_protocol::protocol::Product;
 use nez_protocol::protocol::SkillScope;
@@ -10,8 +12,6 @@ use nez_skills::SkillRootSnapshots;
 use nez_utils_path_uri::PathUri;
 use nez_utils_plugins::PluginSkillRoot;
 use nez_utils_plugins::migrated_command_skills_root;
-use futures::FutureExt;
-use futures::StreamExt;
 use tokio::sync::OnceCell;
 use tokio::sync::Semaphore;
 

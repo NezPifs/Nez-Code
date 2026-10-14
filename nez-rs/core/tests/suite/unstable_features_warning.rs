@@ -1,5 +1,8 @@
 #![allow(clippy::unwrap_used)]
 
+use core::time::Duration;
+use core_test_support::load_default_config_for_test;
+use core_test_support::wait_for_event;
 use nez_config::CONFIG_TOML_FILE;
 use nez_core::NewThread;
 use nez_features::Feature;
@@ -9,9 +12,6 @@ use nez_protocol::mcp::ClientMcpExtensions;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::WarningEvent;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use core::time::Duration;
-use core_test_support::load_default_config_for_test;
-use core_test_support::wait_for_event;
 use tempfile::TempDir;
 use tokio::time::timeout;
 use toml::toml;

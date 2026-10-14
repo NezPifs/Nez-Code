@@ -1,4 +1,13 @@
 use anyhow::Result;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::ConfigLayerStack;
 use nez_core::ForkSnapshot;
 use nez_core::TurnInputRequest;
@@ -15,15 +24,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
 use nez_utils_absolute_path::AbsolutePathBuf;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use std::collections::HashSet;
 use tempfile::TempDir;
@@ -66,10 +66,7 @@ fn model_with_permission_messages(
     model
 }
 
-async fn submit_text_turn(
-    test: &core_test_support::test_nez::TestNez,
-    text: &str,
-) -> Result<()> {
+async fn submit_text_turn(test: &core_test_support::test_nez::TestNez, text: &str) -> Result<()> {
     test.nez
         .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
             text: text.to_string(),

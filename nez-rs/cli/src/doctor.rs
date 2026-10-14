@@ -28,6 +28,9 @@ use std::time::Instant;
 
 use anyhow::Context;
 use clap::Parser;
+use http::HeaderMap;
+use http::HeaderValue;
+use http::Method;
 use nez_api::ApiError;
 use nez_api::ResponsesWebsocketClient;
 use nez_api::is_azure_responses_provider;
@@ -44,9 +47,9 @@ use nez_http_client::ClientRouteClass;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
 use nez_http_client::RouteAwareClientPool;
-use nez_install_context::NezPackageLayout;
 use nez_install_context::InstallContext;
 use nez_install_context::InstallMethod;
+use nez_install_context::NezPackageLayout;
 use nez_install_context::StandalonePlatform;
 use nez_login::AuthDotJson;
 use nez_login::AuthManager;
@@ -66,9 +69,6 @@ use nez_terminal_detection::TerminalName;
 use nez_terminal_detection::terminal_info;
 use nez_tui::Cli as TuiCli;
 use nez_utils_cli::CliConfigOverrides;
-use http::HeaderMap;
-use http::HeaderValue;
-use http::Method;
 use serde::Serialize;
 use supports_color::Stream;
 
@@ -2171,8 +2171,7 @@ async fn sqlite_integrity_detail(
         return CheckStatus::Ok;
     }
 
-    let (rows, timed_out) = match nez_state::sqlite_integrity_check(sqlite, path, deadline).await
-    {
+    let (rows, timed_out) = match nez_state::sqlite_integrity_check(sqlite, path, deadline).await {
         Ok(nez_state::SqliteIntegrityCheck::Complete(rows)) => (rows, false),
         Ok(nez_state::SqliteIntegrityCheck::TimedOut(rows)) => (rows, true),
         Err(err) => {

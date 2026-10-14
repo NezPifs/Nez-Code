@@ -9,11 +9,11 @@ use anyhow::Result;
 use anyhow::bail;
 use base64::Engine as _;
 use base64::engine::general_purpose;
+use image::imageops::FilterType;
 use nez_terminal_detection::Multiplexer;
 use nez_terminal_detection::TerminalInfo;
 use nez_terminal_detection::TerminalName;
 use nez_terminal_detection::terminal_info;
-use image::imageops::FilterType;
 
 use super::sixel;
 

@@ -16,6 +16,7 @@ use std::sync::Weak;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
+use indexmap::IndexMap;
 use nez_code_mode::CellId;
 use nez_features::Feature;
 use nez_features::Features;
@@ -30,7 +31,6 @@ use nez_protocol::models::ToolResultMetadata;
 use nez_protocol::models::executed_tool_call_metadata_bytes;
 use nez_protocol::models::normalize_executed_tool_call_completeness;
 use nez_protocol::openai_models::ToolMode;
-use indexmap::IndexMap;
 use serde_json::Value as JsonValue;
 
 use crate::session::session::Session;

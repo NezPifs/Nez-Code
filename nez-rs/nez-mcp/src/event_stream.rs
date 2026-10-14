@@ -19,11 +19,11 @@ use serde_json::Map;
 use serde_json::Value;
 use tokio::sync::watch;
 
-use crate::NEZ_APPS_MCP_SERVER_NAME;
 use crate::EffectiveMcpServer;
 use crate::McpEventStream;
 use crate::McpProtocolMode;
 use crate::McpRuntimeContext;
+use crate::NEZ_APPS_MCP_SERVER_NAME;
 use crate::rmcp_client::DEFAULT_STARTUP_TIMEOUT;
 use crate::rmcp_client::make_rmcp_client;
 use crate::rmcp_client::mcp_initialize_request_params;
@@ -142,9 +142,7 @@ impl McpEventStreamOpener {
             (Some(NezAuth::AgentIdentity(expected)), Some(NezAuth::AgentIdentity(current))) => {
                 expected.record() == current.record()
             }
-            (Some(NezAuth::AgentIdentity(_)), _) | (_, Some(NezAuth::AgentIdentity(_))) => {
-                false
-            }
+            (Some(NezAuth::AgentIdentity(_)), _) | (_, Some(NezAuth::AgentIdentity(_))) => false,
             (Some(expected), Some(current)) => {
                 expected.get_account_id() == current.get_account_id()
                     && expected.get_chatgpt_user_id() == current.get_chatgpt_user_id()

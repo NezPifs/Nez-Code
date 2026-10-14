@@ -1,9 +1,9 @@
 //! A later LOW releases its own review without releasing an earlier pending review.
 
 use super::*;
+use futures::StreamExt;
 use nez_app_server_protocol::GuardianApprovalReviewStatus;
 use nez_app_server_protocol::ItemGuardianApprovalReviewCompletedNotification;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use test_case::test_case;
 

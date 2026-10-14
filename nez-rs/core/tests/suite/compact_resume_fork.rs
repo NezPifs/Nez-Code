@@ -10,6 +10,16 @@ use super::compact::FIRST_REPLY;
 use super::compact::SUMMARY_TEXT;
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::ThreadIdle;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::mount_sse_once_match;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::NezThread;
 use nez_core::ThreadManager;
 use nez_core::TurnInputRequest;
@@ -26,16 +36,6 @@ use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::WarningEvent;
 use nez_protocol::user_input::UserInput;
-use core_test_support::ThreadIdle;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::mount_sse_once_match;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -687,9 +687,8 @@ async fn resume_conversation(
     config: &Config,
     path: std::path::PathBuf,
 ) -> Arc<NezThread> {
-    let auth_manager = nez_core::test_support::auth_manager_from_auth(
-        nez_login::NezAuth::from_api_key("dummy"),
-    );
+    let auth_manager =
+        nez_core::test_support::auth_manager_from_auth(nez_login::NezAuth::from_api_key("dummy"));
     Box::pin(manager.resume_legacy_thread_from_rollout(
         config.clone(),
         path,

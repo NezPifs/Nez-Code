@@ -417,10 +417,7 @@ async fn command_exec_permission_profile_starts_selected_network_proxy() -> Resu
     let server = create_mock_responses_server_sequence_unchecked(Vec::new()).await;
     let nez_home = TempDir::new()?;
     create_config_toml(nez_home.path(), &server.uri(), "never")?;
-    insert_networked_permission_profile_config(
-        nez_home.path(),
-        /*default_permissions*/ None,
-    )?;
+    insert_networked_permission_profile_config(nez_home.path(), /*default_permissions*/ None)?;
     let mut mcp = TestAppServer::builder()
         .with_nez_home(nez_home.path())
         .without_auto_env()

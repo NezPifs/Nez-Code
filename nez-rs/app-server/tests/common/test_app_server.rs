@@ -15,6 +15,9 @@ use tokio::process::ChildStdout;
 
 use anyhow::Context;
 use anyhow::ensure;
+use core_test_support::is_remote_test_environment;
+use core_test_support::test_nez::TestEnv;
+use core_test_support::test_nez::test_env;
 use nez_app_server_protocol::AppsInstalledParams;
 use nez_app_server_protocol::AppsListParams;
 use nez_app_server_protocol::AppsReadParams;
@@ -130,9 +133,6 @@ use nez_exec_server::NEZ_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR;
 use nez_exec_server::NEZ_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR;
 use nez_exec_server::NEZ_EXEC_SERVER_URL_ENV_VAR;
 use nez_login::default_client::NEZ_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR;
-use core_test_support::is_remote_test_environment;
-use core_test_support::test_nez::TestEnv;
-use core_test_support::test_nez::test_env;
 use serde::de::DeserializeOwned;
 use tempfile::TempDir;
 use tokio::process::Command;
@@ -1982,10 +1982,7 @@ impl TestAppServerBuilder {
             Some(nez_home) => (nez_home, None),
             None => {
                 let owned_nez_home = TempDir::new()?;
-                (
-                    owned_nez_home.path().to_path_buf(),
-                    Some(owned_nez_home),
-                )
+                (owned_nez_home.path().to_path_buf(), Some(owned_nez_home))
             }
         };
         let attribution_settings_server = if mock_chatgpt_backend
@@ -2042,9 +2039,8 @@ impl TestAppServerBuilder {
                             !is_remote_test_environment(),
                             "TestAppServer exec-server delay only supports the local test environment"
                         );
-                        let exec_server_program =
-                            nez_utils_cargo_bin::cargo_bin("exec-server")
-                                .context("should find binary for delayed exec-server fixture")?;
+                        let exec_server_program = nez_utils_cargo_bin::cargo_bin("exec-server")
+                            .context("should find binary for delayed exec-server fixture")?;
                         // Local auto environments normally use stdio. Start a
                         // host-local WebSocket fixture so the delay interposer has a
                         // socket stream to wrap.
@@ -2071,10 +2067,7 @@ impl TestAppServerBuilder {
                         NEZ_EXEC_SERVER_URL_ENV_VAR.to_string(),
                         auto_env.exec_server_url().map(str::to_string),
                     ),
-                    (
-                        NEZ_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR.to_string(),
-                        None,
-                    ),
+                    (NEZ_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR.to_string(), None),
                     (
                         NEZ_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR.to_string(),
                         None,
@@ -2106,8 +2099,7 @@ impl TestAppServerBuilder {
         let mut owned_install_dir = None;
         if !custom_program
             && nez_utils_cargo_bin::runfiles_available()
-            && let Ok(code_mode_host_program) =
-                nez_utils_cargo_bin::cargo_bin("nez-code-mode-host")
+            && let Ok(code_mode_host_program) = nez_utils_cargo_bin::cargo_bin("nez-code-mode-host")
         {
             // Bazel keeps binary targets in separate package directories.
             // Recreate the installed sibling layout without a path override.

@@ -1,3 +1,5 @@
+use http::HeaderMap;
+use http::HeaderValue;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::OutboundProxyPolicy;
 use nez_login::AuthHeaders;
@@ -6,8 +8,6 @@ use nez_login::NezAuth;
 use nez_model_provider::create_model_provider;
 use nez_model_provider_info::ModelProviderInfo;
 use nez_utils_output_truncation::TruncationPolicy;
-use http::HeaderMap;
-use http::HeaderValue;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use wiremock::Mock;

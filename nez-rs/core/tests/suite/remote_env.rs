@@ -11,11 +11,48 @@ use anyhow::Context;
 use anyhow::Result;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::PathBufExt;
+use core_test_support::PathExt;
+use core_test_support::TestTargetOs;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_apply_patch_custom_tool_call;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_completed_with_tokens;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_no_remote_env;
+use core_test_support::skip_if_target_windows;
+use core_test_support::startup::expect_startup;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_docker_container_name;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::environment_config_for_selection;
+use core_test_support::test_nez::local;
+use core_test_support::test_nez::local_request;
+use core_test_support::test_nez::test_env;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::test_target_os;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use futures::SinkExt;
+use futures::StreamExt;
+use futures::future::BoxFuture;
+use http::HeaderMap;
 use nez_api::AuthProvider;
 use nez_config::types::ApprovalsReviewer;
-use nez_core::NezThreadSettingsOverrides;
 use nez_core::EnvironmentConfig;
 use nez_core::EnvironmentNetworkPolicy;
+use nez_core::NezThreadSettingsOverrides;
 use nez_core::StartThreadOptions;
 use nez_core::TurnInputRequest;
 use nez_core::TurnInputSubmission;
@@ -92,43 +129,6 @@ use nez_protocol::request_user_input::RequestUserInputResponse;
 use nez_protocol::user_input::UserInput;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathBufExt;
-use core_test_support::PathExt;
-use core_test_support::TestTargetOs;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_apply_patch_custom_tool_call;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_completed_with_tokens;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_no_remote_env;
-use core_test_support::skip_if_target_windows;
-use core_test_support::startup::expect_startup;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::environment_config_for_selection;
-use core_test_support::test_nez::local;
-use core_test_support::test_nez::local_request;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::test_env;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::test_docker_container_name;
-use core_test_support::test_target_os;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use futures::SinkExt;
-use futures::StreamExt;
-use futures::future::BoxFuture;
-use http::HeaderMap;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -1284,8 +1284,7 @@ async fn deferred_executor_promotes_primary_environment_when_startup_completes()
     let mut websocket = accept_initialized_exec_server(listener).await;
     // Forward MCP HTTP through the fake executor while keeping startup under test control.
     let http_client =
-        nez_exec_server::Environment::create_for_tests(/*exec_server_url*/ None)?
-            .get_http_client();
+        nez_exec_server::Environment::create_for_tests(/*exec_server_url*/ None)?.get_http_client();
     let executor = tokio::spawn(async move {
         loop {
             let request = read_exec_server_json(&mut websocket).await;
@@ -2992,10 +2991,7 @@ async fn deferred_executor_stays_pending_after_materialization() -> Result<()> {
     );
 
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
 
     Ok(())
 }
@@ -4782,10 +4778,7 @@ async fn remote_test_env_copy_preserves_symlink_source() -> Result<()> {
     let test_env = test_env().await?;
     let file_system = test_env.environment().get_filesystem();
 
-    let root = PathBuf::from(format!(
-        "/tmp/nez-remote-copy-link-{}",
-        std::process::id()
-    ));
+    let root = PathBuf::from(format!("/tmp/nez-remote-copy-link-{}", std::process::id()));
     let allowed_dir = root.join("allowed");
     let outside_file = root.join("outside").join("outside.txt");
     let source_symlink = allowed_dir.join("link");

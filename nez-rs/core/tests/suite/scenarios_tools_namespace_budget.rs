@@ -1,18 +1,18 @@
 //! Deferred namespace summaries keep names discoverable when descriptions exceed the budget.
 
 use anyhow::Result;
-use nez_core::StartThreadOptions;
-use nez_features::Feature;
-use nez_protocol::dynamic_tools::DynamicToolFunctionSpec;
-use nez_protocol::dynamic_tools::DynamicToolNamespaceSpec;
-use nez_protocol::dynamic_tools::DynamicToolNamespaceTool;
-use nez_protocol::dynamic_tools::DynamicToolSpec;
 use core_test_support::apps_test_server::configure_search_capable_model;
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
+use nez_core::StartThreadOptions;
+use nez_features::Feature;
+use nez_protocol::dynamic_tools::DynamicToolFunctionSpec;
+use nez_protocol::dynamic_tools::DynamicToolNamespaceSpec;
+use nez_protocol::dynamic_tools::DynamicToolNamespaceTool;
+use nez_protocol::dynamic_tools::DynamicToolSpec;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

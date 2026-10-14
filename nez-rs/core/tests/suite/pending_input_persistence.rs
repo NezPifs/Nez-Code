@@ -6,6 +6,11 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
+use core_test_support::responses;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInput;
 use nez_core::TurnInputRequest;
 use nez_core::TurnInputSubmission;
@@ -41,11 +46,6 @@ use nez_thread_store::ThreadPage;
 use nez_thread_store::ThreadStore;
 use nez_thread_store::ThreadStoreFuture;
 use nez_thread_store::UpdateThreadMetadataParams;
-use core_test_support::responses;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;
@@ -672,10 +672,7 @@ async fn cancelled_spawn_discards_provisional_child(caller: SpawnCaller) -> anyh
         .expect("state db should be enabled");
 
     test.nez.submit(Op::Interrupt).await?;
-    wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnAborted(_))
-    })
-    .await;
+    wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
     timeout(Duration::from_secs(10), child.wait_until_terminated()).await?;
     timeout(Duration::from_secs(10), async {
         while test

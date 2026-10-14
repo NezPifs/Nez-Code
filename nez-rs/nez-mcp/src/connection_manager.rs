@@ -39,8 +39,8 @@ use crate::elicitation::ElicitationRequestRouter;
 use crate::event_stream::EventStreamConnectionSettings;
 use crate::mcp::NEZ_APPS_MCP_SERVER_NAME;
 use crate::mcp::ToolPluginContext;
-use crate::pagination::MAX_NEZ_APPS_TOOL_CATALOG_ITEMS;
 use crate::pagination::MAX_MCP_CATALOG_ITEMS;
+use crate::pagination::MAX_NEZ_APPS_TOOL_CATALOG_ITEMS;
 use crate::rmcp_client::AsyncManagedClient;
 use crate::rmcp_client::DEFAULT_STARTUP_TIMEOUT;
 use crate::rmcp_client::DEFAULT_TOOL_TIMEOUT;
@@ -321,10 +321,7 @@ impl McpConnectionSet {
             .map(nez_model_provider::auth_provider_from_auth);
         let nez_apps_auth_provider = auth_manager.as_ref().and_then(|auth_manager| {
             auth.filter(|auth| auth.uses_nez_backend()).map(|auth| {
-                nez_model_provider::auth_provider_from_auth_manager(
-                    Arc::clone(auth_manager),
-                    auth,
-                )
+                nez_model_provider::auth_provider_from_auth_manager(Arc::clone(auth_manager), auth)
             })
         });
         for (server_name, server) in mcp_servers

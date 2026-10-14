@@ -9,11 +9,11 @@ use crate::app_event_sender::AppEventSender;
 use crate::bottom_pane::bottom_pane_view::BottomPaneView;
 use crate::test_support::PathBufExt;
 use crate::test_support::test_path_buf;
-use nez_app_server_protocol::HookEventName;
-use nez_app_server_protocol::HookSource;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use insta::assert_snapshot;
+use nez_app_server_protocol::HookEventName;
+use nez_app_server_protocol::HookSource;
 use pretty_assertions::assert_eq;
 use ratatui::style::Color;
 use ratatui::style::Modifier;
@@ -55,7 +55,8 @@ fn wide_titles_preserve_reverse_video_selection_and_dim_index() {
 
 #[test]
 fn wrapped_hook_command_preserves_the_complete_url_destination() {
-    let url = "https://github.com/NezPifs/Nez-Code/pull/12345?diff=split&review=complete-destination";
+    let url =
+        "https://github.com/NezPifs/Nez-Code/pull/12345?diff=split&review=complete-destination";
     let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
     let mut url_hook = hook(
         "path:review",

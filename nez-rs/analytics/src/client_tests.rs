@@ -10,6 +10,8 @@ use super::send_track_events_request;
 use super::track_event_request_batches;
 #[cfg(debug_assertions)]
 use crate::events::AppServerRpcTransport;
+#[cfg(debug_assertions)]
+use crate::events::FinalApprovalOutcome;
 use crate::events::NezAcceptedLineFingerprintsEventParams;
 use crate::events::NezAcceptedLineFingerprintsEventRequest;
 #[cfg(debug_assertions)]
@@ -32,8 +34,6 @@ use crate::events::NezPluginUsedMetadata;
 use crate::events::NezRuntimeMetadata;
 #[cfg(debug_assertions)]
 use crate::events::NezToolItemEventBase;
-#[cfg(debug_assertions)]
-use crate::events::FinalApprovalOutcome;
 use crate::events::SkillInvocationEventParams;
 use crate::events::SkillInvocationEventRequest;
 #[cfg(debug_assertions)]
@@ -128,23 +128,21 @@ impl AnalyticsEventsClient {
 }
 
 fn sample_accepted_line_fingerprint_event(thread_id: &str) -> TrackEventRequest {
-    TrackEventRequest::AcceptedLineFingerprints(Box::new(
-        NezAcceptedLineFingerprintsEventRequest {
-            event_type: "nez_accepted_line_fingerprints",
-            event_params: NezAcceptedLineFingerprintsEventParams {
-                event_type: "nez.accepted_line_fingerprints",
-                turn_id: "turn-1".to_string(),
-                thread_id: thread_id.to_string(),
-                product_surface: Some("nez".to_string()),
-                model_slug: Some("gpt-5.1-nez".to_string()),
-                completed_at: 1,
-                repo_hash: None,
-                accepted_added_lines: 1,
-                accepted_deleted_lines: 0,
-                line_fingerprints: [],
-            },
+    TrackEventRequest::AcceptedLineFingerprints(Box::new(NezAcceptedLineFingerprintsEventRequest {
+        event_type: "nez_accepted_line_fingerprints",
+        event_params: NezAcceptedLineFingerprintsEventParams {
+            event_type: "nez.accepted_line_fingerprints",
+            turn_id: "turn-1".to_string(),
+            thread_id: thread_id.to_string(),
+            product_surface: Some("nez".to_string()),
+            model_slug: Some("gpt-5.1-nez".to_string()),
+            completed_at: 1,
+            repo_hash: None,
+            accepted_added_lines: 1,
+            accepted_deleted_lines: 0,
+            line_fingerprints: [],
         },
-    ))
+    }))
 }
 
 fn sample_skill_track_event(thread_id: &str, plugin_id: Option<&str>) -> TrackEventRequest {
@@ -446,9 +444,8 @@ async fn api_key_auth_sends_only_plugin_events_to_nez_backend() {
     let destination = AnalyticsEventsDestination::CaptureFile {
         path: capture_path.clone(),
     };
-    let auth_manager = nez_login::AuthManager::from_auth_for_testing(
-        nez_login::NezAuth::from_api_key("sk-test"),
-    );
+    let auth_manager =
+        nez_login::AuthManager::from_auth_for_testing(nez_login::NezAuth::from_api_key("sk-test"));
     let plugin_measurement = |thread_id: &str, plugin_id: &str| {
         TrackEventRequest::PluginMeasurement(NezPluginMeasurementEventRequest {
             event_type: "nez_plugin_measurement_event",

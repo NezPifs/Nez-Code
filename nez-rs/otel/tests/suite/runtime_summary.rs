@@ -1,3 +1,4 @@
+use eventsource_stream::Event as StreamEvent;
 use nez_otel::MetricsClient;
 use nez_otel::MetricsConfig;
 use nez_otel::Result;
@@ -8,7 +9,6 @@ use nez_otel::TelemetryAuthMode;
 use nez_protocol::ThreadId;
 use nez_protocol::ToolName;
 use nez_protocol::protocol::SessionSource;
-use eventsource_stream::Event as StreamEvent;
 use opentelemetry_sdk::metrics::InMemoryMetricExporter;
 use pretty_assertions::assert_eq;
 use std::time::Duration;
@@ -95,16 +95,8 @@ fn runtime_metrics_summary_collects_tool_api_and_streaming_metrics() -> Result<(
             .into(),
     ))));
     manager.record_websocket_event(&ws_timing_response, Duration::from_millis(20));
-    manager.record_duration(
-        "nez.turn.ttft.duration_ms",
-        Duration::from_millis(95),
-        &[],
-    );
-    manager.record_duration(
-        "nez.turn.ttfm.duration_ms",
-        Duration::from_millis(180),
-        &[],
-    );
+    manager.record_duration("nez.turn.ttft.duration_ms", Duration::from_millis(95), &[]);
+    manager.record_duration("nez.turn.ttfm.duration_ms", Duration::from_millis(180), &[]);
 
     let summary = manager
         .runtime_metrics_summary()

@@ -32,10 +32,7 @@ fn packaged_daemon_launch(action: &str, initial: InitialDaemon) -> Result<()> {
     // Both paths are in this test's temp home and therefore on the same filesystem.
     // Reuse its prepared (and on Intel macOS, translated) executable. The installer
     // still makes a real independent package copy; only fixture setup shares this inode.
-    std::fs::hard_link(
-        standalone.join("current/bin/nez"),
-        package.join("bin/nez"),
-    )?;
+    std::fs::hard_link(standalone.join("current/bin/nez"), package.join("bin/nez"))?;
     daemon.nez = package.join("bin/nez");
     for helper in [
         "bin/nez-code-mode-host",

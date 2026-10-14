@@ -6,11 +6,11 @@ use crate::legacy_core::config::Config;
 use crate::legacy_core::config::ConfigBuilder;
 use app_test_support::create_fake_paginated_rollout;
 use app_test_support::create_fake_rollout;
+use color_eyre::eyre::Result;
+use futures::FutureExt;
 use nez_app_server_protocol::ThreadHistoryMode;
 use nez_features::Feature;
 use nez_protocol::ThreadId;
-use color_eyre::eyre::Result;
-use futures::FutureExt;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 
@@ -351,9 +351,8 @@ async fn cached_legacy_resume_revalidates_history_across_migration_settings() ->
                 .enable(Feature::BackgroundPaginatedRolloutMigration)?;
         }
         // Keep the real startup worker from migrating the legacy fixture before selection.
-        let maintenance_guard =
-            nez_rollout::try_acquire_rollout_maintenance_lock(nez_home.path())?
-                .expect("acquire rollout maintenance lock");
+        let maintenance_guard = nez_rollout::try_acquire_rollout_maintenance_lock(nez_home.path())?
+            .expect("acquire rollout maintenance lock");
         let mut app_server =
             Box::pin(crate::start_embedded_app_server_for_picker(&startup_config)).await?;
         app_server.remember_thread_history_mode(legacy_thread_id, ThreadHistoryMode::Legacy);
@@ -371,9 +370,7 @@ async fn cached_legacy_resume_revalidates_history_across_migration_settings() ->
             // This current-thread test polls resume before yielding to the startup worker.
             // Resume must acquire its guard before waiting for metadata revalidation.
             assert!(resume.as_mut().now_or_never().is_none());
-            assert!(
-                nez_rollout::try_acquire_rollout_maintenance_lock(nez_home.path())?.is_none()
-            );
+            assert!(nez_rollout::try_acquire_rollout_maintenance_lock(nez_home.path())?.is_none());
             resume.await?
         };
         assert_eq!(app_server.next_request_id, next_request_id + 2);
@@ -400,9 +397,8 @@ async fn rollout_maintenance_contention_disables_cached_legacy_resume_shortcut()
     )?;
     let mut app_server = crate::start_embedded_app_server_for_picker(&config).await?;
     app_server.remember_thread_history_mode(thread_id, ThreadHistoryMode::Legacy);
-    let _maintenance_guard =
-        nez_rollout::try_acquire_rollout_maintenance_lock(nez_home.path())?
-            .expect("acquire rollout maintenance lock");
+    let _maintenance_guard = nez_rollout::try_acquire_rollout_maintenance_lock(nez_home.path())?
+        .expect("acquire rollout maintenance lock");
     let next_request_id = app_server.next_request_id;
 
     let resumed = app_server

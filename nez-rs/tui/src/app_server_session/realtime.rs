@@ -1,6 +1,8 @@
 //! App-server signaling for TUI-owned realtime WebRTC sessions.
 
 use super::AppServerSession;
+use color_eyre::eyre::Result;
+use color_eyre::eyre::WrapErr;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::ThreadRealtimeAppendSpeechParams;
 use nez_app_server_protocol::ThreadRealtimeAppendSpeechResponse;
@@ -13,8 +15,6 @@ use nez_protocol::ThreadId;
 use nez_protocol::protocol::RealtimeConversationVersion;
 use nez_protocol::protocol::RealtimeOutputModality;
 use nez_protocol::protocol::RealtimeVoice;
-use color_eyre::eyre::Result;
-use color_eyre::eyre::WrapErr;
 
 impl AppServerSession {
     pub(crate) async fn thread_realtime_start(

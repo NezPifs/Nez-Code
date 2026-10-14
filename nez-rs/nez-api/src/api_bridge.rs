@@ -7,15 +7,15 @@ use crate::rate_limits::parse_rate_limit_reached_type;
 use base64::Engine;
 use chrono::DateTime;
 use chrono::Utc;
+use http::HeaderMap;
 use nez_protocol::auth::PlanType;
+use nez_protocol::error::ConnectionFailedError;
 use nez_protocol::error::NezErr;
 use nez_protocol::error::NezErrorDetails;
-use nez_protocol::error::ConnectionFailedError;
 use nez_protocol::error::RetryLimitReachedError;
 use nez_protocol::error::UnexpectedResponseError;
 use nez_protocol::error::UsageLimitReachedError;
 use nez_protocol::protocol::MisalignmentErrorDetails;
-use http::HeaderMap;
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -81,9 +81,7 @@ fn map_api_error_details(err: ApiError) -> NezErr {
         ApiError::InvalidPrompt { message } => {
             NezErr::new(NezErrorDetails::InvalidPrompt { message })
         }
-        ApiError::CyberPolicy { message } => {
-            NezErr::new(NezErrorDetails::CyberPolicy { message })
-        }
+        ApiError::CyberPolicy { message } => NezErr::new(NezErrorDetails::CyberPolicy { message }),
         ApiError::BioPolicy { message } => NezErr::new(NezErrorDetails::BioPolicy { message }),
         ApiError::MisalignmentPolicyViolation {
             message,

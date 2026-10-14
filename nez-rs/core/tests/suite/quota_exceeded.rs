@@ -1,8 +1,4 @@
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_protocol::protocol::NezErrorInfo;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ev_response_created;
 use core_test_support::responses::mount_sse_once;
 use core_test_support::responses::sse;
@@ -10,6 +6,10 @@ use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::NezErrorInfo;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 
@@ -63,10 +63,7 @@ async fn quota_exceeded_emits_single_error_event(code: &str) -> Result<()> {
                     err.message,
                     "Quota exceeded. Check your plan and billing details."
                 );
-                assert_eq!(
-                    err.nez_error_info,
-                    Some(NezErrorInfo::UsageLimitExceeded)
-                );
+                assert_eq!(err.nez_error_info, Some(NezErrorInfo::UsageLimitExceeded));
             }
             EventMsg::TurnComplete(_) => break,
             _ => {}

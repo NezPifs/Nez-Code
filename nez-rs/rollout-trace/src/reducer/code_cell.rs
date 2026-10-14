@@ -369,8 +369,7 @@ impl TraceReducer {
             .code_cells
             .values()
             .filter(|cell| {
-                cell.nez_turn_id == nez_turn_id
-                    && cell.execution.status == ExecutionStatus::Running
+                cell.nez_turn_id == nez_turn_id && cell.execution.status == ExecutionStatus::Running
             })
             .map(|cell| cell.code_cell_id.clone())
             .collect();
@@ -548,9 +547,7 @@ impl TraceReducer {
             .get(nez_turn_id)
             .map(|turn| turn.thread_id.clone())
             .with_context(|| {
-                format!(
-                    "{event_name} {runtime_cell_id} referenced unknown Nez turn {nez_turn_id}"
-                )
+                format!("{event_name} {runtime_cell_id} referenced unknown Nez turn {nez_turn_id}")
             })
     }
 

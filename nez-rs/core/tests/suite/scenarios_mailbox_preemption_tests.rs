@@ -1,12 +1,6 @@
 //! Mailbox scheduling preserves the current response when deferral is enabled.
 //! Queued mail still reaches the next request, alongside completed tool results.
 
-use nez_core::TurnInputRequest;
-use nez_features::Feature;
-use nez_protocol::AgentPath;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::InterAgentCommunication;
-use nez_protocol::protocol::Op;
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::context_snapshot::SnapshotEntry;
@@ -15,6 +9,12 @@ use core_test_support::streaming_sse::StreamingSseChunk;
 use core_test_support::streaming_sse::start_streaming_sse_server;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_features::Feature;
+use nez_protocol::AgentPath;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::InterAgentCommunication;
+use nez_protocol::protocol::Op;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -133,9 +133,7 @@ async fn mailbox_preemption_preserves_response_when_deferred(
             .await?;
     }
     // The barrier confirms that both messages were queued before finishing the item.
-    test.nez
-        .submit(Op::RealtimeConversationListVoices)
-        .await?;
+    test.nez.submit(Op::RealtimeConversationListVoices).await?;
     wait_for_event(&test.nez, |event| {
         matches!(event, EventMsg::RealtimeConversationListVoicesResponse(_))
     })

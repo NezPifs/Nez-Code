@@ -4,9 +4,9 @@ use super::focus_palette::PtyNez;
 use super::focus_palette::write_test_config;
 use anyhow::Result;
 use anyhow::ensure;
-use nez_app_server_protocol::JSONRPCMessage;
 use futures::SinkExt;
 use futures::StreamExt;
+use nez_app_server_protocol::JSONRPCMessage;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::time::Duration;
@@ -202,8 +202,7 @@ async fn automatic_reconnect_restores_draft_and_routes_new_notifications() -> Re
         }
         Ok::<_, anyhow::Error>(methods)
     });
-    let mut terminal =
-        PtyNez::start(&workspace_path, nez_home, &["--yolo", "--no-alt-screen"])?;
+    let mut terminal = PtyNez::start(&workspace_path, nez_home, &["--yolo", "--no-alt-screen"])?;
     terminal.wait_for_startup()?;
     let mut disconnect_tx = Some(disconnect_tx);
     let mut restore_tx = Some(restore_tx);

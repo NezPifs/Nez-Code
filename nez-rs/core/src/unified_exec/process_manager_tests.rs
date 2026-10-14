@@ -3,8 +3,8 @@ use crate::shell::Shell;
 use crate::shell::ShellInvocation;
 use crate::shell::ShellType;
 use crate::unified_exec::clamp_yield_time;
-use nez_network_proxy::ManagedNetworkSandboxContext;
 use core_test_support::assert_regex_match;
+use nez_network_proxy::ManagedNetworkSandboxContext;
 use pretty_assertions::assert_eq;
 use tokio::sync::Notify;
 use tokio::time::Duration;
@@ -98,10 +98,7 @@ fn env_overlay_for_exec_server_keeps_runtime_changes_only() {
             nez_apply_patch::NEZ_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR.to_string(),
             "1".to_string(),
         ),
-        (
-            "NEZ_SANDBOX_NETWORK_DISABLED".to_string(),
-            "1".to_string(),
-        ),
+        ("NEZ_SANDBOX_NETWORK_DISABLED".to_string(), "1".to_string()),
     ]);
 
     assert_eq!(
@@ -121,10 +118,7 @@ fn env_overlay_for_exec_server_keeps_runtime_changes_only() {
                 nez_apply_patch::NEZ_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR.to_string(),
                 "1".to_string(),
             ),
-            (
-                "NEZ_SANDBOX_NETWORK_DISABLED".to_string(),
-                "1".to_string()
-            ),
+            ("NEZ_SANDBOX_NETWORK_DISABLED".to_string(), "1".to_string()),
         ])
     );
 }

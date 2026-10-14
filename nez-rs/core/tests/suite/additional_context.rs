@@ -1,11 +1,4 @@
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_protocol::items::TurnItem;
-use nez_protocol::protocol::AdditionalContextEntry;
-use nez_protocol::protocol::AdditionalContextKind;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ItemCompletedEvent;
-use nez_protocol::user_input::UserInput;
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::responses::ev_completed;
@@ -16,6 +9,13 @@ use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event_match;
+use nez_core::TurnInputRequest;
+use nez_protocol::items::TurnItem;
+use nez_protocol::protocol::AdditionalContextEntry;
+use nez_protocol::protocol::AdditionalContextKind;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ItemCompletedEvent;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use std::collections::BTreeMap;
 

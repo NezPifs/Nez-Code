@@ -1,8 +1,9 @@
 use crate::metrics::MEMORY_STORAGE_BYTES;
 use crate::workspace::memory_storage_bytes;
-use nez_core::NezThread;
+use futures::StreamExt;
 use nez_core::ModelClient;
 use nez_core::NewThread;
+use nez_core::NezThread;
 use nez_core::Prompt;
 use nez_core::ResponseEvent;
 use nez_core::StartIfIdleSubmission;
@@ -39,7 +40,6 @@ use nez_protocol::user_input::UserInput;
 use nez_rollout_trace::InferenceTraceContext;
 use nez_state::MemoryStore;
 use nez_terminal_detection::user_agent;
-use futures::StreamExt;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;

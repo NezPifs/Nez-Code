@@ -142,10 +142,7 @@ impl Client {
     fn consume_rate_limit_reset_credit_url(&self) -> String {
         match self.path_style {
             PathStyle::NezApi => {
-                format!(
-                    "{}/api/nez/rate-limit-reset-credits/consume",
-                    self.base_url
-                )
+                format!("{}/api/nez/rate-limit-reset-credits/consume", self.base_url)
             }
             PathStyle::ChatGptApi => {
                 format!("{}/wham/rate-limit-reset-credits/consume", self.base_url)

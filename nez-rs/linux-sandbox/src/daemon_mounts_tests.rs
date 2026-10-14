@@ -180,13 +180,7 @@ fn masks_alias_when_tmp_is_itself_a_bind_mount() {
         PathBuf::from("/backing/tmp/nez-daemon-1000"),
     ]);
     assert_eq!(
-        check_mounts(
-            Path::new("/tmp/nez-daemon-1000"),
-            "0:1",
-            Some("2"),
-            mounts
-        )
-        .unwrap(),
+        check_mounts(Path::new("/tmp/nez-daemon-1000"), "0:1", Some("2"), mounts).unwrap(),
         expected
     );
     // A hidden deeper mount must not override the actual /tmp backing location.
@@ -196,13 +190,7 @@ fn masks_alias_when_tmp_is_itself_a_bind_mount() {
     ]
     .concat();
     assert_eq!(
-        check_mounts(
-            Path::new("/tmp/nez-daemon-1000"),
-            "0:1",
-            Some("2"),
-            &hidden
-        )
-        .unwrap(),
+        check_mounts(Path::new("/tmp/nez-daemon-1000"), "0:1", Some("2"), &hidden).unwrap(),
         expected
     );
 }

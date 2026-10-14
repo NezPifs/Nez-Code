@@ -1,6 +1,13 @@
 //! Base instructions stay fixed within a context window and refresh when a new window opens.
 
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::responses::ResponsesRequest as Request;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::ForkSnapshot;
 use nez_core::StartThreadOptions;
 use nez_core::TurnInputRequest;
@@ -16,13 +23,6 @@ use nez_protocol::protocol::Op;
 use nez_protocol::protocol::ThreadHistoryMode;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::responses::ResponsesRequest as Request;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use test_case::test_case;

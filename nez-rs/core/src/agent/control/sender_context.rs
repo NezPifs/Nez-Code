@@ -37,8 +37,7 @@ impl LocalAgentRuntime {
         };
         if !matches!(
             (namespace.as_str(), name.as_str()),
-            ("nez_app" | "nez_tui", "send_message_to_thread")
-                | ("cloud_threads", "send_message")
+            ("nez_app" | "nez_tui", "send_message_to_thread") | ("cloud_threads", "send_message")
         ) {
             return None;
         }

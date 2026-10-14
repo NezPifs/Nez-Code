@@ -1,6 +1,6 @@
+use indexmap::IndexMap;
 use nez_plugin::AppConnectorId;
 use nez_plugin::AppDeclaration;
-use indexmap::IndexMap;
 use serde::Deserialize;
 use serde_json::Value;
 

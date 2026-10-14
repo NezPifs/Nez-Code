@@ -1,15 +1,15 @@
 use super::*;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
 use nez_app_server_protocol::AccountRateLimitsUpdatedNotification;
-use nez_app_server_protocol::NezErrorInfo;
 use nez_app_server_protocol::CreditsSnapshot;
 use nez_app_server_protocol::ErrorNotification;
 use nez_app_server_protocol::GetAccountRateLimitsResponse;
+use nez_app_server_protocol::NezErrorInfo;
 use nez_app_server_protocol::RateLimitReachedType;
 use nez_app_server_protocol::RateLimitResetCreditsSummary;
 use nez_app_server_protocol::RateLimitSnapshot;
 use nez_app_server_protocol::RateLimitWindow;
-use crossterm::event::KeyCode;
-use crossterm::event::KeyEvent;
 use pretty_assertions::assert_eq;
 
 fn rate_limit_snapshot(

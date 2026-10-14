@@ -1,7 +1,7 @@
 //! Binds cached scores to the user authorization, review context, and model policy they evaluated.
 
-use nez_core::NezThread;
 use nez_core::GuardianAuthorizationVersion;
+use nez_core::NezThread;
 use nez_core::context::GuardianReviewEvidence;
 
 #[derive(Clone, Debug, PartialEq)]

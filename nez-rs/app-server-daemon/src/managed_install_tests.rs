@@ -6,10 +6,7 @@ use super::parse_nez_version;
 
 #[test]
 fn parses_nez_cli_version_output() {
-    assert_eq!(
-        parse_nez_version("nez 1.2.3\n").expect("version"),
-        "1.2.3"
-    );
+    assert_eq!(parse_nez_version("nez 1.2.3\n").expect("version"), "1.2.3");
 }
 
 #[test]

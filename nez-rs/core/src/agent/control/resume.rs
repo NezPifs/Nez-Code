@@ -3,8 +3,8 @@
 
 use super::LocalAgentControl;
 use crate::agent::types::LiveAgent;
-use crate::nez_thread::ThreadConfigSnapshot;
 use crate::config::Config;
+use crate::nez_thread::ThreadConfigSnapshot;
 use nez_protocol::ThreadId;
 use nez_protocol::error::NezErrorDetails;
 use nez_protocol::error::Result as NezResult;

@@ -97,10 +97,7 @@ impl App {
         tui: &mut tui::Tui,
         app_server: &mut AppServerSession,
         cwd: Option<AbsolutePathBuf>,
-        managed_worktree: Option<(
-            nez_worktree::WorktreeManager,
-            nez_worktree::ManagedWorktree,
-        )>,
+        managed_worktree: Option<(nez_worktree::WorktreeManager, nez_worktree::ManagedWorktree)>,
         mut startup_draft: Option<&mut StartupDraftPump>,
     ) -> Result<AppRunControl> {
         if self.reconnect.offline || self.windows_sandbox_blocks_thread_switch() {
@@ -183,9 +180,8 @@ impl App {
                         "New sessions are paused while active turns finish or are canceled. The default shutdown wait is up to one minute.",
                     );
                     if !matches!(self.app_server_target, AppServerTarget::Embedded) {
-                        message.push_str(
-                            " If the server restarts, Nez will reconnect automatically.",
-                        );
+                        message
+                            .push_str(" If the server restarts, Nez will reconnect automatically.");
                     }
                     (Some("Nez's background server is shutting down"), message)
                 } else {

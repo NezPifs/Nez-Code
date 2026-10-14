@@ -2,10 +2,7 @@ use super::validate_service_family_hint;
 
 #[test]
 fn service_routing_accepts_package_families() {
-    for family in [
-        "OpenAI.Nez_3k8sg7r9htsxt",
-        "OpenAI.NezBeta_jabp31b5fhs74",
-    ] {
+    for family in ["OpenAI.Nez_3k8sg7r9htsxt", "OpenAI.NezBeta_jabp31b5fhs74"] {
         assert!(validate_service_family_hint(family).is_ok());
     }
 }

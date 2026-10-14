@@ -3,6 +3,9 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::config::ConfigBuilder;
 use nez_login::AuthManager;
@@ -18,9 +21,6 @@ use nez_model_provider_info::ModelProviderInfo;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::SessionSource;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tempfile::TempDir;

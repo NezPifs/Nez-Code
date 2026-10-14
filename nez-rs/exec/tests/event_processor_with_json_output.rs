@@ -40,7 +40,6 @@ use pretty_assertions::assert_eq;
 use serde_json::json;
 
 use nez_exec::AgentMessageItem;
-use nez_exec::NezStatus;
 use nez_exec::CollabAgentState;
 use nez_exec::CollabAgentStatus;
 use nez_exec::CollabTool;
@@ -61,6 +60,7 @@ use nez_exec::McpToolCallItem;
 use nez_exec::McpToolCallItemError;
 use nez_exec::McpToolCallItemResult;
 use nez_exec::McpToolCallStatus;
+use nez_exec::NezStatus;
 use nez_exec::PatchApplyStatus;
 use nez_exec::PatchChangeKind;
 use nez_exec::ReasoningItem;

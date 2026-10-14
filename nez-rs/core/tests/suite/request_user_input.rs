@@ -1,21 +1,9 @@
 #![allow(clippy::unwrap_used)]
 
-use nez_core::TurnInputRequest;
 use core_test_support::test_nez::local_requests;
+use nez_core::TurnInputRequest;
 use std::collections::HashMap;
 
-use nez_features::Feature;
-use nez_protocol::config_types::CollaborationMode;
-use nez_protocol::config_types::ModeKind;
-use nez_protocol::config_types::Settings;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::request_user_input::RequestUserInputAnswer;
-use nez_protocol::request_user_input::RequestUserInputResponse;
-use nez_protocol::user_input::UserInput;
 use core_test_support::TempDirExt;
 use core_test_support::responses;
 use core_test_support::responses::ResponsesRequest;
@@ -32,6 +20,18 @@ use core_test_support::test_nez::test_nez;
 use core_test_support::test_nez::turn_permission_fields;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
+use nez_features::Feature;
+use nez_protocol::config_types::CollaborationMode;
+use nez_protocol::config_types::ModeKind;
+use nez_protocol::config_types::Settings;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::request_user_input::RequestUserInputAnswer;
+use nez_protocol::request_user_input::RequestUserInputResponse;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -131,29 +131,28 @@ async fn request_user_input_round_trip_for_mode(mode: ModeKind) -> anyhow::Resul
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please confirm".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd.abs())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode,
-                    settings: Settings {
-                        model: session_configured.model.clone(),
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please confirm".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd.abs())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode,
+                settings: Settings {
+                    model: session_configured.model.clone(),
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let request = wait_for_event_match(&nez, |event| match event {
         EventMsg::RequestUserInput(request) => Some(request.clone()),
@@ -190,12 +189,11 @@ async fn request_user_input_round_trip_for_mode(mode: ModeKind) -> anyhow::Resul
         },
     );
     let response = RequestUserInputResponse { answers };
-    nez
-        .submit(Op::UserInputAnswer {
-            id: request.turn_id.clone(),
-            response,
-        })
-        .await?;
+    nez.submit(Op::UserInputAnswer {
+        id: request.turn_id.clone(),
+        response,
+    })
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TokenCount(_))).await;
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
@@ -280,29 +278,28 @@ async fn request_user_input_interrupt_emits_deferred_token_count(
 
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please confirm".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd.abs())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Plan,
-                    settings: Settings {
-                        model: session_configured.model,
-                        reasoning_effort: None,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please confirm".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd.abs())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Plan,
+                settings: Settings {
+                    model: session_configured.model,
+                    reasoning_effort: None,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     let request = wait_for_event_match(&nez, |event| match event {
         EventMsg::RequestUserInput(request) => Some(request.clone()),
@@ -381,22 +378,21 @@ where
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, cwd.path());
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "please confirm".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(cwd.abs())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                collaboration_mode: Some(collaboration_mode),
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "please confirm".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(cwd.abs())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            collaboration_mode: Some(collaboration_mode),
+            ..Default::default()
+        }),
+    )
+    .await?;
 
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 

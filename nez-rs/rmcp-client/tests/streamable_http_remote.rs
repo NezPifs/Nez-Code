@@ -10,13 +10,13 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context;
+use futures::FutureExt as _;
 use nez_config::types::AuthKeyringBackendKind;
 use nez_config::types::OAuthCredentialsStoreMode;
 use nez_rmcp_client::ElicitationAction;
 use nez_rmcp_client::ElicitationResponse;
 use nez_rmcp_client::McpProtocolMode;
 use nez_rmcp_client::RmcpClient;
-use futures::FutureExt as _;
 use pretty_assertions::assert_eq;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::Implementation;

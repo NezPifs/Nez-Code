@@ -3,21 +3,6 @@
 use std::time::Duration;
 
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_core::config::Config;
-use nez_features::Feature;
-use nez_protocol::config_types::CollaborationMode;
-use nez_protocol::config_types::ModeKind;
-use nez_protocol::config_types::Settings;
-use nez_protocol::models::PermissionProfile;
-use nez_protocol::protocol::AskForApproval;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::ReviewDecision;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::request_permissions::PermissionGrantScope;
-use nez_protocol::request_permissions::RequestPermissionsResponse;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses;
 use core_test_support::responses::ResponseMock;
 use core_test_support::responses::ev_assistant_message;
@@ -33,6 +18,21 @@ use core_test_support::test_nez::turn_permission_fields;
 use core_test_support::wait_for_event;
 use core_test_support::wait_for_event_match;
 use core_test_support::wait_for_event_with_timeout;
+use nez_core::TurnInputRequest;
+use nez_core::config::Config;
+use nez_features::Feature;
+use nez_protocol::config_types::CollaborationMode;
+use nez_protocol::config_types::ModeKind;
+use nez_protocol::config_types::Settings;
+use nez_protocol::models::PermissionProfile;
+use nez_protocol::protocol::AskForApproval;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::ReviewDecision;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::request_permissions::PermissionGrantScope;
+use nez_protocol::request_permissions::RequestPermissionsResponse;
+use nez_protocol::user_input::UserInput;
 use wiremock::MockServer;
 
 const YIELD_TIME_MS: u64 = 1_000;
@@ -52,13 +52,12 @@ impl CodeModeElicitationHarness {
         configure: impl FnOnce(&mut Config) + Send + 'static,
     ) -> Result<Self> {
         let server = responses::start_mock_server().await;
-        let mut builder =
-            test_nez()
-                .with_model("test-gpt-5.1-nez")
-                .with_config(move |config| {
-                    let _ = config.features.enable(Feature::CodeMode);
-                    configure(config);
-                });
+        let mut builder = test_nez()
+            .with_model("test-gpt-5.1-nez")
+            .with_config(move |config| {
+                let _ = config.features.enable(Feature::CodeMode);
+                configure(config);
+            });
         let test = builder.build_with_auto_env(&server).await?;
         let follow_up = mount_code_mode_responses(&server, code).await;
         let turn_id = submit_turn(&test, permission_profile).await?;

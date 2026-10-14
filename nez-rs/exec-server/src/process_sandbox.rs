@@ -37,9 +37,9 @@ use nez_shell_command::shell_detect::fallback_powershell_shell_for_windows_sandb
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
 
+use crate::ExecServerRuntimeOptions;
 #[cfg(unix)]
 use crate::NEZ_ARG0_EXEC_HELPER_ARG1;
-use crate::ExecServerRuntimeOptions;
 use crate::process_telemetry::trace_process_id;
 use crate::protocol::ExecParams;
 use crate::rpc::internal_error;
@@ -238,11 +238,7 @@ pub(crate) async fn prepare_exec_request_with_telemetry(
             helper_args.push(arg0.clone());
             helper_args.extend(params.argv.iter().cloned());
             (
-                runtime_paths
-                    .nez_self_exe
-                    .as_path()
-                    .as_os_str()
-                    .to_owned(),
+                runtime_paths.nez_self_exe.as_path().as_os_str().to_owned(),
                 helper_args,
             )
         },

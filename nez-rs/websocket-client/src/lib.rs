@@ -10,17 +10,17 @@ use std::sync::Arc;
 use std::task::Context;
 use std::task::Poll;
 
+use futures::FutureExt;
+use futures::Sink;
+use futures::Stream;
+use futures::future::BoxFuture;
+use futures::future::Either;
 use nez_http_client::BuildCustomCaTransportError;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::NetworkPermit;
 use nez_http_client::NetworkPolicyDenied;
 use nez_http_client::OutboundProxyRoute;
 use nez_http_client::build_rustls_client_config_with_custom_ca;
-use futures::FutureExt;
-use futures::Sink;
-use futures::Stream;
-use futures::future::BoxFuture;
-use futures::future::Either;
 use rustls::ClientConfig;
 use tokio::io::AsyncRead;
 use tokio::io::AsyncWrite;
@@ -93,9 +93,7 @@ impl WebSocketConnector {
         tls_mode: WebSocketTlsMode,
     ) -> Result<Self, BuildCustomCaTransportError> {
         let tls_config = match tls_mode {
-            WebSocketTlsMode::ExplicitNezTls => {
-                Some(build_rustls_client_config_with_custom_ca()?)
-            }
+            WebSocketTlsMode::ExplicitNezTls => Some(build_rustls_client_config_with_custom_ca()?),
             WebSocketTlsMode::Rustls(config) => Some(config),
             WebSocketTlsMode::TungsteniteDefault => None,
         };

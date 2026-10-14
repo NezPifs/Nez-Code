@@ -25,10 +25,7 @@ fn tool_call_id_replaces_platform_equivalent_names() {
                 "Nez_Tool_Call_Id".to_string(),
                 "mixed-case-call".to_string(),
             ),
-            (
-                "nez_tool_call_id".to_string(),
-                "lowercase-call".to_string(),
-            ),
+            ("nez_tool_call_id".to_string(), "lowercase-call".to_string()),
             ("OTHER".to_string(), "unchanged".to_string()),
         ]);
 
@@ -41,10 +38,7 @@ fn tool_call_id_replaces_platform_equivalent_names() {
                 "Nez_Tool_Call_Id".to_string(),
                 "mixed-case-call".to_string(),
             ),
-            (
-                "nez_tool_call_id".to_string(),
-                "lowercase-call".to_string(),
-            ),
+            ("nez_tool_call_id".to_string(), "lowercase-call".to_string()),
         ]);
         if let Some(expected_call) = expected_call {
             expected.insert("NEZ_TOOL_CALL_ID".to_string(), expected_call.to_string());
@@ -109,20 +103,14 @@ fn command_scrubber_removes_names_from_real_child_environment() {
         let output = Command::new(std::env::current_exe().expect("locate current test binary"))
             .args([TEST_NAME, "--exact", "--nocapture"])
             .env(CHILD_MODE_ENV_VAR, "1")
-            .env(
-                "Nez_Guardian_Decisions_Api_Key",
-                "synthetic-inherited-key",
-            )
+            .env("Nez_Guardian_Decisions_Api_Key", "synthetic-inherited-key")
             .env("Node_Repl_Auth_Token", "inherited-token")
             .env("OpenAI_Federation_Rule_Id", "inherited-rule")
             .env(
                 "OpenAI_Workload_Identity_Context",
                 r#"{"instance_id":"box-one"}"#,
             )
-            .env(
-                "Nez_Exec_Server_Noise_Auth_Token",
-                "inherited-noise-token",
-            )
+            .env("Nez_Exec_Server_Noise_Auth_Token", "inherited-noise-token")
             .output()
             .expect("run inherited-environment test process");
         assert!(

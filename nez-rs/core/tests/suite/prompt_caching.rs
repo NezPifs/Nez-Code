@@ -5,6 +5,19 @@ use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 
+use core_test_support::TempDirExt;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::responses::strip_metadata_from_json;
+use core_test_support::responses::strip_response_item_ids_from_json;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::wait_for_event;
 use nez_core::TurnInputRequest;
 use nez_core::shell::default_user_shell;
 use nez_features::Feature;
@@ -26,19 +39,6 @@ use nez_protocol::protocol::ENVIRONMENT_CONTEXT_OPEN_TAG;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::TempDirExt;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::responses::strip_metadata_from_json;
-use core_test_support::responses::strip_response_item_ids_from_json;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use test_case::test_case;
@@ -237,33 +237,31 @@ async fn prompt_tools_are_consistent_across_requests(
             .and_then(|preset| preset.developer_instructions.flatten())
             .expect("built-in Plan mode instructions")
     };
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello 1".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Plan,
-                    settings: Settings {
-                        model: "gpt-5.5".to_string(),
-                        reasoning_effort: None,
-                        developer_instructions: Some(mode_instructions.clone()),
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello 1".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Plan,
+                settings: Settings {
+                    model: "gpt-5.5".to_string(),
+                    reasoning_effort: None,
+                    developer_instructions: Some(mode_instructions.clone()),
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 2".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 2".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let mut expected_tools_names = vec!["exec_command", "write_stdin"];
@@ -342,20 +340,18 @@ async fn gpt_5_tools_without_apply_patch_append_apply_patch_instructions() -> an
         .build(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 1".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 1".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 2".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 2".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -408,20 +404,18 @@ async fn prefixes_context_and_instructions_once_and_consistently_across_requests
         .build(&server)
         .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 1".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 1".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 2".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 2".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let body1 = req1.single_request().body_json();
@@ -503,12 +497,11 @@ async fn overrides_turn_context_but_keeps_cached_prefix_and_key_constant() -> an
         .await?;
 
     // First turn
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 1".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 1".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let writable = TempDir::new().unwrap();
@@ -535,12 +528,11 @@ async fn overrides_turn_context_but_keeps_cached_prefix_and_key_constant() -> an
     .await?;
 
     // Second turn after overrides
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 2".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 2".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let request1 = req1.single_request();
@@ -629,12 +621,11 @@ async fn override_before_first_turn_emits_environment_context() -> anyhow::Resul
     )
     .await?;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "first message".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "first message".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
 
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
@@ -773,12 +764,11 @@ async fn per_turn_overrides_keep_cached_prefix_and_key_constant() -> anyhow::Res
         .await?;
 
     // First turn
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "hello 1".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "hello 1".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     // Second turn using per-turn thread-settings overrides.
@@ -792,24 +782,23 @@ async fn per_turn_overrides_keep_cached_prefix_and_key_constant() -> anyhow::Res
     );
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(permission_profile, new_cwd.path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello 2".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(new_cwd.abs())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                model: Some("o3".to_string()),
-                effort: Some(Some(ReasoningEffort::High)),
-                summary: Some(ReasoningSummary::Detailed),
-                ..Default::default()
-            }),
-        )
-        .await?;
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello 2".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(new_cwd.abs())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            model: Some("o3".to_string()),
+            effort: Some(Some(ReasoningEffort::High)),
+            summary: Some(ReasoningSummary::Detailed),
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let request1 = req1.single_request();
@@ -912,54 +901,52 @@ async fn send_user_turn_with_no_changes_does_not_send_environment_context() -> a
     let default_effort = config.model_reasoning_effort.clone();
     let default_summary = config.model_reasoning_summary;
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello 1".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(default_cwd.clone())),
-                approval_policy: Some(default_approval_policy),
-                sandbox_policy: Some(default_sandbox_policy.clone()),
-                summary: Some(default_summary.unwrap_or(ReasoningSummary::Auto)),
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: default_model.clone(),
-                        reasoning_effort: default_effort.clone(),
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello 1".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(default_cwd.clone())),
+            approval_policy: Some(default_approval_policy),
+            sandbox_policy: Some(default_sandbox_policy.clone()),
+            summary: Some(default_summary.unwrap_or(ReasoningSummary::Auto)),
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: default_model.clone(),
+                    reasoning_effort: default_effort.clone(),
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello 2".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(default_cwd.clone())),
-                approval_policy: Some(default_approval_policy),
-                sandbox_policy: Some(default_sandbox_policy.clone()),
-                summary: Some(default_summary.unwrap_or(ReasoningSummary::Auto)),
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: default_model.clone(),
-                        reasoning_effort: default_effort,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello 2".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(default_cwd.clone())),
+            approval_policy: Some(default_approval_policy),
+            sandbox_policy: Some(default_sandbox_policy.clone()),
+            summary: Some(default_summary.unwrap_or(ReasoningSummary::Auto)),
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: default_model.clone(),
+                    reasoning_effort: default_effort,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let request1 = req1.single_request();
@@ -1049,57 +1036,55 @@ async fn send_user_turn_with_changes_sends_environment_context() -> anyhow::Resu
     let default_effort = config.model_reasoning_effort.clone();
     let default_summary = config.model_reasoning_summary;
 
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello 1".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(default_cwd.clone())),
-                approval_policy: Some(default_approval_policy),
-                sandbox_policy: Some(default_sandbox_policy.clone()),
-                summary: Some(default_summary.unwrap_or(ReasoningSummary::Auto)),
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: default_model,
-                        reasoning_effort: default_effort,
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello 1".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(default_cwd.clone())),
+            approval_policy: Some(default_approval_policy),
+            sandbox_policy: Some(default_sandbox_policy.clone()),
+            summary: Some(default_summary.unwrap_or(ReasoningSummary::Auto)),
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: default_model,
+                    reasoning_effort: default_effort,
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, default_cwd.as_path());
-    nez
-        .start_or_steer_turn(
-            TurnInputRequest::user_input(vec![UserInput::Text {
-                text: "hello 2".into(),
-                text_elements: Vec::new(),
-            }])
-            .with_thread_settings(ThreadSettingsOverrides {
-                environments: Some(local_requests(default_cwd.clone())),
-                approval_policy: Some(AskForApproval::Never),
-                sandbox_policy: Some(sandbox_policy),
-                permission_profile,
-                summary: Some(ReasoningSummary::Detailed),
-                collaboration_mode: Some(CollaborationMode {
-                    mode: ModeKind::Default,
-                    settings: Settings {
-                        model: "o3".to_string(),
-                        reasoning_effort: Some(ReasoningEffort::High),
-                        developer_instructions: None,
-                    },
-                }),
-                ..Default::default()
+    nez.start_or_steer_turn(
+        TurnInputRequest::user_input(vec![UserInput::Text {
+            text: "hello 2".into(),
+            text_elements: Vec::new(),
+        }])
+        .with_thread_settings(ThreadSettingsOverrides {
+            environments: Some(local_requests(default_cwd.clone())),
+            approval_policy: Some(AskForApproval::Never),
+            sandbox_policy: Some(sandbox_policy),
+            permission_profile,
+            summary: Some(ReasoningSummary::Detailed),
+            collaboration_mode: Some(CollaborationMode {
+                mode: ModeKind::Default,
+                settings: Settings {
+                    model: "o3".to_string(),
+                    reasoning_effort: Some(ReasoningEffort::High),
+                    developer_instructions: None,
+                },
             }),
-        )
-        .await?;
+            ..Default::default()
+        }),
+    )
+    .await?;
     wait_for_event(&nez, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let request1 = req1.single_request();

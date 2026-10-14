@@ -142,9 +142,9 @@ fn daemon_launch_telemetry_records_once_on_connection_or_early_return() {
 #[tokio::test]
 async fn daemon_feature_compatibility_respects_required_and_optional_attachment()
 -> color_eyre::Result<()> {
-    use nez_app_server_protocol::JSONRPCMessage;
     use futures::SinkExt;
     use futures::StreamExt;
+    use nez_app_server_protocol::JSONRPCMessage;
     use serde_json::json;
     use tokio_tungstenite::tungstenite::Message;
 

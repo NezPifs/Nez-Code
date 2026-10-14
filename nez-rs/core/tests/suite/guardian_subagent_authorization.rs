@@ -4,6 +4,31 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
+use core_test_support::ThreadIdle;
+use core_test_support::apps_test_server::HostedMessagingServer;
+use core_test_support::hooks::trust_discovered_hooks;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ResponsesRequest;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_response_once_match;
+use core_test_support::responses::mount_sse_once_match;
+use core_test_support::responses::sse;
+use core_test_support::responses::sse_response;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
 use nez_core::GuardianRootMessage;
 use nez_core::TurnInputRequest;
 use nez_core::TurnInputSubmission;
@@ -33,31 +58,6 @@ use nez_protocol::user_input::UserInput;
 use nez_thread_store::LoadThreadHistoryParams;
 use nez_tools::ToolName;
 use nez_tools::code_mode_name_for_tool_name;
-use core_test_support::ThreadIdle;
-use core_test_support::apps_test_server::HostedMessagingServer;
-use core_test_support::hooks::trust_discovered_hooks;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ResponsesRequest;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_response_once_match;
-use core_test_support::responses::mount_sse_once_match;
-use core_test_support::responses::sse;
-use core_test_support::responses::sse_response;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -173,8 +173,7 @@ fn is_hosted_messaging_review_body(body: &Value) -> bool {
                             .as_str()
                             .and_then(|text| serde_json::from_str::<Value>(text).ok())
                             .is_some_and(|action| {
-                                action["tool"] == "mcp_tool_call"
-                                    && action["server"] == "nez_apps"
+                                action["tool"] == "mcp_tool_call" && action["server"] == "nez_apps"
                             })
                 })
             })
@@ -949,10 +948,7 @@ async fn run_guardian_subagent_review(
         .await;
     } else if cancel_call {
         test.nez.submit(Op::Interrupt).await?;
-        wait_for_event(&test.nez, |event| {
-            matches!(event, EventMsg::TurnAborted(_))
-        })
-        .await;
+        wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
         let history = test.nez.conversation_history_snapshot().await;
         assert!(history.items().any(|item| match (code_mode, item) {
             (

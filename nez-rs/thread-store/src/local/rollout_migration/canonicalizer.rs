@@ -466,8 +466,7 @@ impl LegacyRolloutCanonicalizer {
         timestamp: &str,
         item: RolloutItem,
     ) -> ThreadStoreResult<()> {
-        let item = match nez_rollout::persisted_rollout_item(&item, ThreadHistoryMode::Paginated)
-        {
+        let item = match nez_rollout::persisted_rollout_item(&item, ThreadHistoryMode::Paginated) {
             Some(Cow::Borrowed(_)) => item,
             Some(Cow::Owned(item)) => item,
             None => return Ok(()),

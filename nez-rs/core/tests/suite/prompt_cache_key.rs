@@ -2,9 +2,6 @@ use std::time::Duration;
 
 use anyhow::Result;
 use anyhow::anyhow;
-use nez_features::Feature;
-use nez_login::NezAuth;
-use nez_protocol::protocol::TurnEnvironmentSelection;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_function_call_with_namespace;
@@ -13,6 +10,9 @@ use core_test_support::responses::mount_sse_once_match;
 use core_test_support::responses::sse;
 use core_test_support::responses::start_mock_server;
 use core_test_support::test_nez::test_nez;
+use nez_features::Feature;
+use nez_login::NezAuth;
+use nez_protocol::protocol::TurnEnvironmentSelection;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -162,9 +162,9 @@ async fn api_key_subagent_uses_session_id_as_prompt_cache_key() -> Result<()> {
 
 #[tokio::test]
 async fn ephemeral_fork_shares_cache_routing_but_keeps_session_identity() -> Result<()> {
+    use core_test_support::responses::mount_sse_sequence;
     use nez_core::ForkSnapshot;
     use nez_core::StartThreadOptions;
-    use core_test_support::responses::mount_sse_sequence;
 
     let server = start_mock_server().await;
     let requests = mount_sse_sequence(

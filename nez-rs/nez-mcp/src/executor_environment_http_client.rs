@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
+use futures::future::BoxFuture;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::HttpClient;
 use nez_exec_server::HttpHeader;
 use nez_exec_server::HttpRequestParams;
 use nez_exec_server::HttpRequestResponse;
 use nez_exec_server::HttpResponseBodyStream;
-use futures::future::BoxFuture;
 
 pub(crate) struct ExecutorEnvironmentHttpClient {
     pub(crate) bearer_token_env_var: String,

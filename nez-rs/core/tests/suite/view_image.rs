@@ -3,6 +3,30 @@
 use anyhow::Context;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::PathExt;
+use core_test_support::is_remote_test_environment;
+use core_test_support::responses;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_models_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_no_remote_env;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::local;
+use core_test_support::test_nez::test_nez;
+use core_test_support::test_nez::turn_permission_fields;
+use core_test_support::test_target_os;
+use core_test_support::wait_for_event_with_timeout;
+use image::DynamicImage;
+use image::GenericImageView;
+use image::ImageBuffer;
+use image::Rgba;
+use image::load_from_memory;
 use nez_core::TurnInputRequest;
 use nez_exec_server::CreateDirectoryOptions;
 use nez_exec_server::LOCAL_ENVIRONMENT_ID;
@@ -35,30 +59,6 @@ use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::protocol::TurnEnvironmentSelection;
 use nez_protocol::user_input::UserInput;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathExt;
-use core_test_support::is_remote_test_environment;
-use core_test_support::responses;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_models_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_no_remote_env;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::local;
-use core_test_support::test_nez::test_nez;
-use core_test_support::test_nez::turn_permission_fields;
-use core_test_support::test_target_os;
-use core_test_support::wait_for_event_with_timeout;
-use image::DynamicImage;
-use image::GenericImageView;
-use image::ImageBuffer;
-use image::Rgba;
-use image::load_from_memory;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -261,16 +261,15 @@ async fn assert_user_turn_local_image_resizes_to(
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::LocalImage {
-                path: abs_path.clone(),
-                detail: None,
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::LocalImage {
+            path: abs_path.clone(),
+            detail: None,
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -461,16 +460,15 @@ async fn view_image_tool_attaches_local_image() -> anyhow::Result<()> {
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please add the screenshot".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please add the screenshot".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     let mut item_started = None;
     let mut item_completed = None;
@@ -883,16 +881,15 @@ async fn view_image_tool_can_preserve_original_resolution_when_requested_on_gpt5
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please add the original screenshot".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please add the original screenshot".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1048,16 +1045,15 @@ async fn view_image_tool_errors_clearly_for_unsupported_detail_values() -> anyho
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please attach the image at low detail".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please attach the image at low detail".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1128,16 +1124,15 @@ async fn view_image_tool_treats_null_detail_as_omitted() -> anyhow::Result<()> {
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please attach the image with a null detail".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please attach the image with a null detail".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1193,13 +1188,11 @@ async fn assert_view_image_tool_resizes_without_original_support(
     image_budget_policy: ImageBudgetPolicy,
 ) -> anyhow::Result<()> {
     let server = start_mock_server().await;
-    let mut builder = test_nez()
-        .with_model("gpt-5.2")
-        .with_config(move |config| {
-            if image_budget_policy == ImageBudgetPolicy::Unified {
-                let _ = config.features.enable(Feature::UnifiedImageBudget);
-            }
-        });
+    let mut builder = test_nez().with_model("gpt-5.2").with_config(move |config| {
+        if image_budget_policy == ImageBudgetPolicy::Unified {
+            let _ = config.features.enable(Feature::UnifiedImageBudget);
+        }
+    });
     let test = builder.build_with_auto_env(&server).await?;
     let TestNez {
         nez,
@@ -1237,16 +1230,15 @@ async fn assert_view_image_tool_resizes_without_original_support(
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please add the screenshot".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please add the screenshot".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1331,16 +1323,15 @@ async fn view_image_tool_does_not_force_original_resolution_with_capability_only
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please add the screenshot".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please add the screenshot".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1413,16 +1404,15 @@ async fn view_image_tool_errors_when_path_is_directory() -> anyhow::Result<()> {
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please attach the folder".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please attach the folder".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1485,16 +1475,15 @@ async fn view_image_tool_rejects_invalid_image_before_tool_output() -> anyhow::R
     )
     .await;
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please inspect the image".into(),
-                text_elements: Vec::new(),
-            }],
-            session_configured.model.clone(),
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please inspect the image".into(),
+            text_elements: Vec::new(),
+        }],
+        session_configured.model.clone(),
+    ))
+    .await?;
     wait_for_event_with_timeout(
         nez,
         |event| matches!(event, EventMsg::TurnComplete(_)),
@@ -1557,16 +1546,15 @@ async fn view_image_tool_errors_when_file_missing() -> anyhow::Result<()> {
 
     let session_model = session_configured.model.clone();
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please attach the missing image".into(),
-                text_elements: Vec::new(),
-            }],
-            session_model,
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please attach the missing image".into(),
+            text_elements: Vec::new(),
+        }],
+        session_model,
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,
@@ -1701,16 +1689,15 @@ async fn view_image_tool_returns_unsupported_message_for_text_only_model() -> an
     ]);
     let mock = responses::mount_sse_once(&server, second_response).await;
 
-    nez
-        .start_or_steer_turn(disabled_user_turn(
-            &test,
-            vec![UserInput::Text {
-                text: "please attach the image".into(),
-                text_elements: Vec::new(),
-            }],
-            model_slug.to_string(),
-        ))
-        .await?;
+    nez.start_or_steer_turn(disabled_user_turn(
+        &test,
+        vec![UserInput::Text {
+            text: "please attach the image".into(),
+            text_elements: Vec::new(),
+        }],
+        model_slug.to_string(),
+    ))
+    .await?;
 
     wait_for_event_with_timeout(
         nez,

@@ -1,6 +1,7 @@
 use anyhow::Context;
 use anyhow::Result;
 use base64::Engine;
+use core_test_support::skip_if_no_network;
 use nez_config::types::AuthCredentialsStoreMode;
 use nez_login::AuthDotJson;
 use nez_login::AuthKeyringBackendKind;
@@ -14,7 +15,6 @@ use nez_login::save_auth;
 use nez_login::token_data::IdTokenInfo;
 use nez_login::token_data::TokenData;
 use nez_protocol::auth::AuthMode;
-use core_test_support::skip_if_no_network;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -103,10 +103,8 @@ async fn logout_with_revoke_uses_stored_auth_when_access_token_env_is_set() -> R
         REVOKE_TOKEN_URL_OVERRIDE_ENV_VAR,
         format!("{}/oauth/revoke", server.uri()),
     );
-    let _access_token_env_guard = EnvGuard::set(
-        NEZ_ACCESS_TOKEN_ENV_VAR,
-        "at-environment-token".to_string(),
-    );
+    let _access_token_env_guard =
+        EnvGuard::set(NEZ_ACCESS_TOKEN_ENV_VAR, "at-environment-token".to_string());
 
     let nez_home = TempDir::new()?;
     save_auth(

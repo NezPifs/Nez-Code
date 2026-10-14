@@ -10,14 +10,14 @@ use std::time::Duration;
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use nez_exec_server::RouteAwareHttpClient;
-use nez_http_client::HttpClientFactory;
-use nez_http_client::OutboundProxyPolicy;
 use keyring::credential::Credential;
 use keyring::credential::CredentialApi;
 use keyring::credential::CredentialBuilderApi;
 use keyring::credential::CredentialPersistence;
 use keyring::mock::MockCredential;
+use nez_exec_server::RouteAwareHttpClient;
+use nez_http_client::HttpClientFactory;
+use nez_http_client::OutboundProxyPolicy;
 use oauth2::TokenResponse;
 use pretty_assertions::assert_eq;
 use serde_json::json;

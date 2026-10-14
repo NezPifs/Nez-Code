@@ -1,20 +1,3 @@
-use nez_core::TurnInputRequest;
-use nez_login::AuthHeaders;
-use nez_login::NezAuth;
-use nez_login::ExternalAuth;
-use nez_login::ExternalAuthFuture;
-use nez_login::ExternalAuthRefreshContext;
-use nez_login::auth::BedrockAccessKeysAuth;
-use nez_model_provider_info::AwsAuthRefreshConfig;
-use nez_model_provider_info::AwsCredentialExportConfig;
-use nez_model_provider_info::ModelProviderAwsAuthInfo;
-use nez_model_provider_info::ModelProviderInfo;
-use nez_model_provider_info::WireApi;
-use nez_model_provider_info::create_oss_provider_with_base_url;
-use nez_protocol::protocol::AuthRecoveryEvent;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::user_input::UserInput;
-use nez_utils_redacted_string::RedactedString;
 use core_test_support::responses::ev_completed;
 use core_test_support::responses::ev_response_created;
 use core_test_support::responses::mount_response_sequence;
@@ -28,6 +11,23 @@ use core_test_support::wait_for_event;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::header::AUTHORIZATION;
+use nez_core::TurnInputRequest;
+use nez_login::AuthHeaders;
+use nez_login::ExternalAuth;
+use nez_login::ExternalAuthFuture;
+use nez_login::ExternalAuthRefreshContext;
+use nez_login::NezAuth;
+use nez_login::auth::BedrockAccessKeysAuth;
+use nez_model_provider_info::AwsAuthRefreshConfig;
+use nez_model_provider_info::AwsCredentialExportConfig;
+use nez_model_provider_info::ModelProviderAwsAuthInfo;
+use nez_model_provider_info::ModelProviderInfo;
+use nez_model_provider_info::WireApi;
+use nez_model_provider_info::create_oss_provider_with_base_url;
+use nez_protocol::protocol::AuthRecoveryEvent;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::user_input::UserInput;
+use nez_utils_redacted_string::RedactedString;
 use pretty_assertions::assert_eq;
 use std::num::NonZeroU64;
 use std::path::Path;
@@ -433,9 +433,8 @@ async fn amazon_bedrock_aws_auth_refresh_resigns() -> anyhow::Result<()> {
         let aws_executable = fixture
             .path()
             .join(format!("aws{}", std::env::consts::EXE_SUFFIX));
-        std::fs::hard_link(&test_executable, &aws_executable).or_else(|_| {
-            nez_utils_cargo_bin::copy_executable(&test_executable, &aws_executable)
-        })?;
+        std::fs::hard_link(&test_executable, &aws_executable)
+            .or_else(|_| nez_utils_cargo_bin::copy_executable(&test_executable, &aws_executable))?;
         let inherited_path = std::env::var_os("PATH").unwrap_or_default();
         let mut paths = std::env::split_paths(&inherited_path).collect::<Vec<_>>();
         paths.insert(/*index*/ 0, fixture.path().to_path_buf());

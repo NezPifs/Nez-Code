@@ -6,6 +6,8 @@ use app_test_support::create_fake_paginated_rollout;
 use app_test_support::create_fake_parented_rollout_with_source;
 use app_test_support::create_fake_rollout;
 use app_test_support::rollout_path;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server_client::AppServerEvent;
 use nez_app_server_protocol::ClientNotification;
 use nez_app_server_protocol::ClientRequest;
@@ -31,8 +33,6 @@ use nez_protocol::protocol::ItemCompletedEvent;
 use nez_protocol::protocol::ReviewTarget;
 use nez_protocol::user_input::UserInput as CoreUserInput;
 use nez_state::SqliteConfig;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use std::sync::Mutex;
 use tokio::net::TcpListener;
@@ -893,8 +893,7 @@ pub(super) async fn start_recording_app_server_with_realtime_speech(
     .await?;
 
     Ok((
-        AppServerSession::new(app_server, thread_params_mode)
-            .with_local_nez_home(&config.nez_home),
+        AppServerSession::new(app_server, thread_params_mode).with_local_nez_home(&config.nez_home),
         requests,
         proxy,
     ))
@@ -1619,10 +1618,9 @@ async fn local_daemon_registers_approval_gated_mcp_tools_for_both_start_paths_sc
         forked["config"]["mcp_servers.nez_tui"],
         starts[0]["config"]["mcp_servers.nez_tui"]
     );
-    let authorization =
-        starts[0]["config"]["mcp_servers.nez_tui"]["http_headers"]["Authorization"]
-            .as_str()
-            .expect("MCP bearer token");
+    let authorization = starts[0]["config"]["mcp_servers.nez_tui"]["http_headers"]["Authorization"]
+        .as_str()
+        .expect("MCP bearer token");
     let client = nez_http_client::HttpClientBuilder::new().build_direct()?;
     let call_tool = |id: u32, tool: &'static str, arguments: serde_json::Value| {
         client
@@ -2006,10 +2004,9 @@ async fn check_dynamic_tool_requests(
     app.config.sqlite = SqliteConfig::new_for_testing(nez_home.path().abs());
     let mut catalog = nez_models_manager::bundled_models_response()?;
     for model in &mut catalog.models {
-        model.available_access_programs =
-            Some(nez_protocol::openai_models::ModelAccessPrograms {
-                cyber: vec![nez_protocol::turn_input::CyberAccessProgram::DaybreakBlue],
-            });
+        model.available_access_programs = Some(nez_protocol::openai_models::ModelAccessPrograms {
+            cyber: vec![nez_protocol::turn_input::CyberAccessProgram::DaybreakBlue],
+        });
     }
     let catalog_path = nez_home.path().join("models.json");
     std::fs::write(&catalog_path, serde_json::to_vec(&catalog)?)?;
@@ -4766,8 +4763,7 @@ fn session_lifecycle_avoids_redundant_subagent_metadata_reads() -> Result<()> {
                 let (mut app, mut app_event_rx, _op_rx) = make_test_app_with_channels().await;
                 let nez_home = tempdir()?;
                 app.config.nez_home = nez_home.path().to_path_buf().abs();
-                app.config.sqlite =
-                    nez_state::SqliteConfig::new_for_testing(nez_home.path().abs());
+                app.config.sqlite = nez_state::SqliteConfig::new_for_testing(nez_home.path().abs());
                 let root_timestamp = "2026-01-01T00-00-00";
                 let root_thread_id = ThreadId::from_string(
                     &create_fake_rollout(
@@ -4802,11 +4798,8 @@ fn session_lifecycle_avoids_redundant_subagent_metadata_reads() -> Result<()> {
                     )
                     .expect("create child rollout"),
                 )?;
-                let root_rollout_path = rollout_path(
-                    nez_home.path(),
-                    root_timestamp,
-                    &root_thread_id.to_string(),
-                );
+                let root_rollout_path =
+                    rollout_path(nez_home.path(), root_timestamp, &root_thread_id.to_string());
                 let (started_tx, started_rx) = oneshot::channel();
                 let (release_tx, release_rx) = oneshot::channel();
                 let (mut app_server, requests, proxy) = start_recording_app_server(

@@ -9,12 +9,12 @@ use crate::keymap::bindings::KeymapContext;
 use crate::keymap::bindings::keymap_action_ids;
 use crate::keymap::keymap_action_id;
 use crate::keymap::user_bindings;
-use nez_config::types::KeybindingSpec;
-use nez_config::types::KeybindingsSpec;
-use nez_config::types::TuiKeymap;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use crossterm::event::KeyModifiers;
+use nez_config::types::KeybindingSpec;
+use nez_config::types::KeybindingsSpec;
+use nez_config::types::TuiKeymap;
 use pretty_assertions::assert_eq;
 use std::collections::HashSet;
 

@@ -51,6 +51,9 @@ use crate::tui::FrameRequester;
 pub(crate) use bottom_pane_view::BottomPaneView;
 pub(crate) use bottom_pane_view::ViewCompletion;
 pub(crate) use bottom_pane_view::ViewPresentation;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
+use crossterm::event::KeyEventKind;
 use nez_app_server_protocol::SkillMetadata;
 use nez_app_server_protocol::ToolRequestUserInputParams;
 use nez_features::Features;
@@ -59,9 +62,6 @@ use nez_plugin::PluginCapabilitySummary;
 use nez_protocol::ThreadId;
 use nez_protocol::openai_models::ReasoningEffort;
 use nez_protocol::user_input::TextElement;
-use crossterm::event::KeyCode;
-use crossterm::event::KeyEvent;
-use crossterm::event::KeyEventKind;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::Stylize;
@@ -2638,12 +2638,12 @@ mod tests {
     use crate::status_indicator_widget::StatusDetailsCapitalization;
     use crate::test_support::PathBufExt;
     use crate::test_support::test_path_buf;
-    use nez_app_server_protocol::CommandExecutionApprovalDecision;
     use crossterm::event::KeyCode;
     use crossterm::event::KeyEvent;
     use crossterm::event::KeyEventKind;
     use crossterm::event::KeyModifiers;
     use insta::assert_snapshot;
+    use nez_app_server_protocol::CommandExecutionApprovalDecision;
     use pretty_assertions::assert_eq;
     use ratatui::buffer::Buffer;
     use ratatui::layout::Rect;
@@ -4017,10 +4017,7 @@ mod tests {
 
         pane.hide_status_indicator();
         pane.handle_key_event(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
-        assert!(matches!(
-            rx.try_recv(),
-            Ok(AppEvent::NezOp(Op::Interrupt))
-        ));
+        assert!(matches!(rx.try_recv(), Ok(AppEvent::NezOp(Op::Interrupt))));
     }
 
     #[test]
@@ -4048,10 +4045,7 @@ mod tests {
 
         pane.hide_status_indicator();
         pane.handle_key_event(KeyEvent::new(KeyCode::F(12), KeyModifiers::NONE));
-        assert!(matches!(
-            rx.try_recv(),
-            Ok(AppEvent::NezOp(Op::Interrupt))
-        ));
+        assert!(matches!(rx.try_recv(), Ok(AppEvent::NezOp(Op::Interrupt))));
     }
 
     #[test]

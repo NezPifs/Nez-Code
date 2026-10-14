@@ -1,3 +1,15 @@
+use core_test_support::ThreadIdle;
+use core_test_support::responses;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::local;
+use core_test_support::test_nez::local_request;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
 use nez_core::NotSubmittedReason;
 use nez_core::RecoverTurnRequest;
 use nez_core::StartIfIdleSubmission;
@@ -33,18 +45,6 @@ use nez_protocol::turn_input::AnnotatedResponseItem;
 use nez_protocol::turn_input::ResponseItemAnnotations;
 use nez_protocol::turn_input::TurnAttribution;
 use nez_protocol::user_input::UserInput;
-use core_test_support::ThreadIdle;
-use core_test_support::responses;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::local;
-use core_test_support::test_nez::local_request;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use std::sync::Arc;
@@ -424,8 +424,7 @@ async fn host_drain_closes_realtime_after_handoff_error() -> anyhow::Result<()> 
             flush_transcript_tail_on_session_end: false,
             nez_responses_as_items: false,
             nez_response_item_prefix: None,
-            nez_response_handoff_mode:
-                nez_protocol::protocol::NezResponseHandoffMode::Thinking,
+            nez_response_handoff_mode: nez_protocol::protocol::NezResponseHandoffMode::Thinking,
             backend_reasoning_status: false,
             nez_response_handoff_channel_prefixes: None,
             model: None,
@@ -576,10 +575,7 @@ async fn start_turn_if_idle_keeps_automatic_plan_rejections_atomic(
             reason: NotSubmittedReason::PlanMode,
         }
     );
-    assert_eq!(
-        test.nez.thread_settings_snapshot().await,
-        current_settings
-    );
+    assert_eq!(test.nez.thread_settings_snapshot().await, current_settings);
 
     // Rejection releases the idle reservation, and an explicit user can make
     // either transition without receiving the rejected automatic input.
@@ -652,10 +648,8 @@ async fn recover_turn_if_idle_preserves_id_and_resumes_plan_mode() {
         ModeKind::Plan
     );
 
-    let started = wait_for_event(&test.nez, |event| {
-        matches!(event, EventMsg::TurnStarted(_))
-    })
-    .await;
+    let started =
+        wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnStarted(_))).await;
     let EventMsg::TurnStarted(started) = started else {
         unreachable!("wait_for_event returned unexpected event");
     };

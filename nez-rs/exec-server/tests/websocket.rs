@@ -2,12 +2,12 @@
 
 mod common;
 
+use common::exec_server::exec_server;
 use nez_exec_server::InitializeParams;
 use nez_exec_server::InitializeResponse;
 use nez_exec_server_protocol::JSONRPCError;
 use nez_exec_server_protocol::JSONRPCMessage;
 use nez_exec_server_protocol::JSONRPCResponse;
-use common::exec_server::exec_server;
 use pretty_assertions::assert_eq;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Error as WebSocketError;

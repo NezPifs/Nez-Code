@@ -17,8 +17,8 @@ use crate::hook_runtime::PostCompactHookOutcome;
 use crate::hook_runtime::PreCompactHookOutcome;
 use crate::hook_runtime::run_post_compact_hooks;
 use crate::hook_runtime::run_pre_compact_hooks;
-use crate::responses_metadata::NezResponsesMetadata;
 use crate::responses_metadata::CompactionTurnMetadata;
+use crate::responses_metadata::NezResponsesMetadata;
 use crate::session::RequestEffortUsage;
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
@@ -26,13 +26,14 @@ use crate::session::turn::get_last_assistant_message_from_turn;
 use crate::session::turn_context::TurnContext;
 use crate::state::AutoCompactWindowIds;
 use crate::util::backoff;
-use nez_analytics::NezCompactionEvent;
+use futures::prelude::*;
 use nez_analytics::CompactionImplementation;
 use nez_analytics::CompactionPhase;
 use nez_analytics::CompactionReason;
 use nez_analytics::CompactionStatus;
 use nez_analytics::CompactionStrategy;
 use nez_analytics::CompactionTrigger;
+use nez_analytics::NezCompactionEvent;
 use nez_analytics::now_unix_seconds;
 use nez_context_fragments::AnnotatedContent;
 use nez_context_fragments::set_annotated_content;
@@ -56,7 +57,6 @@ use nez_protocol::protocol::WarningEvent;
 use nez_protocol::user_input::UserInput;
 use nez_rollout_trace::InferenceTraceContext;
 use nez_utils_output_truncation::approx_token_count;
-use futures::prelude::*;
 use tracing::error;
 
 pub use nez_prompts::SUMMARIZATION_PROMPT;
@@ -350,8 +350,7 @@ async fn run_compact_task_inner_impl(
             Err(e)
                 if matches!(
                     e.details(),
-                    NezErrorDetails::SessionBudgetExceeded
-                        | NezErrorDetails::ResponseIncomplete(_)
+                    NezErrorDetails::SessionBudgetExceeded | NezErrorDetails::ResponseIncomplete(_)
                 ) =>
             {
                 return Err(e);
@@ -519,8 +518,7 @@ impl CompactionAnalyticsAttempt {
                 strategy: CompactionStrategy::Memento,
                 status,
                 nez_error_kind: nez_error.map(Into::into),
-                nez_error_http_status_code: nez_error
-                    .and_then(NezErr::http_status_code_value),
+                nez_error_http_status_code: nez_error.and_then(NezErr::http_status_code_value),
                 usage_limit_window_minutes: nez_error.and_then(|error| match error.details() {
                     NezErrorDetails::UsageLimitReached(error) => error.limit_window_minutes,
                     _ => None,

@@ -1009,11 +1009,7 @@ mod tests {
                     Paragraph::new(vec![
                         Line::default(),
                         Line::default(),
-                        Line::from(vec![
-                            "›".bold(),
-                            " ".into(),
-                            "Ask Nez to do anything".dim(),
-                        ]),
+                        Line::from(vec!["›".bold(), " ".into(), "Ask Nez to do anything".dim()]),
                     ])
                     .render(frame.area(), frame.buffer_mut());
                 })

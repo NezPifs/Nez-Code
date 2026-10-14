@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server_client::RemoteAppServerClient;
 use nez_app_server_client::RemoteAppServerConnectArgs;
 use nez_app_server_client::RemoteAppServerEndpoint;
@@ -12,8 +14,6 @@ use nez_protocol::protocol::SessionSource;
 use nez_protocol::protocol::ThreadHistoryMode;
 use nez_state::ThreadMetadataBuilder;
 use nez_utils_absolute_path::test_support::PathExt;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tempfile::TempDir;
@@ -526,10 +526,8 @@ async fn uses_listed_thread_when_older_server_cannot_read_it() -> color_eyre::Re
             channel_capacity: 8,
         })
         .await?;
-        let mut remote = AppServerSession::new(
-            nez_app_server_client::AppServerClient::Remote(client),
-            mode,
-        );
+        let mut remote =
+            AppServerSession::new(nez_app_server_client::AppServerClient::Remote(client), mode);
         let found = lookup(
             &mut remote,
             config.nez_home.as_path(),

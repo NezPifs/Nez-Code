@@ -1,7 +1,7 @@
 use super::*;
 use crate::chatwidget::UserMessage;
-use nez_app_server_protocol::NezErrorInfo;
 use nez_app_server_protocol::ErrorNotification;
+use nez_app_server_protocol::NezErrorInfo;
 use nez_app_server_protocol::ThreadGoalStatus;
 use nez_protocol::models::ManagedFileSystemPermissions;
 use nez_protocol::permissions::FileSystemAccessMode;
@@ -48,8 +48,7 @@ async fn worktree_creation_rejects_untrusted_source_before_allocation() -> Resul
 
     let (mut app, mut events, _op_rx) = make_test_app_with_channels().await;
     app.config.features.enable(Feature::Worktrees)?;
-    app.config.active_project.trust_level =
-        Some(nez_protocol::config_types::TrustLevel::Untrusted);
+    app.config.active_project.trust_level = Some(nez_protocol::config_types::TrustLevel::Untrusted);
     let thread_id = ThreadId::new();
     app.primary_thread_id = Some(thread_id);
     app.chat_widget

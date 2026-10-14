@@ -7,6 +7,10 @@
 
 #![allow(clippy::unwrap_used)]
 
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
+use crossterm::event::KeyEventKind;
+use crossterm::event::KeyModifiers;
 use nez_app_server_client::AppServerRequestHandle;
 use nez_app_server_protocol::AccountLoginCompletedNotification;
 use nez_app_server_protocol::AccountUpdatedNotification;
@@ -18,10 +22,6 @@ use nez_app_server_protocol::LoginAccountResponse;
 use nez_login::AuthConfig;
 use nez_login::read_openai_api_key_from_env;
 use nez_protocol::auth::AuthMode;
-use crossterm::event::KeyCode;
-use crossterm::event::KeyEvent;
-use crossterm::event::KeyEventKind;
-use crossterm::event::KeyModifiers;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Constraint;
 use ratatui::layout::Layout;

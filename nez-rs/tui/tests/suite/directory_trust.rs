@@ -3,10 +3,10 @@
 use super::focus_palette::PtyNez;
 use super::focus_palette::write_test_config;
 use anyhow::Result;
-use nez_app_server_protocol::JSONRPCMessage;
-use nez_app_server_protocol::RequestId;
 use futures::SinkExt;
 use futures::StreamExt;
+use nez_app_server_protocol::JSONRPCMessage;
+use nez_app_server_protocol::RequestId;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Arc;

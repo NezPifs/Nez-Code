@@ -2107,8 +2107,8 @@ mod tests {
     use nez_protocol::config_types::MultiAgentMode;
     use nez_protocol::models::BUILT_IN_PERMISSION_PROFILE_READ_ONLY;
     use nez_protocol::parse_command::ParsedCommand;
-    use nez_protocol::protocol::NezResponseHandoffMode;
     use nez_protocol::protocol::ConversationTextRole;
+    use nez_protocol::protocol::NezResponseHandoffMode;
     use nez_protocol::protocol::RealtimeConversationVersion;
     use nez_protocol::protocol::RealtimeOutputModality;
     use nez_protocol::protocol::RealtimeVoice;
@@ -3278,11 +3278,9 @@ mod tests {
                 service_tier: None,
                 cwd,
                 runtime_workspace_roots: Vec::new(),
-                instruction_sources: vec![
-                    nez_utils_path_uri::LegacyAppPathString::from_abs_path(&absolute_path(
-                        "/tmp/AGENTS.md",
-                    )),
-                ],
+                instruction_sources: vec![nez_utils_path_uri::LegacyAppPathString::from_abs_path(
+                    &absolute_path("/tmp/AGENTS.md"),
+                )],
                 approval_policy: v2::AskForApproval::OnRequest,
                 approvals_reviewer: v2::ApprovalsReviewer::User,
                 sandbox: v2::SandboxPolicy::DangerFullAccess,

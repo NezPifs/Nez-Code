@@ -1,5 +1,5 @@
-use nez_utils_absolute_path::AbsolutePathBuf;
 use multimap::MultiMap;
+use nez_utils_absolute_path::AbsolutePathBuf;
 use starlark::any::ProvidesStaticType;
 use starlark::codemap::FileSpan;
 use starlark::environment::GlobalsBuilder;

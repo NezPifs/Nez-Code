@@ -17,8 +17,8 @@ use nez_utils_sandbox_summary::summarize_permission_profile;
 use owo_colors::OwoColorize;
 use owo_colors::Style;
 
-use crate::event_processor::NezStatus;
 use crate::event_processor::EventProcessor;
+use crate::event_processor::NezStatus;
 use crate::event_processor::handle_last_message;
 
 pub(crate) struct EventProcessorWithHumanOutput {
@@ -100,11 +100,7 @@ impl EventProcessorWithHumanOutput {
     fn render_item_completed(&mut self, item: ThreadItem) {
         match item {
             ThreadItem::AgentMessage { text, .. } => {
-                eprintln!(
-                    "{}\n{}",
-                    "nez".style(self.italic).style(self.magenta),
-                    text
-                );
+                eprintln!("{}\n{}", "nez".style(self.italic).style(self.magenta), text);
                 self.final_message = Some(text);
                 self.final_message_rendered = true;
             }

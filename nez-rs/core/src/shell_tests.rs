@@ -165,10 +165,7 @@ fn nez_path_setup_preserves_shell_script_line_numbers() -> anyhow::Result<()> {
             shell,
             use_login_shell: true,
         };
-        for directory in [
-            "nez-path",
-            "nez '\\c[*]$(printf bad)`printf bad`\npath\n",
-        ] {
+        for directory in ["nez-path", "nez '\\c[*]$(printf bad)`printf bad`\npath\n"] {
             let directory = temp_dir.path().join(directory);
             let path = PathUri::from_host_native_path(&directory)?;
             let commands = [

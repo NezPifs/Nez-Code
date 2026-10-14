@@ -1,4 +1,5 @@
 use crate::error::ApiError;
+use futures::Stream;
 use nez_protocol::ResponseUsageMetadata;
 use nez_protocol::config_types::ReasoningSummary as ReasoningSummaryConfig;
 use nez_protocol::config_types::Verbosity as VerbosityConfig;
@@ -10,7 +11,6 @@ use nez_protocol::protocol::TokenUsage;
 use nez_protocol::protocol::TurnModerationMetadataEvent;
 use nez_protocol::protocol::W3cTraceContext;
 use nez_protocol::turn_input::CyberAccessProgram;
-use futures::Stream;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;

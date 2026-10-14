@@ -12,12 +12,13 @@ use super::X_OPENAI_SUBAGENT_HEADER;
 use crate::AttestationContext;
 use crate::AttestationProvider;
 use crate::GenerateAttestationFuture;
-use crate::responses_metadata::NezResponsesMetadata;
 use crate::responses_metadata::MAX_MCP_ATTRIBUTION_BYTES;
 use crate::responses_metadata::MCP_ATTRIBUTION_CLIENT_METADATA_KEY;
+use crate::responses_metadata::NezResponsesMetadata;
 use crate::test_support::TestNezResponsesRequestKind;
 use crate::test_support::responses_metadata as test_responses_metadata;
 use base64::Engine;
+use futures::StreamExt;
 use nez_api::AgentIdentityTelemetry;
 use nez_api::ApiError;
 use nez_api::ResponseEvent;
@@ -75,7 +76,6 @@ use nez_rollout_trace::replay_bundle;
 use nez_tools::JsonSchema;
 use nez_tools::ResponsesApiTool;
 use nez_tools::ToolSpec;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -133,9 +133,7 @@ fn test_model_client_with_thread_id(
         /*output_token_replay_enabled*/ false,
         /*attestation_provider*/ None,
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
-        nez_model_provider::WorkspaceRoutingContext::new(
-            "https://chatgpt.com/backend-api".into(),
-        ),
+        nez_model_provider::WorkspaceRoutingContext::new("https://chatgpt.com/backend-api".into()),
         Vec::new(),
     )
 }
@@ -679,9 +677,7 @@ async fn responses_request_includes_internal_metadata_for_provider_grant_or_firs
     }
     responses_metadata.mcp_attribution = Some(McpAttribution {
         status: McpAttributionStatus::AttributionError,
-        error_reason: Some(
-            nez_protocol::mcp::McpAttributionErrorReason::HistoryMissingCheckpoint,
-        ),
+        error_reason: Some(nez_protocol::mcp::McpAttributionErrorReason::HistoryMissingCheckpoint),
         sources: attribution.sources.clone(),
     });
     let request = client.build_responses_request(
@@ -2030,9 +2026,7 @@ fn model_client_with_counting_attestation(
             calls: attestation_calls.clone(),
         })),
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
-        nez_model_provider::WorkspaceRoutingContext::new(
-            "https://chatgpt.com/backend-api".into(),
-        ),
+        nez_model_provider::WorkspaceRoutingContext::new("https://chatgpt.com/backend-api".into()),
         Vec::new(),
     );
     (model_client, attestation_calls)

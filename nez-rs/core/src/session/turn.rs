@@ -64,6 +64,8 @@ use crate::tools::spec_plan::tool_suggest_enabled;
 use crate::turn_diff_tracker::TurnDiffTracker;
 use crate::turn_timing::record_turn_ttft_metric;
 use crate::util::error_or_panic;
+use futures::prelude::*;
+use futures::stream::FuturesOrdered;
 use nez_analytics::AppInvocation;
 use nez_analytics::CompactionPhase;
 use nez_analytics::CompactionReason;
@@ -98,10 +100,10 @@ use nez_protocol::models::ResponseItem;
 use nez_protocol::openai_models::ModelInfo;
 use nez_protocol::protocol::AgentMessageContentDeltaEvent;
 use nez_protocol::protocol::AgentReasoningSectionBreakEvent;
-use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::ErrorEvent;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::InternalSessionSource;
+use nez_protocol::protocol::NezErrorInfo;
 use nez_protocol::protocol::PlanDeltaEvent;
 use nez_protocol::protocol::ReasoningContentDeltaEvent;
 use nez_protocol::protocol::ReasoningRawContentDeltaEvent;
@@ -128,8 +130,6 @@ use nez_utils_stream_parser::AssistantTextStreamParser;
 use nez_utils_stream_parser::ProposedPlanSegment;
 use nez_utils_stream_parser::extract_proposed_plan_text;
 use nez_utils_stream_parser::strip_citations;
-use futures::prelude::*;
-use futures::stream::FuturesOrdered;
 use tokio_util::sync::CancellationToken;
 use tracing::Instrument;
 use tracing::error;
@@ -861,10 +861,7 @@ pub(crate) async fn run_turn(
                 return Err(err);
             }
             Err(nez_error)
-                if matches!(
-                    nez_error.details(),
-                    NezErrorDetails::InvalidImageRequest()
-                ) =>
+                if matches!(nez_error.details(), NezErrorDetails::InvalidImageRequest()) =>
             {
                 sess.track_turn_nez_error(turn_context.as_ref(), &nez_error);
                 let error = NezErrorInfo::BadRequest;

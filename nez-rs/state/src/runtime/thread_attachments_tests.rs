@@ -478,11 +478,7 @@ async fn attachment_reverse_lookup_filters_pages_and_tracks_membership() -> Resu
         .add_thread_attachment(thread_ids[2], "worktree", "other", &json!({}))
         .await?;
     runtime
-        .mark_archived(
-            thread_ids[0],
-            &nez_home.join("archived.jsonl"),
-            Utc::now(),
-        )
+        .mark_archived(thread_ids[0], &nez_home.join("archived.jsonl"), Utc::now())
         .await?;
     let archived_thread = ThreadAttachmentOwner {
         thread_id: thread_ids[0],

@@ -1,6 +1,6 @@
 use super::*;
-use nez_protocol::config_types::ShellEnvironmentPolicyInherit;
 use maplit::hashmap;
+use nez_protocol::config_types::ShellEnvironmentPolicyInherit;
 use pretty_assertions::assert_eq;
 
 fn make_vars(pairs: &[(&str, &str)]) -> Vec<(String, String)> {
@@ -23,8 +23,7 @@ fn inject_permission_profile_env_overrides_policy_value() {
     );
 
     assert_eq!(
-        env.get(NEZ_PERMISSION_PROFILE_ENV_VAR)
-            .map(String::as_str),
+        env.get(NEZ_PERMISSION_PROFILE_ENV_VAR).map(String::as_str),
         Some("current-profile")
     );
 }

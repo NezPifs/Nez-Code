@@ -661,8 +661,7 @@ mod tests {
         let nez_home = tempfile::tempdir().unwrap();
         super::super::asset_pack::write_test_pack(nez_home.path());
 
-        let pet =
-            Pet::load_with_nez_home("dewey", /*nez_home*/ Some(nez_home.path())).unwrap();
+        let pet = Pet::load_with_nez_home("dewey", /*nez_home*/ Some(nez_home.path())).unwrap();
 
         assert_eq!(pet.id, "dewey");
         assert_eq!(pet.display_name, "Dewey");

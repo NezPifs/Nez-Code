@@ -468,10 +468,7 @@ mod tests {
         .expect("absolute path should not require current dir");
 
         std::env::set_current_dir(original_cwd).expect("restore cwd");
-        assert_eq!(
-            path.as_path(),
-            test_path_buf("/tmp/nez-home/plugins/cache")
-        );
+        assert_eq!(path.as_path(), test_path_buf("/tmp/nez-home/plugins/cache"));
         assert_eq!(relative_to_current_dir_path, path);
     }
 

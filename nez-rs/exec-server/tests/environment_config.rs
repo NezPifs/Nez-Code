@@ -1,5 +1,7 @@
 mod common;
 
+use common::exec_server::exec_server;
+use common::exec_server::exec_server_with_env;
 use nez_config::CONFIG_TOML_FILE;
 use nez_config::ConfigLayerSource;
 use nez_config::format_config_layer_source;
@@ -12,16 +14,13 @@ use nez_exec_server::EnvironmentConfigReadResponse;
 use nez_exec_server::ExecServerError;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use common::exec_server::exec_server;
-use common::exec_server::exec_server_with_env;
 use pretty_assertions::assert_eq;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn remote_environment_reads_projected_executor_config() -> anyhow::Result<()> {
     let mut server =
         exec_server_with_env([("NEZ_EXEC_SERVER_TEST_PREFER_MXC", "true")], &[]).await?;
-    let nez_home =
-        AbsolutePathBuf::from_absolute_path(std::fs::canonicalize(server.nez_home())?)?;
+    let nez_home = AbsolutePathBuf::from_absolute_path(std::fs::canonicalize(server.nez_home())?)?;
     let config_file = nez_home.join(CONFIG_TOML_FILE);
     let project = nez_home.join("project");
     let nested = project.join("nested");
@@ -150,8 +149,7 @@ private_startup_value = "unselected-private-value"
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn environment_config_read_rejects_empty_selectors() -> anyhow::Result<()> {
     let mut server = exec_server().await?;
-    let nez_home =
-        AbsolutePathBuf::from_absolute_path(std::fs::canonicalize(server.nez_home())?)?;
+    let nez_home = AbsolutePathBuf::from_absolute_path(std::fs::canonicalize(server.nez_home())?)?;
     let environment = Environment::create_for_tests(Some(server.websocket_url().to_string()))?;
 
     for (config_paths, expected_message) in [

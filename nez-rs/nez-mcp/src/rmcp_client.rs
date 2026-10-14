@@ -25,14 +25,14 @@ use std::time::Duration;
 use std::time::Instant;
 
 use crate::client_tool_catalog::ClientToolCatalog;
-use crate::nez_apps::normalize_nez_apps_callable_name;
-use crate::nez_apps::normalize_nez_apps_callable_namespace;
-use crate::nez_apps::normalize_nez_apps_tool_title;
-use crate::nez_apps::prepare_openai_file_params_for_model;
 use crate::elicitation::ElicitationRequestManager;
 use crate::executor_environment_http_client::ExecutorEnvironmentHttpClient;
 use crate::mcp::NEZ_APPS_MCP_SERVER_NAME;
 use crate::mcp::ToolPluginContext;
+use crate::nez_apps::normalize_nez_apps_callable_name;
+use crate::nez_apps::normalize_nez_apps_callable_namespace;
+use crate::nez_apps::normalize_nez_apps_tool_title;
+use crate::nez_apps::prepare_openai_file_params_for_model;
 use crate::openai_docs_source_attribution::maybe_with_openai_docs_source_attribution;
 use crate::pagination::collect_paginated_with_limit;
 use crate::runtime::McpRuntimeContext;
@@ -46,6 +46,9 @@ use crate::tools::ToolInfo;
 use anyhow::Result;
 use anyhow::anyhow;
 use async_channel::Sender;
+use futures::future::BoxFuture;
+use futures::future::FutureExt;
+use futures::future::Shared;
 use nez_api::SharedAuthProvider;
 use nez_async_utils::CancelErr;
 use nez_async_utils::OrCancelExt;
@@ -75,9 +78,6 @@ use nez_rmcp_client::StreamableHttpBearerToken;
 use nez_rmcp_client::StreamableHttpRedirectMode;
 use nez_rmcp_client::ToolWithConnectorId;
 use nez_rmcp_client::is_authentication_required_error;
-use futures::future::BoxFuture;
-use futures::future::FutureExt;
-use futures::future::Shared;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::ElicitationCapability;
 use rmcp::model::Implementation;
@@ -1034,18 +1034,18 @@ async fn start_server_task(
     )
     .await
     .map_err(StartupOutcomeError::from)?;
-    let client_tools: Arc<[ToolInfo]> =
-        match (nez_apps_tools_cache_context.as_ref(), fetch_ticket) {
-            (Some(context), Some(ticket)) if server_disables_tool_catalog_cache => {
-                context.publish_runtime_if_newest_accepted(ticket, &server_info, tools.clone());
-                tools.into()
-            }
-            (Some(context), Some(ticket)) => context
-                .publish_runtime_if_newest_accepted(ticket, &server_info, tools)
-                .shared_tools(),
-            (None, None) => tools.into(),
-            _ => unreachable!("Nez Apps fetch ticket requires cache context"),
-        };
+    let client_tools: Arc<[ToolInfo]> = match (nez_apps_tools_cache_context.as_ref(), fetch_ticket)
+    {
+        (Some(context), Some(ticket)) if server_disables_tool_catalog_cache => {
+            context.publish_runtime_if_newest_accepted(ticket, &server_info, tools.clone());
+            tools.into()
+        }
+        (Some(context), Some(ticket)) => context
+            .publish_runtime_if_newest_accepted(ticket, &server_info, tools)
+            .shared_tools(),
+        (None, None) => tools.into(),
+        _ => unreachable!("Nez Apps fetch ticket requires cache context"),
+    };
     if let (Some(cache_context), Some(fetch_ticket)) = (
         tool_catalog_cache_context.as_ref(),
         tool_catalog_fetch_ticket,

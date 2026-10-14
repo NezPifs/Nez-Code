@@ -1,4 +1,5 @@
 use super::*;
+use core_test_support::PathExt;
 use nez_protocol::models::PermissionProfile;
 use nez_protocol::permissions::FileSystemSandboxPolicyContext;
 use nez_protocol::permissions::NetworkSandboxPolicy;
@@ -9,7 +10,6 @@ use nez_protocol::protocol::FileSystemSpecialPath;
 use nez_protocol::protocol::GranularApprovalConfig;
 use nez_utils_absolute_path::AbsolutePathBuf;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathExt;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 

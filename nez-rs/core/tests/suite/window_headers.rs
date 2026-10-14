@@ -1,12 +1,5 @@
 use super::compact::COMPACT_WARNING_MESSAGE;
 use anyhow::Result;
-use nez_core::NezThread;
-use nez_core::TurnInputRequest;
-use nez_core::compact::SUMMARIZATION_PROMPT;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
-use nez_protocol::protocol::WarningEvent;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::ResponsesRequest;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
@@ -16,6 +9,13 @@ use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::NezThread;
+use nez_core::TurnInputRequest;
+use nez_core::compact::SUMMARIZATION_PROMPT;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
+use nez_protocol::protocol::WarningEvent;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 
@@ -139,12 +139,11 @@ async fn window_id_advances_after_compact_persists_on_resume_and_resets_on_fork(
 }
 
 async fn submit_user_turn(nez: &Arc<NezThread>, text: &str) -> Result<()> {
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: text.to_string(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: text.to_string(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     Ok(())
 }

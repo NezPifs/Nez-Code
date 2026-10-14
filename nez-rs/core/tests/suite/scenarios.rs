@@ -11,6 +11,32 @@ use std::time::Duration;
 use anyhow::Result;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::context_snapshot;
+use core_test_support::context_snapshot::ContextSnapshotOptions;
+use core_test_support::context_snapshot::SnapshotEntry;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_completed_with_tokens;
+use core_test_support::responses::ev_custom_tool_call;
+use core_test_support::responses::ev_function_call_with_namespace;
+use core_test_support::responses::ev_message_item_added;
+use core_test_support::responses::ev_output_text_delta;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::stdio_server_bin;
+use core_test_support::streaming_sse::StreamingSseChunk;
+use core_test_support::streaming_sse::start_streaming_sse_server;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::environment_config_for_selection;
+use core_test_support::test_nez::executor_path_uri;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
 use nez_analytics::CompactionTrigger;
 use nez_config::ConfigLayerSource;
 use nez_config::ConfigLayerStack;
@@ -64,32 +90,6 @@ use nez_skills_extension::SkillsExtensionConfig;
 use nez_skills_extension::install;
 use nez_skills_extension::install_with_providers;
 use nez_utils_path_uri::PathUri;
-use core_test_support::context_snapshot;
-use core_test_support::context_snapshot::ContextSnapshotOptions;
-use core_test_support::context_snapshot::SnapshotEntry;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_completed_with_tokens;
-use core_test_support::responses::ev_custom_tool_call;
-use core_test_support::responses::ev_function_call_with_namespace;
-use core_test_support::responses::ev_message_item_added;
-use core_test_support::responses::ev_output_text_delta;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::stdio_server_bin;
-use core_test_support::streaming_sse::StreamingSseChunk;
-use core_test_support::streaming_sse::start_streaming_sse_server;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::environment_config_for_selection;
-use core_test_support::test_nez::executor_path_uri;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tempfile::TempDir;
@@ -1569,37 +1569,34 @@ async fn astra_continues_after_input_yields_a_code_mode_cell() -> Result<()> {
     )
     .await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![text(
-            "Check the release status.",
-        )]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![text(
+        "Check the release status.",
+    )]))
+    .await?;
     let EventMsg::DynamicToolCallRequest(tool_request) = wait_for_event(&nez, |event| {
         matches!(event, EventMsg::DynamicToolCallRequest(request) if request.tool == "check_release")
     })
     .await else {
         unreachable!("predicate guarantees a dynamic tool request");
     };
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![text(
-            "Please also highlight the customer impact.",
-        )]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![text(
+        "Please also highlight the customer impact.",
+    )]))
+    .await?;
     wait_for_event(&nez, |event| {
         matches!(event, EventMsg::RawResponseItem(raw) if matches!(&raw.item, ResponseItem::FunctionCall { call_id, .. } if call_id == "wait-call"))
     })
     .await;
-    nez
-        .submit(Op::DynamicToolResponse {
-            id: tool_request.call_id,
-            response: DynamicToolResponse {
-                content_items: vec![DynamicToolCallOutputContentItem::InputText {
-                    text: "Release ready".into(),
-                }],
-                success: true,
-            },
-        })
-        .await?;
+    nez.submit(Op::DynamicToolResponse {
+        id: tool_request.call_id,
+        response: DynamicToolResponse {
+            content_items: vec![DynamicToolCallOutputContentItem::InputText {
+                text: "Release ready".into(),
+            }],
+            success: true,
+        },
+    })
+    .await?;
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
 
     let requests = mock.requests();
@@ -2248,11 +2245,11 @@ enum LiveSuffix {
 async fn astra_async_compaction_keeps_work_added_after_its_snapshot(
     suffix: LiveSuffix,
 ) -> Result<()> {
+    use core_test_support::responses::ev_completed_with_tokens;
     use nez_protocol::config_types::CollaborationMode;
     use nez_protocol::config_types::ModeKind;
     use nez_protocol::config_types::Settings;
     use nez_protocol::protocol::ThreadSettingsOverrides;
-    use core_test_support::responses::ev_completed_with_tokens;
 
     skip_if_no_network!(Ok(()));
     let over_budget = matches!(suffix, LiveSuffix::OverBudgetRetainedTool);
@@ -2366,14 +2363,10 @@ async fn astra_async_compaction_keeps_work_added_after_its_snapshot(
                 suffix,
                 LiveSuffix::RetainedTool | LiveSuffix::OverBudgetRetainedTool
             ) {
-                TurnInput::AnnotatedResponseItem(
-                    nez_protocol::turn_input::AnnotatedResponseItem {
-                        item,
-                        annotations: nez_protocol::turn_input::ResponseItemAnnotations {
-                            retain: true,
-                        },
-                    },
-                )
+                TurnInput::AnnotatedResponseItem(nez_protocol::turn_input::AnnotatedResponseItem {
+                    item,
+                    annotations: nez_protocol::turn_input::ResponseItemAnnotations { retain: true },
+                })
             } else {
                 TurnInput::ResponseItem(item)
             },
@@ -2405,11 +2398,7 @@ async fn astra_async_compaction_keeps_work_added_after_its_snapshot(
         .send(())
         .expect("release background compaction");
     // Wait for client publication while foreground work is gated, keeping adoption optional.
-    tokio::time::timeout(
-        timeout,
-        test.nez.wait_for_background_compaction_for_test(),
-    )
-    .await?;
+    tokio::time::timeout(timeout, test.nez.wait_for_background_compaction_for_test()).await?;
     release_foreground
         .send(())
         .expect("release foreground work");
@@ -2419,11 +2408,7 @@ async fn astra_async_compaction_keeps_work_added_after_its_snapshot(
         matches!(event, EventMsg::TurnComplete(_))
     })
     .await;
-    tokio::time::timeout(
-        timeout,
-        test.nez.wait_for_background_compaction_for_test(),
-    )
-    .await?;
+    tokio::time::timeout(timeout, test.nez.wait_for_background_compaction_for_test()).await?;
     assert_eq!(compaction_events.len(), if over_budget { 4 } else { 2 });
     for pair in compaction_events.chunks_exact(2) {
         assert_eq!((pair[0].0, pair[1].0), ("started", "completed"));
@@ -2647,10 +2632,7 @@ async fn async_compaction_reuses_pending_work(
     }
     if outcome == PendingCompactionOutcome::Interrupted {
         test.nez.submit(Op::Interrupt).await?;
-        wait_for_event(&test.nez, |event| {
-            matches!(event, EventMsg::TurnAborted(_))
-        })
-        .await;
+        wait_for_event(&test.nez, |event| matches!(event, EventMsg::TurnAborted(_))).await;
         release_background.send(()).expect("release unused result");
         completions.remove(1).await?;
         test.nez.shutdown_and_wait().await?;
@@ -2696,11 +2678,7 @@ async fn async_compaction_reuses_pending_work(
     assert_eq!(completed, starts);
     assert_eq!(starts.len(), if over_budget { 2 } else { 1 });
     assert_eq!(starts.iter().collect::<HashSet<_>>().len(), starts.len());
-    tokio::time::timeout(
-        timeout,
-        test.nez.wait_for_background_compaction_for_test(),
-    )
-    .await?;
+    tokio::time::timeout(timeout, test.nez.wait_for_background_compaction_for_test()).await?;
     if manual {
         test.submit_text_turn("after manual compaction").await?;
     }

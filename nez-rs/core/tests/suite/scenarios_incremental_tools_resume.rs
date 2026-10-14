@@ -1,11 +1,6 @@
 //! Request-history coverage for adopting incremental tools when initial context is rebuilt.
 
 use anyhow::Result;
-use nez_features::Feature;
-use nez_login::NezAuth;
-use nez_protocol::openai_models::ToolMode;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::Op;
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::responses;
@@ -13,6 +8,11 @@ use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::TestNezBuilder;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_features::Feature;
+use nez_login::NezAuth;
+use nez_protocol::openai_models::ToolMode;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::Op;
 use serde_json::json;
 use test_case::test_case;
 

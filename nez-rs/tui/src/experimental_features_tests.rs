@@ -1,10 +1,10 @@
 use super::*;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_app_server_client::RemoteAppServerClient;
 use nez_app_server_client::RemoteAppServerConnectArgs;
 use nez_app_server_client::RemoteAppServerEndpoint;
 use nez_app_server_protocol::JSONRPCMessage;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tokio_tungstenite::tungstenite::Message;

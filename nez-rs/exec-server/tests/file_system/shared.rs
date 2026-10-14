@@ -1,5 +1,6 @@
 use anyhow::Context;
 use anyhow::Result;
+use futures::TryStreamExt;
 use nez_exec_server::CopyOptions;
 use nez_exec_server::CreateDirectoryOptions;
 use nez_exec_server::EnvironmentAccess;
@@ -34,7 +35,6 @@ use nez_protocol::permissions::NetworkSandboxPolicy;
 use nez_sandboxing::policy_transforms::effective_file_system_sandbox_policy;
 use nez_sandboxing::policy_transforms::effective_network_sandbox_policy;
 use nez_utils_path_uri::PathUri;
-use futures::TryStreamExt;
 use pretty_assertions::assert_eq;
 use std::path::Path;
 use std::sync::Arc;

@@ -3,13 +3,13 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
+use futures::FutureExt as _;
 use nez_rmcp_client::ElicitationAction;
 use nez_rmcp_client::ElicitationResponse;
 use nez_rmcp_client::LocalStdioServerLauncher;
 use nez_rmcp_client::RmcpClient;
 use nez_rmcp_client::mcp_error;
 use nez_utils_cargo_bin::CargoBinError;
-use futures::FutureExt as _;
 use pretty_assertions::assert_eq;
 use rmcp::model::ClientCapabilities;
 use rmcp::model::ElicitationCapability;

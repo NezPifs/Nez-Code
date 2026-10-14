@@ -7,12 +7,12 @@ use std::process::Stdio;
 use std::time::Duration;
 
 use self::http_client::StartupSyncHttpClient;
+use http::Method;
 use nez_http_client::HttpClientFactory;
 use nez_http_client::RequestBuilder;
 use nez_login::default_client::default_headers;
 use nez_otel::CURATED_PLUGINS_STARTUP_SYNC_FINAL_METRIC;
 use nez_otel::CURATED_PLUGINS_STARTUP_SYNC_METRIC;
-use http::Method;
 use serde::Deserialize;
 use tempfile::TempDir;
 use tracing::warn;
@@ -182,10 +182,7 @@ fn lock_curated_plugins_startup_sync(nez_home: &Path) -> Result<File, String> {
     Ok(lock_file)
 }
 
-fn sync_openai_plugins_repo_via_git(
-    nez_home: &Path,
-    git_binary: &Path,
-) -> Result<String, String> {
+fn sync_openai_plugins_repo_via_git(nez_home: &Path, git_binary: &Path) -> Result<String, String> {
     let repo_path = curated_plugins_repo_path(nez_home);
     let sha_path = nez_home.join(CURATED_PLUGINS_SHA_FILE);
     let remote_sha = git_ls_remote_head_sha(nez_home, git_binary)?;

@@ -143,11 +143,9 @@ impl ConfigManager {
         chatgpt_base_url: String,
         http_client_factory: nez_http_client::HttpClientFactory,
     ) {
-        let endpoint = nez_backend_client::Client::new(
-            chatgpt_base_url.clone(),
-            http_client_factory.clone(),
-        )
-        .config_bundle_url();
+        let endpoint =
+            nez_backend_client::Client::new(chatgpt_base_url.clone(), http_client_factory.clone())
+                .config_bundle_url();
         let http_client_factory = http_client_factory.with_network_policy(
             self.local_network_policy
                 .policy()

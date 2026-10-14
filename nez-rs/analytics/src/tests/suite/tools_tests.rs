@@ -1,12 +1,12 @@
 //! Tool item, Code Mode correlation, and artifact event tests.
 
 use crate::events::AppServerRpcTransport;
+use crate::events::FinalApprovalOutcome;
 use crate::events::NezAppServerClientMetadata;
 use crate::events::NezCommandExecutionEventParams;
 use crate::events::NezCommandExecutionEventRequest;
 use crate::events::NezRuntimeMetadata;
 use crate::events::NezToolItemEventBase;
-use crate::events::FinalApprovalOutcome;
 use crate::events::ToolEventType;
 use crate::events::ToolItemTerminalStatus;
 use crate::events::TrackEventRequest;

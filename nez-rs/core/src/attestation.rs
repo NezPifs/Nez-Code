@@ -1,8 +1,8 @@
 use std::future::Future;
 use std::pin::Pin;
 
-use nez_protocol::ThreadId;
 use http::HeaderValue;
+use nez_protocol::ThreadId;
 
 pub(crate) const X_OAI_ATTESTATION_HEADER: &str = "x-oai-attestation";
 

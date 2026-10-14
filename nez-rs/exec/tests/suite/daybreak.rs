@@ -98,8 +98,7 @@ async fn exec_rejects_daybreak_for_non_openai_provider() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn configured_daybreak_exec() -> anyhow::Result<(TestNezExecBuilder, wiremock::MockServer)>
-{
+async fn configured_daybreak_exec() -> anyhow::Result<(TestNezExecBuilder, wiremock::MockServer)> {
     let test = test_nez_exec();
     let server = responses::start_mock_server().await;
     let token = concat!(

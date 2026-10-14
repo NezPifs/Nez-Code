@@ -8,17 +8,17 @@
 //! API provider construction applies the process-wide managed residency policy also
 //! used by default HTTP headers.
 
+use http::HeaderMap;
+use http::header::HeaderName;
+use http::header::HeaderValue;
 use nez_client::Provider as ApiProvider;
 use nez_client::RetryConfig as ApiRetryConfig;
 use nez_protocol::auth::AuthMode;
 use nez_protocol::config_types::ModelProviderAuthInfo;
-use nez_protocol::error::NezErr;
 use nez_protocol::error::EnvVarError;
+use nez_protocol::error::NezErr;
 use nez_protocol::error::Result as NezResult;
 use nez_utils_redacted_string::RedactedString;
-use http::HeaderMap;
-use http::header::HeaderName;
-use http::header::HeaderValue;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
@@ -619,11 +619,10 @@ other non-default provider fields are not supported"
 
     pub fn supports_nez_backend_routes(&self) -> bool {
         self.is_openai()
-            && self.base_url.as_deref().is_none_or(|base_url| {
-                base_url
-                    .trim_end_matches('/')
-                    .ends_with("/backend-api/nez")
-            })
+            && self
+                .base_url
+                .as_deref()
+                .is_none_or(|base_url| base_url.trim_end_matches('/').ends_with("/backend-api/nez"))
     }
 
     pub fn uses_openai_actor_authorization(&self) -> bool {

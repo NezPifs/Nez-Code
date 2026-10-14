@@ -28,8 +28,7 @@ use agent_plugin_manifest::parse_agent_plugin_manifest_uri;
 pub type PluginManifest = nez_plugin::manifest::PluginManifest<AbsolutePathBuf>;
 pub type PluginManifestHooks = nez_plugin::manifest::PluginManifestHooks<AbsolutePathBuf>;
 pub type PluginManifestInterface = nez_plugin::manifest::PluginManifestInterface<AbsolutePathBuf>;
-pub type PluginManifestMcpServers =
-    nez_plugin::manifest::PluginManifestMcpServers<AbsolutePathBuf>;
+pub type PluginManifestMcpServers = nez_plugin::manifest::PluginManifestMcpServers<AbsolutePathBuf>;
 pub type PluginManifestPaths = nez_plugin::manifest::PluginManifestPaths<AbsolutePathBuf>;
 
 pub type UriPluginManifest = nez_plugin::manifest::PluginManifest<PathUri>;
@@ -425,8 +424,9 @@ fn resolve_manifest_hooks(
                 *hooks,
             ]))
         }
-        RawPluginManifestHooks::InlineList(hooks) => (!hooks.is_empty())
-            .then_some(nez_plugin::manifest::PluginManifestHooks::Inline(hooks)),
+        RawPluginManifestHooks::InlineList(hooks) => {
+            (!hooks.is_empty()).then_some(nez_plugin::manifest::PluginManifestHooks::Inline(hooks))
+        }
         RawPluginManifestHooks::Invalid(value) => {
             tracing::warn!(
                 "ignoring hooks: expected a string, string array, object, or object array; found {}",

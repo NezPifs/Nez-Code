@@ -1,4 +1,14 @@
 use anyhow::Result;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_sse_once;
+use core_test_support::responses::mount_sse_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_config::types::Personality;
 use nez_core::TurnInputRequest;
 use nez_history::InitialHistory;
@@ -10,16 +20,6 @@ use nez_protocol::protocol::ThreadHistoryMode;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
 use nez_thread_store::LoadThreadHistoryParams;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_sse_once;
-use core_test_support::responses::mount_sse_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 
@@ -150,12 +150,11 @@ async fn resume_switches_models_preserves_base_instructions() -> Result<()> {
     ]);
     let initial_mock = mount_sse_once(&server, initial_sse).await;
 
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "Record initial instructions".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "Record initial instructions".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     let initial_instructions = initial_mock.single_request().instructions_text();
     assert_eq!(initial_instructions, legacy_instructions);
@@ -270,12 +269,11 @@ async fn resume_model_switch_is_not_duplicated_after_pre_turn_override() -> Resu
         ]),
     )
     .await;
-    nez
-        .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
-            text: "Record initial instructions".into(),
-            text_elements: Vec::new(),
-        }]))
-        .await?;
+    nez.start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
+        text: "Record initial instructions".into(),
+        text_elements: Vec::new(),
+    }]))
+    .await?;
     wait_for_event(&nez, |event| matches!(event, EventMsg::TurnComplete(_))).await;
     let _ = initial_mock.single_request();
 

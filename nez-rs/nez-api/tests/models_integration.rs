@@ -1,3 +1,5 @@
+use http::HeaderMap;
+use http::Method;
 use nez_api::AuthProvider;
 use nez_api::ModelsClient;
 use nez_api::Provider;
@@ -13,8 +15,6 @@ use nez_protocol::openai_models::ReasoningEffort;
 use nez_protocol::openai_models::ReasoningEffortPreset;
 use nez_protocol::openai_models::TruncationPolicyConfig;
 use nez_protocol::openai_models::default_input_modalities;
-use http::HeaderMap;
-use http::Method;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Arc;

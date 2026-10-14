@@ -4,8 +4,7 @@ use rmcp::model::Tool;
 use serde::Serialize;
 use std::io::Write;
 
-const RAW_DEFINITION_JSON_BYTES_METRIC: &str =
-    "nez.mcp.binding_catalog.raw_definition_json_bytes";
+const RAW_DEFINITION_JSON_BYTES_METRIC: &str = "nez.mcp.binding_catalog.raw_definition_json_bytes";
 const KIB: f64 = 1024.0;
 const MIB: f64 = 1024.0 * KIB;
 const RAW_DEFINITION_JSON_BYTES_BUCKETS: &[f64] = &[

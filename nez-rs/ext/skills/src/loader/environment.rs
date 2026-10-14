@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io;
 
+use futures::StreamExt;
 use nez_exec_server::CapabilityRootDiscovery;
 use nez_exec_server::EnvironmentAccess;
 use nez_exec_server::EnvironmentAccessExt;
@@ -14,7 +15,6 @@ use nez_skills::SkillPolicy;
 use nez_skills::parse_skill_frontmatter_metadata;
 use nez_utils_path_uri::PathUri;
 use nez_utils_plugins::SkillDiscoveryMode;
-use futures::StreamExt;
 
 use super::MAX_QUALIFIED_NAME_LEN;
 use super::discovery::DirectorySymlinkPolicy;

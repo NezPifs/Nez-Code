@@ -1340,10 +1340,9 @@ async fn managed_auth_policy_survives_unusable_requirements_file_changes() -> Re
         CloudConfigBundleLoader::default(),
     );
     let startup = service.load_latest_config(/*fallback_cwd*/ None).await?;
-    let auth_manager = nez_login::AuthManager::shared_from_config(
-        &startup, /*enable_nez_api_key_env*/ false,
-    )
-    .await?;
+    let auth_manager =
+        nez_login::AuthManager::shared_from_config(&startup, /*enable_nez_api_key_env*/ false)
+            .await?;
     std::fs::write(
         &requirements_path,
         "allowed_login_methods = [\"chatgpt\"]\nallowed_chatgpt_workspaces = []\n",
@@ -2726,10 +2725,9 @@ async fn allowed_login_methods_follow_current_forced_workspaces() -> Result<()> 
         CloudConfigBundleLoader::default(),
     );
     let config = service.load_latest_config(/*fallback_cwd*/ None).await?;
-    let auth = nez_login::AuthManager::shared_from_config(
-        &config, /*enable_nez_api_key_env*/ false,
-    )
-    .await?;
+    let auth =
+        nez_login::AuthManager::shared_from_config(&config, /*enable_nez_api_key_env*/ false)
+            .await?;
     for (workspaces, expected) in [
         (
             Some(vec!["managed".to_string()]),

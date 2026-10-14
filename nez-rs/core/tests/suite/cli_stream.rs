@@ -1,11 +1,11 @@
+use core_test_support::fs_wait;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
 use nez_git_utils::SanitizedGitUrl;
 use nez_git_utils::collect_git_info;
 use nez_login::NEZ_ACCESS_TOKEN_ENV_VAR;
 use nez_login::NEZ_API_KEY_ENV_VAR;
 use nez_protocol::protocol::GitInfo;
-use core_test_support::fs_wait;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
 use pretty_assertions::assert_eq;
 use std::io;
 #[cfg(unix)]

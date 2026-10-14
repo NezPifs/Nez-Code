@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::McpPluginAttribution;
 use nez_mcp::McpServerRegistration;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::ResolvedMcpCatalog;
 use nez_mcp::ToolInfo;
 use nez_tools::ToolExposure;

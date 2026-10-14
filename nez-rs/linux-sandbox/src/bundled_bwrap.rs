@@ -221,9 +221,9 @@ fn bytes_to_hex(bytes: &[u8; 32]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nez_install_context::NezPackageLayout;
     use nez_install_context::InstallContext;
     use nez_install_context::InstallMethod;
+    use nez_install_context::NezPackageLayout;
     use pretty_assertions::assert_eq;
     use std::fs;
     use tempfile::NamedTempFile;

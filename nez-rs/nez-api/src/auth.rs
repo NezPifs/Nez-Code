@@ -1,6 +1,6 @@
+use http::HeaderMap;
 use nez_client::Request;
 use nez_client::TransportError;
-use http::HeaderMap;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;

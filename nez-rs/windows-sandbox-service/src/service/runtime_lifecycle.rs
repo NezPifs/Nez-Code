@@ -78,10 +78,7 @@ pub(super) fn run(
         || {
             restore_owner()?;
             state.report_status(SERVICE_RUNNING, NO_ERROR)?;
-            log_information(
-                EVENT_SERVICE_STARTED,
-                "The Nez sandbox service is running.",
-            );
+            log_information(EVENT_SERVICE_STARTED, "The Nez sandbox service is running.");
             Ok(())
         },
         |installation, user_token, _runtime| {

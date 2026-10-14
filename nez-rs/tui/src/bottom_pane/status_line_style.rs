@@ -429,11 +429,9 @@ mod tests {
             }
             return;
         };
-        let theme = crate::render::highlight::resolve_theme_by_name(
-            "coldark-dark",
-            /*nez_home*/ None,
-        )
-        .unwrap();
+        let theme =
+            crate::render::highlight::resolve_theme_by_name("coldark-dark", /*nez_home*/ None)
+                .unwrap();
         crate::render::highlight::set_syntax_theme(theme);
         let line = status_line_from_segments(
             [

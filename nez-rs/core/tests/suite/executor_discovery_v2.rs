@@ -2,6 +2,11 @@
 
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use futures::SinkExt;
+use futures::StreamExt;
 use nez_core::config::Config;
 use nez_core::windows_sandbox::WindowsSandboxLevelExt;
 use nez_exec_server::ExecutorCapabilityDiscoveryV2Snapshot;
@@ -14,11 +19,6 @@ use nez_extension_api::McpServerContributionContext;
 use nez_extension_api::McpServerContributor;
 use nez_features::Feature;
 use nez_protocol::config_types::WindowsSandboxLevel;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use futures::SinkExt;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

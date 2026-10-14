@@ -1,14 +1,4 @@
 use anyhow::Result;
-use nez_core::TurnInputRequest;
-use nez_core::X_NEZ_ROUTING_HINT_HEADER;
-use nez_features::Feature;
-use nez_login::NezAuth;
-use nez_protocol::config_types::ServiceTier;
-use nez_protocol::openai_models::ModelServiceTier;
-use nez_protocol::openai_models::ToolMode;
-use nez_protocol::protocol::EventMsg;
-use nez_protocol::protocol::ThreadSettingsOverrides;
-use nez_protocol::user_input::UserInput;
 use core_test_support::responses::WebSocketConnectionConfig;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
@@ -20,6 +10,16 @@ use core_test_support::responses::start_websocket_server_with_headers;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_nez::test_nez;
 use core_test_support::wait_for_event;
+use nez_core::TurnInputRequest;
+use nez_core::X_NEZ_ROUTING_HINT_HEADER;
+use nez_features::Feature;
+use nez_login::NezAuth;
+use nez_protocol::config_types::ServiceTier;
+use nez_protocol::openai_models::ModelServiceTier;
+use nez_protocol::openai_models::ToolMode;
+use nez_protocol::protocol::EventMsg;
+use nez_protocol::protocol::ThreadSettingsOverrides;
+use nez_protocol::user_input::UserInput;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -324,18 +324,16 @@ async fn websocket_first_turn_uses_startup_prewarm_and_create(
     ]])
     .await;
 
-    let mut builder = test_nez()
-        .with_model("gpt-5.2")
-        .with_config(move |config| {
-            config.update_plan_enabled = update_plan_enabled;
-            config.analytics_enabled = Some(false);
-            if incremental_tools {
-                config
-                    .features
-                    .enable(Feature::IncrementalTools)
-                    .expect("enable incremental tools");
-            }
-        });
+    let mut builder = test_nez().with_model("gpt-5.2").with_config(move |config| {
+        config.update_plan_enabled = update_plan_enabled;
+        config.analytics_enabled = Some(false);
+        if incremental_tools {
+            config
+                .features
+                .enable(Feature::IncrementalTools)
+                .expect("enable incremental tools");
+        }
+    });
     if incremental_tools {
         builder = builder.with_model_info_override("gpt-5.2", |model| {
             model.use_responses_lite = true;
@@ -617,9 +615,7 @@ async fn websocket_v2_first_turn_sends_full_create_when_tier_changes_after_start
 
     assert_eq!(server.handshakes().len(), 1);
     assert_eq!(
-        server
-            .single_handshake()
-            .header(X_NEZ_ROUTING_HINT_HEADER),
+        server.single_handshake().header(X_NEZ_ROUTING_HINT_HEADER),
         Some(match startup_tier {
             Some(tier) => format!("model={model};tier={tier}"),
             None => format!("model={model}"),

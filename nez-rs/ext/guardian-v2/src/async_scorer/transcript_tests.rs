@@ -1,4 +1,5 @@
 use super::ContextInput;
+use core_test_support::responses::user_message_item;
 use nez_extension_api::ConversationHistorySnapshot;
 use nez_extension_api::ResponseItem;
 use nez_guardian_context::ContextTarget;
@@ -13,7 +14,6 @@ use nez_protocol::models::ReasoningItemContent;
 use nez_protocol::models::ReasoningItemReasoningSummary;
 use nez_protocol::protocol::InterAgentCommunication;
 use nez_protocol::protocol::TruncationPolicy;
-use core_test_support::responses::user_message_item;
 use pretty_assertions::assert_eq;
 
 use super::MANUAL_APPROVAL_DEVELOPER_PREFIX;

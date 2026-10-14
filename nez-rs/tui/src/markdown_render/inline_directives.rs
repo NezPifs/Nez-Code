@@ -191,13 +191,10 @@ impl<'a> InlineDirectives<'a> {
                     ));
                 }
                 offset = span.end;
-                if let Some(label) = directive
-                    .label
-                    .filter(|_| directive.name == "nez-followup")
-                {
+                if let Some(label) = directive.label.filter(|_| directive.name == "nez-followup") {
                     // Keep the unmatched `[` as a sentinel so labels cannot introduce blocks.
-                    let inline = &directive.raw
-                        [":nez-followup".len()..":nez-followup[".len() + label.len()];
+                    let inline =
+                        &directive.raw[":nez-followup".len()..":nez-followup[".len() + label.len()];
                     events.extend(
                         Parser::new_ext(inline, Options::ENABLE_STRIKETHROUGH)
                             .into_offset_iter()

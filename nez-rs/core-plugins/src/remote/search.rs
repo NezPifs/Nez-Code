@@ -7,8 +7,8 @@ use super::authenticated_request;
 use super::build_remote_plugin_summary;
 use super::ensure_chatgpt_auth;
 use super::send_and_decode;
-use nez_login::NezAuth;
 use http::Method;
+use nez_login::NezAuth;
 use tracing::instrument;
 use url::Url;
 

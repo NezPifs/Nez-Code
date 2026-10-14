@@ -200,8 +200,7 @@ async fn provisioned_macos_bundle_seeds_from_its_running_executable() {
     let selected = std::fs::canonicalize(home.join("packages/app-server-daemon/current"))
         .expect("selected release");
     assert_eq!(
-        std::fs::read(selected.join("NezCLI.app/Contents/MacOS/nez"))
-            .expect("bundled executable"),
+        std::fs::read(selected.join("NezCLI.app/Contents/MacOS/nez")).expect("bundled executable"),
         b"provisioned executable"
     );
     assert!(

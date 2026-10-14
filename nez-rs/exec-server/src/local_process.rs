@@ -1556,9 +1556,8 @@ mod tests {
 
     #[test]
     fn child_env_applies_policy_then_overlay() {
-        let thread_id =
-            nez_protocol::ThreadId::from_string("019d25f0-6728-7ce2-908f-c3c187323e5b")
-                .expect("thread id");
+        let thread_id = nez_protocol::ThreadId::from_string("019d25f0-6728-7ce2-908f-c3c187323e5b")
+            .expect("thread id");
         let mut params = test_exec_params(HashMap::from([
             ("OVERLAY".to_string(), "overlay".to_string()),
             ("POLICY_SET".to_string(), "overlay-wins".to_string()),
@@ -1601,9 +1600,8 @@ mod tests {
 
     #[test]
     fn child_env_partial_metadata_removes_stale_counterpart() {
-        let thread_id =
-            nez_protocol::ThreadId::from_string("019d25f0-6728-7ce2-908f-c3c187323e5b")
-                .expect("thread id");
+        let thread_id = nez_protocol::ThreadId::from_string("019d25f0-6728-7ce2-908f-c3c187323e5b")
+            .expect("thread id");
         for (thread_id, call_id) in [
             (Some(thread_id), None),
             (None, Some("exec-call-only")),

@@ -3,6 +3,10 @@ use crate::accepted_lines::accepted_line_counts_from_unified_diff;
 use crate::accepted_lines::accepted_line_fingerprint_event_requests;
 use crate::accepted_lines::accepted_line_repo_hash_for_cwd;
 use crate::events::AppServerRpcTransport;
+use crate::events::FinalApprovalOutcome;
+use crate::events::GuardianReviewEventParams;
+use crate::events::GuardianReviewEventPayload;
+use crate::events::GuardianReviewEventRequest;
 use crate::events::NezAppMentionedEventRequest;
 use crate::events::NezAppServerClientMetadata;
 use crate::events::NezAppUsedEventRequest;
@@ -45,10 +49,6 @@ use crate::events::NezTurnSteerEventParams;
 use crate::events::NezTurnSteerEventRequest;
 use crate::events::NezWebSearchEventParams;
 use crate::events::NezWebSearchEventRequest;
-use crate::events::FinalApprovalOutcome;
-use crate::events::GuardianReviewEventParams;
-use crate::events::GuardianReviewEventPayload;
-use crate::events::GuardianReviewEventRequest;
 use crate::events::ReviewResolution;
 use crate::events::ReviewStatus;
 use crate::events::ReviewSubjectKind;
@@ -84,8 +84,6 @@ use crate::facts::AppUsedInput;
 use crate::facts::ArtifactOperationInput;
 use crate::facts::CodeModeToolCallFact;
 use crate::facts::CodeModeToolCallStatus;
-use crate::facts::NezCompactionEvent;
-use crate::facts::NezGoalEvent;
 use crate::facts::ControlToolCallFact;
 use crate::facts::ControlToolCallStatus;
 use crate::facts::CustomAnalyticsFact;
@@ -97,6 +95,8 @@ use crate::facts::ImagePreparationFact;
 use crate::facts::ImagePreparationMetadata;
 use crate::facts::InvocationType;
 use crate::facts::McpToolCallElicitation;
+use crate::facts::NezCompactionEvent;
+use crate::facts::NezGoalEvent;
 use crate::facts::PluginInstallFailedInput;
 use crate::facts::PluginInstallRequestedInput;
 use crate::facts::PluginMeasurementRow;
@@ -127,7 +127,6 @@ use crate::serialize_enum_as_string;
 use crate::usize_to_u64;
 use nez_app_server_protocol::ClientRequest;
 use nez_app_server_protocol::ClientResponse;
-use nez_app_server_protocol::NezErrorInfo;
 use nez_app_server_protocol::CollabAgentStatus;
 use nez_app_server_protocol::CollabAgentTool;
 use nez_app_server_protocol::CollabAgentToolCallStatus;
@@ -144,6 +143,7 @@ use nez_app_server_protocol::GuardianApprovalReviewStatus;
 use nez_app_server_protocol::InitializeParams;
 use nez_app_server_protocol::McpToolCallStatus;
 use nez_app_server_protocol::NetworkPolicyRuleAction;
+use nez_app_server_protocol::NezErrorInfo;
 use nez_app_server_protocol::PatchApplyStatus;
 use nez_app_server_protocol::PatchChangeKind;
 use nez_app_server_protocol::RequestId;
@@ -243,10 +243,7 @@ struct VoiceSessionWindow {
 }
 
 impl ThreadAnalyticsState {
-    fn app_server_client(
-        &self,
-        connection_state: &ConnectionState,
-    ) -> NezAppServerClientMetadata {
+    fn app_server_client(&self, connection_state: &ConnectionState) -> NezAppServerClientMetadata {
         let mut app_server_client = connection_state.app_server_client.clone();
         if let Some(originator) = self.originator.as_ref() {
             app_server_client.product_client_id.clone_from(originator);
@@ -723,9 +720,7 @@ impl AnalyticsReducer {
                         GuardianV2EventKind::Classification { .. } => {
                             "nez_guardian_v2_classification"
                         }
-                        GuardianV2EventKind::FastDecision { .. } => {
-                            "nez_guardian_v2_fast_decision"
-                        }
+                        GuardianV2EventKind::FastDecision { .. } => "nez_guardian_v2_fast_decision",
                     };
                     if let Some((connection, thread, metadata)) =
                         self.thread_context_or_warn(AnalyticsDropSite {
@@ -2292,11 +2287,10 @@ impl AnalyticsReducer {
         out: &mut Vec<TrackEventRequest>,
     ) {
         let session_source: SessionSource = thread.source.into();
-        let is_worktree =
-            nez_git_utils::repository_identity(thread.cwd.as_path()).and_then(|_| {
-                nez_git_utils::get_git_repo_root(thread.cwd.canonicalize().ok()?.as_path())
-                    .map(|root| root.join(".git").is_file())
-            });
+        let is_worktree = nez_git_utils::repository_identity(thread.cwd.as_path()).and_then(|_| {
+            nez_git_utils::get_git_repo_root(thread.cwd.canonicalize().ok()?.as_path())
+                .map(|root| root.join(".git").is_file())
+        });
         let session_id = thread.session_id;
         let thread_id = thread.id;
         let parent_thread_id = thread.parent_thread_id;
@@ -3017,23 +3011,21 @@ fn tool_item_event(input: ToolItemEventInput<'_>) -> Option<TrackEventRequest> {
                     review_summary,
                 },
             );
-            Some(TrackEventRequest::McpToolCall(
-                NezMcpToolCallEventRequest {
-                    event_type: "nez_mcp_tool_call_event",
-                    event_params: NezMcpToolCallEventParams {
-                        base,
-                        mcp_server_name: server.clone(),
-                        mcp_tool_name: tool.clone(),
-                        mcp_error_present: error.is_some(),
-                        plugin_id: plugin_id.clone(),
-                        connector_id: app_context
-                            .as_ref()
-                            .map(|app_context| app_context.connector_id.clone()),
-                        voice_session_id: None,
-                        elicitation_type,
-                    },
+            Some(TrackEventRequest::McpToolCall(NezMcpToolCallEventRequest {
+                event_type: "nez_mcp_tool_call_event",
+                event_params: NezMcpToolCallEventParams {
+                    base,
+                    mcp_server_name: server.clone(),
+                    mcp_tool_name: tool.clone(),
+                    mcp_error_present: error.is_some(),
+                    plugin_id: plugin_id.clone(),
+                    connector_id: app_context
+                        .as_ref()
+                        .map(|app_context| app_context.connector_id.clone()),
+                    voice_session_id: None,
+                    elicitation_type,
                 },
-            ))
+            }))
         }
         ThreadItem::DynamicToolCall {
             id,

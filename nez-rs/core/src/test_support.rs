@@ -86,9 +86,7 @@ pub async fn history_with_tool_call_metadata(
 
 /// Returns the recorder state used by the next session metadata snapshot.
 /// This does not change destination filtering or issue a request.
-pub fn mcp_attribution_snapshot(
-    thread: &crate::NezThread,
-) -> nez_protocol::mcp::McpAttribution {
+pub fn mcp_attribution_snapshot(thread: &crate::NezThread) -> nez_protocol::mcp::McpAttribution {
     thread
         .session
         .services

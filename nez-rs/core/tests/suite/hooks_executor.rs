@@ -1,5 +1,26 @@
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::apps_test_server::AppsTestServer;
+use core_test_support::apps_test_server::apps_enabled_builder;
+use core_test_support::apps_test_server::recorded_apps_tool_calls;
+use core_test_support::responses::ResponseMock;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_function_call;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::mount_response_sequence;
+use core_test_support::responses::sse;
+use core_test_support::responses::sse_response;
+use core_test_support::responses::start_mock_server;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_remote;
+use core_test_support::submit_thread_settings;
+use core_test_support::test_nez::TestNez;
+use core_test_support::test_nez::TestNezBuilder;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_event_match;
+use core_test_support::wait_for_mcp_server;
 use nez_config::McpServerConfig;
 use nez_config::test_support::CloudConfigBundleFixture;
 use nez_core::EnvironmentConfig;
@@ -27,27 +48,6 @@ use nez_protocol::request_user_input::RequestUserInputAnswer;
 use nez_protocol::request_user_input::RequestUserInputResponse;
 use nez_protocol::user_input::UserInput;
 use nez_utils_path_uri::PathUri;
-use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::apps_enabled_builder;
-use core_test_support::apps_test_server::recorded_apps_tool_calls;
-use core_test_support::responses::ResponseMock;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_function_call;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::mount_response_sequence;
-use core_test_support::responses::sse;
-use core_test_support::responses::sse_response;
-use core_test_support::responses::start_mock_server;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_remote;
-use core_test_support::submit_thread_settings;
-use core_test_support::test_nez::TestNez;
-use core_test_support::test_nez::TestNezBuilder;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_event_match;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -382,43 +382,40 @@ async fn executor_stop_hook_rejects_mismatched_environment() -> Result<()> {
         .await?;
     fixture.wait_for_hook_call().await?;
 
-    let (executor_url, executor) =
-        if let Some(executor_url) = fixture.test.executor_environment().exec_server_url() {
-            (executor_url.to_string(), None)
-        } else {
-            let listener = TcpListener::bind("127.0.0.1:0").await?;
-            let executor_address = listener.local_addr()?;
-            let executor_url = format!("ws://{executor_address}");
-            drop(listener);
-            let runtime_paths = ExecServerRuntimeOptions::new(
-                std::env::current_exe()?,
-                /*nez_linux_sandbox_exe*/ None,
-            )?;
-            let http_client_factory = fixture.test.config.http_client_factory();
-            let executor_url_for_server = executor_url.clone();
-            let executor = tokio::spawn(async move {
-                nez_exec_server::run_main(
-                    &executor_url_for_server,
-                    runtime_paths,
-                    http_client_factory,
-                )
+    let (executor_url, executor) = if let Some(executor_url) =
+        fixture.test.executor_environment().exec_server_url()
+    {
+        (executor_url.to_string(), None)
+    } else {
+        let listener = TcpListener::bind("127.0.0.1:0").await?;
+        let executor_address = listener.local_addr()?;
+        let executor_url = format!("ws://{executor_address}");
+        drop(listener);
+        let runtime_paths = ExecServerRuntimeOptions::new(
+            std::env::current_exe()?,
+            /*nez_linux_sandbox_exe*/ None,
+        )?;
+        let http_client_factory = fixture.test.config.http_client_factory();
+        let executor_url_for_server = executor_url.clone();
+        let executor = tokio::spawn(async move {
+            nez_exec_server::run_main(&executor_url_for_server, runtime_paths, http_client_factory)
                 .await
-            });
-            tokio::time::timeout(Duration::from_secs(5), async {
-                loop {
-                    if tokio::net::TcpStream::connect(executor_address)
-                        .await
-                        .is_ok()
-                    {
-                        break;
-                    }
-                    tokio::task::yield_now().await;
+        });
+        tokio::time::timeout(Duration::from_secs(5), async {
+            loop {
+                if tokio::net::TcpStream::connect(executor_address)
+                    .await
+                    .is_ok()
+                {
+                    break;
                 }
-            })
-            .await
-            .context("timed out waiting for the mismatched executor to start")?;
-            (executor_url, Some(executor))
-        };
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .context("timed out waiting for the mismatched executor to start")?;
+        (executor_url, Some(executor))
+    };
 
     let mismatched_environment_id = "another-executor";
     let environments = fixture.test.thread_manager.environment_manager();
@@ -729,10 +726,7 @@ async fn executor_browser_and_computer_use_cleanup_hooks_use_separate_mcp_routes
     assert_eq!(browser_params["arguments"], json!({}));
     assert_eq!(browser_params["_meta"]["_nez_apps"], routing);
     let turn_metadata = &browser_params["_meta"]["x-nez-turn-metadata"];
-    assert_eq!(
-        node_params["_meta"]["x-nez-turn-metadata"],
-        *turn_metadata
-    );
+    assert_eq!(node_params["_meta"]["x-nez-turn-metadata"], *turn_metadata);
     assert_eq!(turn_metadata["thread_id"], thread_id);
     if hook_event == "SubagentStop" {
         assert_eq!(turn_metadata["thread_source"], "subagent");

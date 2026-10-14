@@ -4,8 +4,8 @@ use nez_experimental_api_macros::ExperimentalApi;
 use nez_protocol::config_types::ApprovalsReviewer as CoreApprovalsReviewer;
 use nez_protocol::config_types::SandboxMode as CoreSandboxMode;
 use nez_protocol::protocol::AskForApproval as CoreAskForApproval;
-use nez_protocol::protocol::NezErrorInfo as CoreNezErrorInfo;
 use nez_protocol::protocol::GranularApprovalConfig as CoreGranularApprovalConfig;
+use nez_protocol::protocol::NezErrorInfo as CoreNezErrorInfo;
 use nez_protocol::protocol::NonSteerableTurnKind as CoreNonSteerableTurnKind;
 #[cfg(test)]
 use schemars::r#gen::SchemaGenerator;

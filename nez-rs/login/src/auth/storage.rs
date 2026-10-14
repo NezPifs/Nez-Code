@@ -235,11 +235,10 @@ impl AuthStorageBackend for FileAuthStorage {
     }
 }
 
-static NEZ_AUTH_SECRET_NAME: Lazy<SecretName> =
-    Lazy::new(|| match SecretName::new("NEZ_AUTH") {
-        Ok(name) => name,
-        Err(err) => unreachable!("NEZ_AUTH should be a valid secret name: {err}"),
-    });
+static NEZ_AUTH_SECRET_NAME: Lazy<SecretName> = Lazy::new(|| match SecretName::new("NEZ_AUTH") {
+    Ok(name) => name,
+    Err(err) => unreachable!("NEZ_AUTH should be a valid secret name: {err}"),
+});
 const KEYRING_SERVICE: &str = "Nez Auth";
 
 // turns nez_home path into a stable, short key string
@@ -620,11 +619,9 @@ fn create_keyring_auth_storage(
     mode: AuthCredentialsStoreMode,
 ) -> Arc<dyn AuthStorageBackend> {
     match keyring_backend_kind {
-        AuthKeyringBackendKind::Direct => Arc::new(DirectKeyringAuthStorage::new(
-            nez_home,
-            keyring_store,
-            mode,
-        )),
+        AuthKeyringBackendKind::Direct => {
+            Arc::new(DirectKeyringAuthStorage::new(nez_home, keyring_store, mode))
+        }
         AuthKeyringBackendKind::Secrets => Arc::new(SecretsKeyringAuthStorage::new(
             nez_home,
             keyring_store,

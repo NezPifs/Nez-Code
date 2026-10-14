@@ -30,12 +30,12 @@ use nez_core_plugins::PluginsManager;
 use nez_features::Feature;
 use nez_login::AuthManager;
 use nez_login::NezAuth;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::MCP_TOOL_NEZ_APPS_META_KEY;
 use nez_mcp::McpRuntime;
 use nez_mcp::McpRuntimeContext;
 use nez_mcp::McpRuntimeInput;
 use nez_mcp::McpStartupPolicy;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::ToolInfo;
 use nez_mcp::ToolPluginContext;
 use nez_mcp::effective_mcp_servers;
@@ -248,9 +248,8 @@ pub async fn list_accessible_connectors_from_mcp_tools_with_mcp_manager(
         McpRuntimeContext::new(Arc::clone(&environment_manager), config.cwd.to_path_buf());
 
     let cancel_token = CancellationToken::new();
-    let nez_apps_auth_manager =
-        nez_mcp::host_owned_nez_apps_enabled(&mcp_config, auth.as_ref())
-            .then(|| Arc::clone(&auth_manager));
+    let nez_apps_auth_manager = nez_mcp::host_owned_nez_apps_enabled(&mcp_config, auth.as_ref())
+        .then(|| Arc::clone(&auth_manager));
     let mcp_runtime = McpRuntime::new(McpRuntimeInput {
         startup_policy: McpStartupPolicy::Eager,
         config: Arc::clone(&mcp_config),
@@ -275,10 +274,7 @@ pub async fn list_accessible_connectors_from_mcp_tools_with_mcp_manager(
     .await;
 
     let refreshed_tools = if force_refetch {
-        match mcp_runtime
-            .latest_hard_refresh_nez_apps_tools_cache()
-            .await
-        {
+        match mcp_runtime.latest_hard_refresh_nez_apps_tools_cache().await {
             Ok(tools) => Some(tools),
             Err(err) => {
                 warn!(

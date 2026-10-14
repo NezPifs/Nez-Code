@@ -2,6 +2,9 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
+use futures::FutureExt;
+use futures::future::BoxFuture;
+use futures::poll;
 use nez_exec_server::EnvironmentReadyInfo;
 use nez_exec_server::ExecServerError;
 use nez_exec_server::NoiseChannelPublicKey;
@@ -11,9 +14,6 @@ use nez_exec_server_test_support::environment_manager_without_environments;
 use nez_protocol::capabilities::CapabilityRootLocation;
 use nez_protocol::capabilities::SelectedCapabilityRoot;
 use nez_utils_path_uri::PathUri;
-use futures::FutureExt;
-use futures::future::BoxFuture;
-use futures::poll;
 use pretty_assertions::assert_eq;
 
 #[derive(Default)]

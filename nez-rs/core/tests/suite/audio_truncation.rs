@@ -1,6 +1,11 @@
 use anyhow::Result;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
+use core_test_support::responses;
+use core_test_support::responses::sse;
+use core_test_support::skip_if_no_network;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
 use nez_core::StartThreadOptions;
 use nez_core::TurnInputRequest;
 use nez_protocol::dynamic_tools::DynamicToolCallOutputContentItem;
@@ -17,11 +22,6 @@ use nez_protocol::openai_models::TruncationPolicyConfig;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::Op;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses;
-use core_test_support::responses::sse;
-use core_test_support::skip_if_no_network;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
 use pretty_assertions::assert_eq;
 
 const TEST_WAV_SAMPLE_RATE: u32 = 8_000;

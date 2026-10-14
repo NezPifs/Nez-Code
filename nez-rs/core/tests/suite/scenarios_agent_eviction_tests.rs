@@ -1,11 +1,11 @@
 //! Snapshots a worker's retained history and unread mail across idle eviction and follow-up.
 
 use super::*;
-use nez_core::ThreadEvictionOutcome;
-use nez_protocol::protocol::ThreadSettingsOverrides;
 use core_test_support::ThreadIdle;
 use core_test_support::responses;
 use core_test_support::submit_thread_settings;
+use nez_core::ThreadEvictionOutcome;
+use nez_protocol::protocol::ThreadSettingsOverrides;
 use pretty_assertions::assert_eq;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]

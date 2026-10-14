@@ -1,7 +1,7 @@
 use crate::JsonSchema;
 use crate::TS;
-use nez_protocol::protocol::NezResponseHandoffMode;
 use nez_protocol::protocol::ConversationTextRole;
+use nez_protocol::protocol::NezResponseHandoffMode;
 use nez_protocol::protocol::RealtimeAudioFrame as CoreRealtimeAudioFrame;
 use nez_protocol::protocol::RealtimeConversationVersion;
 use nez_protocol::protocol::RealtimeOutputModality;

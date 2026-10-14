@@ -78,10 +78,9 @@ async fn search_matches_selected_rollout_across_path_spellings_and_compression()
         #[cfg(windows)]
         let home_paths = {
             let verbatim = std::fs::canonicalize(&home_paths[0]).expect("canonicalize home");
-            let ordinary =
-                nez_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&verbatim)
-                    .expect("normalize home")
-                    .into_path_buf();
+            let ordinary = nez_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&verbatim)
+                .expect("normalize home")
+                .into_path_buf();
             [ordinary, verbatim]
         };
         let relative_path = selected_path

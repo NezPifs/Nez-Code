@@ -14,6 +14,10 @@ use crate::session::tests::make_session_and_context;
 use crate::tasks::InterruptedTurnHistoryMarker;
 use crate::tasks::interrupted_turn_history_marker;
 use crate::windows_sandbox::WindowsSandboxLevelExt;
+use core_test_support::PathBufExt;
+use core_test_support::PathExt;
+use core_test_support::responses::mount_models_once;
+use core_test_support::responses::strip_response_item_ids_from_json;
 use nez_extension_api::SessionIsolation;
 use nez_extension_api::empty_extension_registry;
 use nez_history::InitialHistory;
@@ -46,10 +50,6 @@ use nez_protocol::protocol::TurnStartedEvent;
 use nez_protocol::protocol::UserMessageEvent;
 use nez_protocol::user_input::UserInput;
 use nez_utils_path_uri::PathUri;
-use core_test_support::PathBufExt;
-use core_test_support::PathExt;
-use core_test_support::responses::mount_models_once;
-use core_test_support::responses::strip_response_item_ids_from_json;
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use tempfile::tempdir;
@@ -2634,10 +2634,7 @@ async fn rollout_path_resume_and_fork_read_history_through_thread_store() {
         .expect("shutdown source thread");
     let _ = manager.remove_thread(&source.thread_id).await;
 
-    let rollout_path = config
-        .nez_home
-        .join("rollouts/source.jsonl")
-        .to_path_buf();
+    let rollout_path = config.nez_home.join("rollouts/source.jsonl").to_path_buf();
     let resumed = manager
         .resume_thread_with_history(
             config.clone(),

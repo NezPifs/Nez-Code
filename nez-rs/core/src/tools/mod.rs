@@ -30,6 +30,8 @@ use std::borrow::Cow;
 use crate::session::turn_context::TurnContext;
 pub(crate) use approvals::ApprovalContext;
 pub(crate) use approvals::ApprovalResolutionSource;
+pub(crate) use executed_tool_calls::ExecutedToolCalls;
+pub(crate) use multi_agent_tool::MULTI_AGENT_V2_NAMESPACE_DESCRIPTION;
 use nez_features::Feature;
 use nez_protocol::exec_output::ExecToolCallOutput;
 use nez_protocol::openai_models::ModelInfo;
@@ -38,8 +40,6 @@ use nez_tools::ToolName;
 use nez_utils_output_truncation::TruncationPolicy;
 use nez_utils_output_truncation::formatted_truncate_text;
 use nez_utils_output_truncation::truncate_text;
-pub(crate) use executed_tool_calls::ExecutedToolCalls;
-pub(crate) use multi_agent_tool::MULTI_AGENT_V2_NAMESPACE_DESCRIPTION;
 pub use router::ToolRouter;
 
 /// Legacy boundaries such as hook payloads, telemetry tags, and Responses tool

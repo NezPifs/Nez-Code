@@ -1,5 +1,13 @@
 //! Output gates allow inference immediately, hold complete output, and cancel with the turn.
 use anyhow::Result;
+use core_test_support::responses::ev_assistant_message;
+use core_test_support::responses::ev_completed;
+use core_test_support::responses::ev_response_created;
+use core_test_support::responses::sse;
+use core_test_support::responses::{self};
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use futures::StreamExt;
 use nez_core::TurnInputRequest;
 use nez_extension_api::ExtensionRegistryBuilder;
 use nez_extension_api::ModelRequestContributor;
@@ -11,14 +19,6 @@ use nez_extension_api::ResponseEvent;
 use nez_protocol::protocol::EventMsg;
 use nez_protocol::protocol::Op;
 use nez_protocol::user_input::UserInput;
-use core_test_support::responses::ev_assistant_message;
-use core_test_support::responses::ev_completed;
-use core_test_support::responses::ev_response_created;
-use core_test_support::responses::sse;
-use core_test_support::responses::{self};
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use tokio::sync::Semaphore;

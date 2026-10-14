@@ -449,9 +449,8 @@ async fn selected_answers_preserve_long_labels_and_reject_oversized_submissions(
             assert_eq!(question_count(&chat), saved);
             assert!(ops.try_recv().is_err());
             // JSON escaping must count toward the limit even when the answer itself fits.
-            chat.bottom_pane.handle_paste(
-                "\"".repeat(nez_protocol::user_input::MAX_USER_INPUT_TEXT_CHARS / 2),
-            );
+            chat.bottom_pane
+                .handle_paste("\"".repeat(nez_protocol::user_input::MAX_USER_INPUT_TEXT_CHARS / 2));
             chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
             assert_eq!(question_count(&chat), saved);
             let rendered = render_bottom_popup(&chat, /*width*/ 80);

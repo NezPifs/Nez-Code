@@ -1,5 +1,13 @@
 use anyhow::Context;
 use anyhow::Result;
+use core_test_support::apps_test_server::apps_enabled_builder;
+use core_test_support::responses;
+use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_wine_exec;
+use core_test_support::test_nez::local_requests;
+use core_test_support::test_nez::test_nez;
+use core_test_support::wait_for_event;
+use core_test_support::wait_for_mcp_server;
 use nez_core::TurnInputRequest;
 use nez_core::config::Config;
 use nez_core::config::Constrained;
@@ -19,14 +27,6 @@ use nez_protocol::protocol::GuardianAssessmentStatus;
 use nez_protocol::protocol::Op;
 use nez_protocol::protocol::ThreadSettingsOverrides;
 use nez_protocol::user_input::UserInput;
-use core_test_support::apps_test_server::apps_enabled_builder;
-use core_test_support::responses;
-use core_test_support::skip_if_no_network;
-use core_test_support::skip_if_wine_exec;
-use core_test_support::test_nez::local_requests;
-use core_test_support::test_nez::test_nez;
-use core_test_support::wait_for_event;
-use core_test_support::wait_for_mcp_server;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -259,10 +259,7 @@ async fn server_initiated_mcp_elicitation_can_require_synchronous_auto_review(
         meta.insert("nez_strict_auto_review".to_string(), json!(true));
     }
     if let Some(sensitive_action) = sensitive_action {
-        meta.insert(
-            "nez_sensitive_action".to_string(),
-            json!(sensitive_action),
-        );
+        meta.insert("nez_sensitive_action".to_string(), json!(sensitive_action));
     }
 
     let server = responses::start_mock_server().await;
@@ -794,8 +791,7 @@ async fn strict_browser_nested_review_requires_live_browser_identity(
         }]))
         .await?;
     loop {
-        let event =
-            tokio::time::timeout(Duration::from_secs(30), test.nez.next_event()).await??;
+        let event = tokio::time::timeout(Duration::from_secs(30), test.nez.next_event()).await??;
         match event.msg {
             EventMsg::GuardianAssessment(_) => panic!("invalid identity must not reach Guardian"),
             EventMsg::ElicitationRequest(_) => panic!("strict review must not prompt the user"),
@@ -1051,8 +1047,7 @@ async fn yielded_code_mode_elicitation_keeps_live_invocation_metadata() -> Resul
     let mut invocation_id = None;
     let mut assessment_target = None;
     loop {
-        let event =
-            tokio::time::timeout(Duration::from_secs(60), test.nez.next_event()).await??;
+        let event = tokio::time::timeout(Duration::from_secs(60), test.nez.next_event()).await??;
         match event.msg {
             EventMsg::ItemCompleted(event) => {
                 if let TurnItem::McpToolCall(item) = event.item {

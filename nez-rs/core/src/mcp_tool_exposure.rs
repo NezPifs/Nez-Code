@@ -6,8 +6,8 @@ use std::sync::Mutex;
 
 use nez_connectors::AppToolPolicyEvaluator;
 use nez_connectors::AppToolPolicyInput;
-use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::McpBinding;
+use nez_mcp::NEZ_APPS_MCP_SERVER_NAME;
 use nez_mcp::ToolInfo as McpToolInfo;
 use nez_mcp::tool_is_model_visible;
 use nez_tools::ToolExposure;
@@ -161,9 +161,9 @@ fn append_mcp_tools(
 fn filter_non_nez_apps_mcp_tools_only(
     mcp_tools: &[McpToolInfo],
 ) -> impl Iterator<Item = &McpToolInfo> + '_ {
-    mcp_tools.iter().filter(|tool| {
-        tool.server_name != NEZ_APPS_MCP_SERVER_NAME && tool_is_model_visible(tool)
-    })
+    mcp_tools
+        .iter()
+        .filter(|tool| tool.server_name != NEZ_APPS_MCP_SERVER_NAME && tool_is_model_visible(tool))
 }
 
 fn filter_nez_apps_mcp_tools<'a>(

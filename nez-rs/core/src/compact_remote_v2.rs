@@ -22,8 +22,8 @@ use crate::hook_runtime::PostCompactHookOutcome;
 use crate::hook_runtime::PreCompactHookOutcome;
 use crate::hook_runtime::run_post_compact_hooks;
 use crate::hook_runtime::run_pre_compact_hooks;
-use crate::responses_metadata::NezResponsesMetadata;
 use crate::responses_metadata::CompactionTurnMetadata;
+use crate::responses_metadata::NezResponsesMetadata;
 use crate::responses_retry::ResponsesStreamRequest;
 use crate::responses_retry::ResponsesStreamRetryState;
 use crate::responses_retry::handle_response_stream_error;
@@ -31,6 +31,7 @@ use crate::session::RequestEffortUsage;
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
 use crate::session::turn_context::TurnContext;
+use futures::StreamExt;
 use nez_analytics::CompactionImplementation;
 use nez_analytics::CompactionPhase;
 use nez_analytics::CompactionReason;
@@ -59,7 +60,6 @@ use nez_protocol::protocol::TruncationPolicy;
 use nez_rollout_trace::InferenceTraceContext;
 use nez_utils_output_truncation::approx_token_count;
 use nez_utils_output_truncation::truncate_text;
-use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
 
 #[path = "compact_remote_v2_attempt.rs"]
@@ -1242,20 +1242,18 @@ mod tests {
 
     #[tokio::test]
     async fn collect_background_incomplete_does_not_publish_foreground_usage() {
-        let stream = response_stream(vec![Err(NezErr::new(
-            NezErrorDetails::ResponseIncomplete(Box::new(
-                nez_protocol::error::ResponseIncompleteError {
-                    reason: "max_output_tokens".to_string(),
-                    response_id: Some("resp-background".to_string()),
-                    token_usage: Some(TokenUsage {
-                        input_tokens: 100,
-                        output_tokens: 20,
-                        total_tokens: 120,
-                        ..Default::default()
-                    }),
-                },
-            )),
-        ))]);
+        let stream = response_stream(vec![Err(NezErr::new(NezErrorDetails::ResponseIncomplete(
+            Box::new(nez_protocol::error::ResponseIncompleteError {
+                reason: "max_output_tokens".to_string(),
+                response_id: Some("resp-background".to_string()),
+                token_usage: Some(TokenUsage {
+                    input_tokens: 100,
+                    output_tokens: 20,
+                    total_tokens: 120,
+                    ..Default::default()
+                }),
+            }),
+        )))]);
         let (sess, turn_context, rx) =
             crate::session::tests::make_session_and_context_with_rx().await;
         let cancellation = CancellationToken::new();

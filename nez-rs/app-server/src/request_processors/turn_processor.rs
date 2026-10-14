@@ -848,8 +848,7 @@ impl TurnRequestProcessor {
             || collaboration_mode.is_some()
             || personality.is_some();
 
-        let approval_policy =
-            approval_policy.map(nez_app_server_protocol::AskForApproval::to_core);
+        let approval_policy = approval_policy.map(nez_app_server_protocol::AskForApproval::to_core);
         let approvals_reviewer =
             approvals_reviewer.map(nez_app_server_protocol::ApprovalsReviewer::to_core);
         let sandbox_policy = sandbox_policy.map(|policy| policy.to_core());
@@ -1263,8 +1262,7 @@ impl TurnRequestProcessor {
                 nez_response_item_prefix: params.nez_response_item_prefix,
                 nez_response_handoff_mode: params.nez_response_handoff_mode.unwrap_or_default(),
                 backend_reasoning_status: params.backend_reasoning_status,
-                nez_response_handoff_channel_prefixes: params
-                    .nez_response_handoff_channel_prefixes,
+                nez_response_handoff_channel_prefixes: params.nez_response_handoff_channel_prefixes,
                 model: params.model,
                 output_modality: params.output_modality,
                 include_startup_context: params
