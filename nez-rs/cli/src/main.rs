@@ -10,20 +10,14 @@ use nez_arg0::Arg0DispatchPaths;
 use nez_arg0::arg0_dispatch_or_else;
 use nez_chatgpt::apply_command::ApplyCommand;
 use nez_chatgpt::apply_command::run_apply_command;
-use nez_cli::read_access_token_from_stdin;
 use nez_cli::read_api_key_from_stdin;
 use nez_cli::run_login_status;
-use nez_cli::run_login_with_access_token;
 use nez_cli::run_login_with_api_key;
-use nez_cli::run_login_with_chatgpt;
-use nez_cli::run_login_with_device_code;
 use nez_cli::run_logout;
-use nez_cloud_tasks::Cli as CloudTasksCli;
 use nez_exec::Cli as ExecCli;
 use nez_exec::Command as ExecCommand;
 use nez_exec::ReviewArgs;
 use nez_execpolicy::ExecPolicyCheckCommand;
-use nez_responses_api_proxy::Args as ResponsesApiProxyArgs;
 use nez_rollout_trace::REDUCED_STATE_FILE_NAME;
 use nez_rollout_trace::replay_bundle;
 use nez_state::StateRuntime;
@@ -224,14 +218,6 @@ enum Subcommand {
     /// Fork a previous interactive session (picker by default; use --last to fork the most recent).
     Fork(ForkCommand),
 
-    /// [EXPERIMENTAL] Browse tasks from Nez Cloud and apply changes locally.
-    #[clap(name = "cloud", alias = "cloud-tasks")]
-    Cloud(CloudTasksCli),
-
-    /// Internal: run the responses API proxy.
-    #[clap(hide = true)]
-    ResponsesApiProxy(ResponsesApiProxyArgs),
-
     /// Internal: relay stdio to a Unix domain socket.
     #[clap(hide = true, name = "stdio-to-uds")]
     StdioToUds(StdioToUdsCommand),
@@ -261,9 +247,6 @@ enum DebugSubcommand {
     /// Render the raw model catalog as JSON.
     Models(DebugModelsCommand),
 
-    /// Tooling: helps debug the app server.
-    AppServer(DebugAppServerCommand),
-
     /// Render the model-visible prompt input list as JSON.
     PromptInput(DebugPromptInputCommand),
 
@@ -274,24 +257,6 @@ enum DebugSubcommand {
     /// Internal: reset local memory state for a fresh start.
     #[clap(hide = true)]
     ClearMemories,
-}
-
-#[derive(Debug, Parser)]
-struct DebugAppServerCommand {
-    #[command(subcommand)]
-    subcommand: DebugAppServerSubcommand,
-}
-
-#[derive(Debug, clap::Subcommand)]
-enum DebugAppServerSubcommand {
-    // Send message to app server V2.
-    SendMessageV2(DebugAppServerSendMessageV2Command),
-}
-
-#[derive(Debug, Parser)]
-struct DebugAppServerSendMessageV2Command {
-    #[arg(value_name = "USER_MESSAGE", required = true)]
-    user_message: String,
 }
 
 #[derive(Debug, Parser)]
@@ -519,15 +484,9 @@ struct LoginCommand {
 
     #[arg(
         long = "with-api-key",
-        help = "Read the API key from stdin (e.g. `printenv OPENAI_API_KEY | nez login --with-api-key`)"
+        help = "Read the API key from stdin (e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`)"
     )]
     with_api_key: bool,
-
-    #[arg(
-        long = "with-access-token",
-        help = "Read the access token from stdin (e.g. `printenv NEZ_ACCESS_TOKEN | nez login --with-access-token`)"
-    )]
-    with_access_token: bool,
 
     #[arg(
         long = "api-key",
@@ -538,18 +497,6 @@ struct LoginCommand {
         hide = true
     )]
     api_key: Option<String>,
-
-    #[arg(long = "device-auth")]
-    use_device_code: bool,
-
-    /// EXPERIMENTAL: Use custom OAuth issuer base URL (advanced)
-    /// Override the OAuth issuer base URL (advanced)
-    #[arg(long = "experimental_issuer", value_name = "URL", hide = true)]
-    issuer_base_url: Option<String>,
-
-    /// EXPERIMENTAL: Use custom OAuth client ID (advanced)
-    #[arg(long = "experimental_client-id", value_name = "CLIENT_ID", hide = true)]
-    client_id: Option<String>,
 
     #[command(subcommand)]
     action: Option<LoginSubcommand>,
@@ -936,16 +883,6 @@ fn delete_action(target: &str, force: bool) -> anyhow::Result<nez_tui::SessionAr
         false => nez_tui::DeleteConfirmation::Prompt,
     };
     Ok(nez_tui::SessionArchiveAction::Delete(confirmation))
-}
-
-async fn run_debug_app_server_command(cmd: DebugAppServerCommand) -> anyhow::Result<()> {
-    match cmd.subcommand {
-        DebugAppServerSubcommand::SendMessageV2(cmd) => {
-            let nez_bin = std::env::current_exe()?;
-            nez_app_server_test_client::send_message_v2(&nez_bin, &[], cmd.user_message, &None)
-                .await
-        }
-    }
 }
 
 #[derive(Debug, Default, Parser, Clone)]
@@ -1623,31 +1560,19 @@ async fn cli_main(
                     run_login_status(login_cli.config_overrides).await;
                 }
                 None => {
-                    if login_cli.with_api_key && login_cli.with_access_token {
+                    if login_cli.api_key.is_some() {
                         eprintln!(
-                            "Choose one login credential source: --with-api-key or --with-access-token."
-                        );
-                        std::process::exit(1);
-                    } else if login_cli.use_device_code {
-                        run_login_with_device_code(
-                            login_cli.config_overrides,
-                            login_cli.issuer_base_url,
-                            login_cli.client_id,
-                        )
-                        .await;
-                    } else if login_cli.api_key.is_some() {
-                        eprintln!(
-                            "The --api-key flag is no longer supported. Pipe the key instead, e.g. `printenv OPENAI_API_KEY | nez login --with-api-key`."
+                            "The --api-key flag is no longer supported. Pipe the key instead, e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`."
                         );
                         std::process::exit(1);
                     } else if login_cli.with_api_key {
                         let api_key = read_api_key_from_stdin();
                         run_login_with_api_key(login_cli.config_overrides, api_key).await;
-                    } else if login_cli.with_access_token {
-                        let access_token = read_access_token_from_stdin();
-                        run_login_with_access_token(login_cli.config_overrides, access_token).await;
                     } else {
-                        run_login_with_chatgpt(login_cli.config_overrides).await;
+                        eprintln!(
+                            "Pipe an API key to store it, e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`.\nLocal Ollama models need no login."
+                        );
+                        std::process::exit(1);
                     }
                 }
             }
@@ -1693,19 +1618,6 @@ async fn cli_main(
                 &arg0_paths,
             )
             .await?;
-        }
-        Some(Subcommand::Cloud(mut cloud_cli)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "cloud",
-            )?;
-            prepend_config_flags(
-                &mut cloud_cli.config_overrides,
-                root_config_overrides.clone(),
-            );
-            nez_cloud_tasks::run_main(cloud_cli, arg0_paths.nez_linux_sandbox_exe.clone())
-                .await?;
         }
         Some(Subcommand::Sandbox(SandboxCommand {
             host: mut sandbox_cli,
@@ -1778,14 +1690,6 @@ async fn cli_main(
                 )?;
                 run_debug_models_command(cmd, root_config_overrides).await?;
             }
-            DebugSubcommand::AppServer(cmd) => {
-                reject_remote_mode_for_subcommand(
-                    root_remote.as_deref(),
-                    root_remote_auth_token_env.as_deref(),
-                    "debug app-server",
-                )?;
-                run_debug_app_server_command(cmd).await?;
-            }
             DebugSubcommand::PromptInput(cmd) => {
                 reject_remote_mode_for_subcommand(
                     root_remote.as_deref(),
@@ -1838,15 +1742,6 @@ async fn cli_main(
                 root_config_overrides.clone(),
             );
             run_apply_command(apply_cli, /*cwd*/ None).await?;
-        }
-        Some(Subcommand::ResponsesApiProxy(args)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "responses-api-proxy",
-            )?;
-            tokio::task::spawn_blocking(move || nez_responses_api_proxy::run_main(args))
-                .await??;
         }
         Some(Subcommand::StdioToUds(cmd)) => {
             reject_remote_mode_for_subcommand(
@@ -2318,12 +2213,10 @@ fn unsupported_subcommand_name_for_strict_config(
         Some(Subcommand::Logout(_)) => Some("logout"),
         Some(Subcommand::Completion(_)) => Some("completion"),
         Some(Subcommand::Update) => Some("update"),
-        Some(Subcommand::Cloud(_)) => Some("cloud"),
         Some(Subcommand::Sandbox(_)) => Some("sandbox"),
         Some(Subcommand::Debug(_)) => Some("debug"),
         Some(Subcommand::Execpolicy(_)) => Some("execpolicy"),
         Some(Subcommand::Apply(_)) => Some("apply"),
-        Some(Subcommand::ResponsesApiProxy(_)) => Some("responses-api-proxy"),
         Some(Subcommand::StdioToUds(_)) => Some("stdio-to-uds"),
         Some(Subcommand::Features(_)) => Some("features"),
         Some(Subcommand::TcpTunnel(_)) => Some("tcp-tunnel"),
