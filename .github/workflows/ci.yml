@@ -18,7 +18,6 @@ env:
   CARGO_INCREMENTAL: "0"
   CARGO_PROFILE_DEV_DEBUG: "0"
   CARGO_PROFILE_TEST_DEBUG: "0"
-  RUST_BACKTRACE: "1"
 
 defaults:
   run:
@@ -41,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/free-disk-space
-      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
       - run: rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
@@ -56,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/free-disk-space
-      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
       - run: rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
