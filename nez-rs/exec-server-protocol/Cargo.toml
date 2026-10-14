@@ -1,0 +1,31 @@
+[package]
+name = "nez-exec-server-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "nez_exec_server_protocol"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+base64 = { workspace = true }
+nez-file-system = { workspace = true }
+nez-install-context = { workspace = true }
+nez-network-proxy = { workspace = true }
+nez-protocol = { workspace = true }
+nez-shell-command = { workspace = true }
+nez-skills = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["arbitrary_precision", "raw_value"] }
+
+[target.'cfg(windows)'.dependencies]
+nez-mxc-sandbox = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

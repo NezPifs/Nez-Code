@@ -1,0 +1,28 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-prompts"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_prompts"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-collaboration-mode-templates = { workspace = true }
+nez-context-fragments = { workspace = true }
+nez-execpolicy = { workspace = true }
+nez-git-utils = { workspace = true }
+nez-guardian-context = { workspace = true }
+nez-protocol = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-template = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

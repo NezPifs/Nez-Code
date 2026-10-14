@@ -1,0 +1,45 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-mcp-extension"
+version.workspace = true
+
+[lib]
+name = "nez_mcp_extension"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-core = { workspace = true }
+nez-core-plugins = { workspace = true }
+nez-config = { workspace = true }
+nez-connectors = { workspace = true }
+nez-connectors-extension = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-features = { workspace = true }
+nez-mcp = { workspace = true }
+nez-plugin = { workspace = true }
+nez-protocol = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+
+[dev-dependencies]
+core_test_support = { workspace = true }
+axum = { workspace = true }
+nez-exec-server-test-support = { workspace = true }
+nez-login = { workspace = true }
+futures = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tokio-util = { workspace = true, features = ["rt"] }
+wiremock = { workspace = true }

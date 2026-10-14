@@ -1,0 +1,38 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-tools"
+version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+bitflags = { workspace = true }
+nez-code-mode = { workspace = true }
+nez-connectors = { workspace = true }
+nez-features = { workspace = true }
+nez-file-system = { workspace = true }
+nez-extension-items = { workspace = true }
+nez-protocol = { workspace = true }
+nez-utils-output-truncation = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-string = { workspace = true }
+jsonptr = { workspace = true }
+rmcp = { workspace = true, default-features = false, features = [
+    "base64",
+    "macros",
+    "schemars",
+    "server",
+] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+thiserror = { workspace = true }
+urlencoding = { workspace = true }
+
+[dev-dependencies]
+nez-utils-cargo-bin = { workspace = true }
+pretty_assertions = { workspace = true }
+
+[lib]
+doctest = false

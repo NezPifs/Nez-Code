@@ -1,0 +1,43 @@
+[package]
+name = "nez-sandboxing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "nez_sandboxing"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-mxc-sandbox = { workspace = true }
+nez-network-proxy = { workspace = true }
+nez-protocol = { workspace = true }
+nez-uds = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-pty = { workspace = true }
+nez-windows-sandbox = { workspace = true }
+dunce = { workspace = true }
+libc = { workspace = true }
+serde_json = { workspace = true }
+regex-lite = { workspace = true }
+tokio = { workspace = true, features = ["rt", "sync"] }
+tracing = { workspace = true, features = ["log"] }
+url = { workspace = true }
+which = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+nez-otel = { workspace = true }
+nez-utils-home-dir = { workspace = true }
+
+[dev-dependencies]
+anyhow = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt", "time"] }

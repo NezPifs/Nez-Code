@@ -1,0 +1,26 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-plugin"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_plugin"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-config = { workspace = true }
+nez-core-plugin-common = { workspace = true }
+nez-protocol = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-plugins = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

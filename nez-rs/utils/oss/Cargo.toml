@@ -1,0 +1,17 @@
+[package]
+name = "nez-utils-oss"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-core = { workspace = true }
+nez-lmstudio = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-ollama = { workspace = true }
+
+[lib]
+doctest = false

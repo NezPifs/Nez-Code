@@ -1,0 +1,149 @@
+[package]
+name = "nez-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+build = "build.rs"
+default-run = "nez"
+
+[[bin]]
+name = "nez"
+path = "src/main.rs"
+
+[[bin]]
+name = "logs_client"
+path = "src/bin/logs_client.rs"
+
+[[test]]
+name = "app_server_daemon_package"
+path = "tests/app_server_daemon/package.rs"
+
+[lib]
+name = "nez_cli"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-utils-process = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["derive", "env"] }
+clap_complete = { workspace = true }
+nez-app-server = { workspace = true }
+nez-app-server-daemon = { workspace = true }
+nez-app-server-protocol = { workspace = true }
+nez-app-server-test-client = { workspace = true }
+nez-arg0 = { workspace = true }
+nez-build-info = { workspace = true }
+nez-api = { workspace = true }
+nez-aws-auth = { workspace = true }
+nez-chatgpt = { workspace = true }
+nez-cloud-config = { workspace = true }
+nez-cloud-tasks = { path = "../cloud-tasks" }
+nez-utils-cli = { workspace = true }
+nez-config = { workspace = true }
+nez-core = { workspace = true }
+nez-core-plugins = { workspace = true }
+nez-history = { workspace = true }
+nez-home = { workspace = true }
+nez-http-client = { workspace = true }
+nez-exec = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-execpolicy = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-features = { workspace = true }
+nez-git-attribution = { workspace = true }
+nez-git-utils = { workspace = true }
+nez-install-context = { workspace = true }
+nez-login = { workspace = true }
+nez-memories-write = { workspace = true }
+nez-mcp = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-models-manager = { workspace = true }
+nez-plugin = { workspace = true }
+nez-protocol = { workspace = true }
+nez-responses-api-proxy = { workspace = true }
+nez-tcp-tunnel = { workspace = true }
+nez-rmcp-client = { workspace = true }
+nez-rollout = { workspace = true }
+nez-rollout-trace = { workspace = true }
+nez-sandboxing = { workspace = true }
+nez-skills-extension = { workspace = true }
+nez-state = { workspace = true }
+nez-stdio-to-uds = { workspace = true }
+nez-terminal-detection = { workspace = true }
+nez-thread-store = { workspace = true }
+nez-tui = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-redacted-string = { workspace = true }
+nez-websocket-auth = { workspace = true }
+crossterm = { workspace = true, features = ["event-stream"] }
+futures = { workspace = true }
+http = { workspace = true }
+libc = { workspace = true }
+os_info = { workspace = true }
+owo-colors = { workspace = true }
+regex-lite = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+supports-color = { workspace = true }
+sys-locale = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = [
+    "io-std",
+    "macros",
+    "net",
+    "process",
+    "rt-multi-thread",
+    "signal",
+    "time",
+] }
+toml = { workspace = true }
+tracing = { workspace = true }
+tracing-appender = { workspace = true }
+tracing-subscriber = { workspace = true }
+unicode-segmentation = { workspace = true }
+url = { workspace = true }
+which = { workspace = true }
+
+[target.'cfg(all(target_os = "linux", target_env = "musl", any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+nez_windows_sandbox = { package = "nez-windows-sandbox", path = "../windows-sandbox-rs" }
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Storage_Packaging_Appx",
+    "Win32_System_Console",
+    "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+app_test_support = { workspace = true }
+assert_cmd = { workspace = true }
+assert_matches = { workspace = true }
+nez-app-server-client = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+nez-utils-pty = { workspace = true }
+flate2 = { workspace = true }
+insta = { workspace = true }
+jsonwebtoken = { workspace = true }
+predicates = { workspace = true }
+pretty_assertions = { workspace = true }
+sha2 = { workspace = true }
+sqlx = { workspace = true }
+tar = { workspace = true }
+tokio-tungstenite = { workspace = true }
+vt100 = { workspace = true }
+wiremock = { workspace = true }
+zstd = { workspace = true }
+
+[package.metadata.cargo-shear]
+# These Rust sources are intentionally Bazel-only macrobenchmarks rather than
+# Cargo targets.
+ignored-paths = ["e2e_benches/*.rs"]

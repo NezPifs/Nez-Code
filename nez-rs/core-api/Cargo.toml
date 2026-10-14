@@ -1,0 +1,33 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-core-api"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_core_api"
+path = "src/lib.rs"
+test = false
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-app-server-protocol = { workspace = true }
+nez-arg0 = { workspace = true }
+nez-analytics = { workspace = true }
+nez-config = { workspace = true }
+nez-core = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-home = { workspace = true }
+nez-history = { workspace = true }
+nez-image-generation-extension = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-features = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-models-manager = { workspace = true }
+nez-protocol = { workspace = true }
+nez-state = { workspace = true }
+nez-utils-absolute-path = { workspace = true }

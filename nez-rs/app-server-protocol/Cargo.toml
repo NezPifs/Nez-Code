@@ -1,0 +1,56 @@
+[package]
+name = "nez-app-server-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "nez_app_server_protocol"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-experimental-api-macros = { workspace = true }
+nez-app-server-protocol-noop-macros = { workspace = true }
+nez-extension-items = { workspace = true }
+nez-history = { workspace = true }
+nez-protocol = { workspace = true }
+nez-rollout = { workspace = true }
+nez-secrets = { workspace = true }
+nez-shell-command = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-redacted-string = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_with = { workspace = true }
+strum_macros = { workspace = true }
+thiserror = { workspace = true }
+rmcp = { workspace = true, default-features = false, features = [
+    "base64",
+    "macros",
+    "server",
+] }
+inventory = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true, features = ["serde", "v7"] }
+zstd = { workspace = true }
+
+[dev-dependencies]
+anyhow = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+pretty_assertions = { workspace = true }
+rmcp = { workspace = true, default-features = false, features = [
+    "base64",
+    "macros",
+    "schemars",
+    "server",
+] }
+schemars = { workspace = true }
+similar = { workspace = true }
+tempfile = { workspace = true }
+ts-rs = { workspace = true }

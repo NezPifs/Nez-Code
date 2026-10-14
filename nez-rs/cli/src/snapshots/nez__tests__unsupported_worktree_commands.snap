@@ -1,0 +1,13 @@
+---
+source: cli/src/main.rs
+assertion_line: 3324
+expression: "errors.join(\"\\n\")"
+---
+nez --worktree login: `--worktree` supports new interactive sessions, `nez fork`, `nez exec`, and `nez exec fork`
+nez fork --worktree: `nez fork --worktree` requires an explicit session ID
+nez fork --worktree --last: `nez fork --worktree` requires an explicit session ID
+nez exec resume --worktree session: `--worktree` cannot resume an existing session; use `nez exec fork --worktree`
+nez exec review --worktree: `--worktree` is not supported for code review
+nez resume --worktree session: `--worktree` supports new interactive sessions, `nez fork`, `nez exec`, and `nez exec fork`
+nez archive session --worktree: `--worktree` supports new interactive sessions, `nez fork`, `nez exec`, and `nez exec fork`
+nez queue --thread session --message hi --worktree: `--worktree` supports new interactive sessions, `nez fork`, `nez exec`, and `nez exec fork`

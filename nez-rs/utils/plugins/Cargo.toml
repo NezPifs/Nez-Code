@@ -1,0 +1,26 @@
+
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-utils-plugins"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_utils_plugins"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-exec-server = { workspace = true }
+nez-exec-server-protocol = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }

@@ -1,0 +1,57 @@
+[package]
+name = "core_test_support"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+path = "lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+assert_cmd = { workspace = true }
+base64 = { workspace = true }
+nez-analytics = { workspace = true }
+nez-arg0 = { workspace = true }
+nez-attachment-store = { workspace = true }
+nez-config = { workspace = true }
+nez-core = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-guardian-v2 = { workspace = true }
+nez-home = { workspace = true }
+nez-features = { workspace = true }
+nez-hooks = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-models-manager = { workspace = true }
+nez-protocol = { workspace = true }
+nez-thread-store = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+ctor = { workspace = true }
+futures = { workspace = true }
+notify = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+regex-lite = { workspace = true }
+serde_json = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["net", "test-util", "time"] }
+tokio-tungstenite = { workspace = true }
+tracing = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+tracing-subscriber = { workspace = true }
+walkdir = { workspace = true }
+wiremock = { workspace = true }
+shlex = { workspace = true }
+zstd = { workspace = true }
+
+[dev-dependencies]
+nez-http-client = { workspace = true }
+pretty_assertions = { workspace = true }

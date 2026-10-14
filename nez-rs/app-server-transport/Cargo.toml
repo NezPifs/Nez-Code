@@ -1,0 +1,66 @@
+[package]
+name = "nez-app-server-transport"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "nez_app_server_transport"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-http-client = { workspace = true }
+nez-websocket-client = { workspace = true }
+axum = { workspace = true, default-features = false, features = [
+    "http1",
+    "json",
+    "tokio",
+    "ws",
+] }
+base64 = { workspace = true }
+nez-api = { workspace = true }
+nez-app-server-protocol = { workspace = true }
+nez-core = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-protocol = { workspace = true }
+nez-state = { workspace = true }
+nez-uds = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-rustls-provider = { workspace = true }
+nez-websocket-auth = { workspace = true }
+futures = { workspace = true }
+gethostname = { workspace = true }
+httpdate = { workspace = true }
+owo-colors = { workspace = true, features = ["supports-colors"] }
+rand = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+time = { workspace = true }
+tokio = { workspace = true, features = [
+    "io-std",
+    "macros",
+    "process",
+    "rt-multi-thread",
+] }
+tokio-tungstenite = { workspace = true }
+tokio-util = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+url = { workspace = true }
+uuid = { workspace = true, features = ["serde", "v7"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true }
+signal-hook = { workspace = true }
+
+[dev-dependencies]
+chrono = { workspace = true }
+nez-config = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["test-util"] }

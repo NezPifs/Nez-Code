@@ -1,0 +1,115 @@
+[package]
+name = "nez-exec-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+doctest = false
+
+# cargo-shear 1.11.2 misresolves these #[path] modules containing parent directories.
+# Both modules are compiled and exercised by the exec-server unit test target.
+[package.metadata.cargo-shear]
+ignored-paths = [
+    "tests/unit/client_provisioning_tests.rs",
+    "src/discoverV2/tests/capability_watchers_tests.rs",
+]
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-utils-process = { workspace = true }
+arc-swap = { workspace = true }
+axum = { workspace = true, features = ["http1", "tokio", "ws"] }
+base64 = { workspace = true }
+bytes = { workspace = true }
+clatter = { workspace = true }
+nez-api = { workspace = true }
+nez-build-info = { workspace = true }
+nez-config = { workspace = true }
+nez-core-plugin-common = { workspace = true }
+nez-http-client = { workspace = true }
+nez-exec-server-protocol = { workspace = true }
+nez-file-system = { workspace = true }
+nez-file-watcher = { workspace = true }
+nez-network-proxy = { workspace = true }
+nez-otel = { workspace = true }
+nez-protocol = { workspace = true }
+nez-sandboxing = { workspace = true }
+nez-shell-command = { workspace = true }
+nez-skills = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-home-dir = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-pty = { workspace = true }
+nez-utils-redacted-string = { workspace = true }
+nez-utils-rustls-provider = { workspace = true }
+nez-websocket-auth = { workspace = true }
+nez-websocket-client = { workspace = true }
+dirs = { workspace = true }
+futures = { workspace = true }
+http = { workspace = true }
+opentelemetry = { workspace = true }
+prost = "0.14.3"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+toml = { workspace = true }
+tokio = { workspace = true, features = [
+    "fs",
+    "io-std",
+    "io-util",
+    "macros",
+    "net",
+    "process",
+    "rt-multi-thread",
+    "sync",
+    "time",
+] }
+tokio-util = { workspace = true, features = ["io", "rt"] }
+tokio-tungstenite = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+nez-linux-sandbox = { workspace = true }
+
+[target.'cfg(unix)'.dependencies]
+nez-uds = { workspace = true }
+libc = { workspace = true }
+rustix = { workspace = true, features = ["fs"] }
+tempfile = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+nez-mxc-sandbox = { workspace = true }
+which = { workspace = true }
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+anyhow = { workspace = true }
+nez-exec-server-test-support = { workspace = true }
+nez-test-binary-support = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+nez-windows-sandbox-test-support = { workspace = true }
+ctor = { workspace = true }
+http = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+pretty_assertions = { workspace = true }
+rcgen = { workspace = true }
+rustls = { workspace = true }
+serial_test = { workspace = true }
+tempfile = { workspace = true }
+test-case = "3.3.1"
+tokio = { workspace = true, features = ["test-util"] }
+tracing-opentelemetry = { workspace = true }
+tracing-subscriber = { workspace = true }
+wiremock = { workspace = true }
