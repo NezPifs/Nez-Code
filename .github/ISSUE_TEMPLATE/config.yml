@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/NezPifs/Nez-Code/security/advisories/new
+    about: Report vulnerabilities privately.
