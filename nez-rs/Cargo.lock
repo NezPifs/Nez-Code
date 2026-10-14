@@ -281,6 +281,7 @@ dependencies = [
  "anyhow",
  "base64 0.22.1",
  "chrono",
+ "core_test_support",
  "nez-app-server-protocol",
  "nez-config",
  "nez-core",
@@ -290,7 +291,6 @@ dependencies = [
  "nez-model-provider",
  "nez-protocol",
  "nez-utils-cargo-bin",
- "core_test_support",
  "pretty_assertions",
  "serde",
  "serde_json",
@@ -1894,3517 +1894,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nez-agent-extension"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-core",
- "nez-protocol",
- "core_test_support",
- "pretty_assertions",
- "tokio",
-]
-
-[[package]]
-name = "nez-agent-graph-store"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "nez-state",
- "nez-utils-absolute-path",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
-]
-
-[[package]]
-name = "nez-agent-identity"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "chrono",
- "nez-http-client",
- "nez-protocol",
- "crypto_box",
- "ed25519-dalek",
- "http 1.4.0",
- "jsonwebtoken",
- "pretty_assertions",
- "rand 0.9.3",
- "serde",
- "serde_json",
- "sha2 0.10.9",
-]
-
-[[package]]
-name = "nez-agent-message-board-client"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-agent-message-board-extension",
- "nez-extension-api",
- "nez-http-client",
- "nez-protocol",
- "eventsource-stream",
- "futures",
- "http 1.4.0",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "tracing",
- "url",
- "wiremock",
-]
-
-[[package]]
-name = "nez-agent-message-board-extension"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "caseless",
- "chrono",
- "nez-extension-api",
- "nez-protocol",
- "nez-state",
- "nez-tools",
- "nez-utils-output-truncation",
- "futures",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sqlx",
- "tempfile",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "nez-agent-roles"
-version = "0.0.0"
-dependencies = [
- "nez-config",
- "nez-file-system",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "serde",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
-]
-
-[[package]]
-name = "nez-analytics"
-version = "0.0.0"
-dependencies = [
- "nez-app-server-protocol",
- "nez-git-utils",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-plugin",
- "nez-protocol",
- "nez-state",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "os_info",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha1 0.10.6",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-ansi-escape"
-version = "0.0.0"
-dependencies = [
- "ansi-to-tui",
- "pretty_assertions",
- "ratatui",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "nez-api"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "assert_matches",
- "async-channel",
- "base64 0.22.1",
- "bytes",
- "chrono",
- "nez-client",
- "nez-http-client",
- "nez-protocol",
- "nez-utils-rustls-provider",
- "nez-websocket-client",
- "eventsource-stream",
- "futures",
- "http 1.4.0",
- "pretty_assertions",
- "rcgen",
- "regex-lite",
- "rustls",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tokio-test",
- "tokio-tungstenite",
- "tokio-util",
- "tracing",
- "tungstenite",
- "url",
- "uuid",
- "wiremock",
-]
-
-[[package]]
-name = "nez-app-server"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "app_test_support",
- "axum",
- "base64 0.22.1",
- "chrono",
- "clap",
- "nez-agent-extension",
- "nez-analytics",
- "nez-app-server-protocol",
- "nez-app-server-transport",
- "nez-arg0",
- "nez-aws-auth",
- "nez-backend-client",
- "nez-chatgpt",
- "nez-cloud-config",
- "nez-code-mode",
- "nez-config",
- "nez-connectors",
- "nez-core",
- "nez-core-plugins",
- "nez-diagnostics",
- "nez-exec-server",
- "nez-extension-api",
- "nez-external-agent-migration",
- "nez-features",
- "nez-feedback",
- "nez-file-search",
- "nez-file-watcher",
- "nez-git-attribution",
- "nez-git-utils",
- "nez-goal-extension",
- "nez-guardian-v2",
- "nez-history-notes-extension",
- "nez-home",
- "nez-hooks",
- "nez-http-client",
- "nez-image-generation-extension",
- "nez-login",
- "nez-mcp",
- "nez-mcp-extension",
- "nez-memories-extension",
- "nez-memories-write",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-models-manager",
- "nez-network-proxy",
- "nez-otel",
- "nez-plugin",
- "nez-prompts",
- "nez-protocol",
- "nez-queue-extension",
- "nez-rmcp-client",
- "nez-rollout",
- "nez-sandboxing",
- "nez-shell-command",
- "nez-skills",
- "nez-skills-extension",
- "nez-state",
- "nez-thread-store",
- "nez-tools",
- "nez-uds",
- "nez-user-verification",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-cli",
- "nez-utils-json-to-toml",
- "nez-utils-path-uri",
- "nez-utils-process",
- "nez-utils-pty",
- "nez-web-search-extension",
- "nez-websocket-auth",
- "nez-windows-sandbox",
- "core_test_support",
- "flate2",
- "futures",
- "hmac 0.12.1",
- "http 1.4.0",
- "keyring",
- "libc",
- "opentelemetry",
- "opentelemetry_sdk",
- "pretty_assertions",
- "rcgen",
- "rmcp",
- "serde",
- "serde_json",
- "serial_test",
- "sha2 0.10.9",
- "shlex",
- "sqlx",
- "tar",
- "tempfile",
- "test-case",
- "thiserror 2.0.18",
- "tikv-jemallocator",
- "time",
- "tokio",
- "tokio-rustls",
- "tokio-tungstenite",
- "tokio-util",
- "toml 0.9.11+spec-1.1.0",
- "toml_edit 0.24.0+spec-1.1.0",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "url",
- "uuid",
- "wiremock",
-]
-
-[[package]]
-name = "nez-app-server-client"
-version = "0.0.0"
-dependencies = [
- "nez-app-server",
- "nez-app-server-protocol",
- "nez-arg0",
- "nez-config",
- "nez-core",
- "nez-exec-server",
- "nez-feedback",
- "nez-protocol",
- "nez-uds",
- "nez-utils-absolute-path",
- "nez-utils-rustls-provider",
- "futures",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-tungstenite",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "nez-app-server-daemon"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "blake3",
- "nez-app-server-protocol",
- "nez-app-server-transport",
- "nez-features",
- "nez-http-client",
- "nez-install-context",
- "nez-uds",
- "nez-utils-cargo-bin",
- "nez-utils-home-dir",
- "futures",
- "libc",
- "pretty_assertions",
- "semver",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-tungstenite",
- "tracing",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-app-server-protocol"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-app-server-protocol-noop-macros",
- "nez-experimental-api-macros",
- "nez-extension-items",
- "nez-history",
- "nez-protocol",
- "nez-rollout",
- "nez-secrets",
- "nez-shell-command",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-path-uri",
- "nez-utils-redacted-string",
- "inventory",
- "pretty_assertions",
- "rmcp",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "serde_with",
- "similar",
- "strum_macros 0.28.0",
- "tempfile",
- "thiserror 2.0.18",
- "tracing",
- "ts-rs",
- "uuid",
- "zstd",
-]
-
-[[package]]
-name = "nez-app-server-protocol-noop-macros"
-version = "0.0.0"
-
-[[package]]
-name = "nez-app-server-test-client"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "nez-app-server-protocol",
- "nez-core",
- "nez-otel",
- "nez-protocol",
- "nez-utils-cli",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "tungstenite",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "nez-app-server-transport"
-version = "0.0.0"
-dependencies = [
- "axum",
- "base64 0.22.1",
- "chrono",
- "nez-api",
- "nez-app-server-protocol",
- "nez-config",
- "nez-core",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-protocol",
- "nez-state",
- "nez-uds",
- "nez-utils-absolute-path",
- "nez-utils-rustls-provider",
- "nez-websocket-auth",
- "nez-websocket-client",
- "futures",
- "gethostname",
- "httpdate",
- "libc",
- "owo-colors",
- "pretty_assertions",
- "rand 0.9.3",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "signal-hook",
- "tempfile",
- "time",
- "tokio",
- "tokio-tungstenite",
- "tokio-util",
- "tracing",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "nez-apply-patch"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "assert_matches",
- "nez-exec-server",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-path-uri",
- "pretty_assertions",
- "similar",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tree-sitter",
- "tree-sitter-bash",
-]
-
-[[package]]
-name = "nez-arg0"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-apply-patch",
- "nez-async-utils",
- "nez-exec-server",
- "nez-install-context",
- "nez-linux-sandbox",
- "nez-sandboxing",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-home-dir",
- "nez-utils-pty",
- "nez-windows-sandbox",
- "dotenvy",
- "pathdiff",
- "pretty_assertions",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "nez-async-utils"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "rand 0.9.3",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "nez-attachment-store"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "serde",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-aws-auth"
-version = "0.0.0"
-dependencies = [
- "aws-config",
- "aws-credential-types",
- "aws-sigv4",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "aws-types",
- "bytes",
- "nez-http-client",
- "nez-utils-rustls-provider",
- "http 1.4.0",
- "http-body 1.0.1",
- "http-body-util",
- "pretty_assertions",
- "rcgen",
- "rustls",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tokio-rustls",
- "url",
-]
-
-[[package]]
-name = "nez-backend-client"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-api",
- "nez-backend-openapi-models",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-protocol",
- "http 1.4.0",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tokio",
- "url",
- "wiremock",
-]
-
-[[package]]
-name = "nez-backend-openapi-models"
-version = "0.0.0"
-dependencies = [
- "serde",
- "serde_json",
- "serde_with",
-]
-
-[[package]]
-name = "nez-build-info"
-version = "0.0.0"
-dependencies = [
- "nez-install-context",
- "pretty_assertions",
- "semver",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
-]
-
-[[package]]
-name = "nez-bwrap"
-version = "0.0.0"
-dependencies = [
- "cc",
- "libc",
- "pkg-config",
-]
-
-[[package]]
-name = "nez-chatgpt"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "nez-connectors",
- "nez-core",
- "nez-git-utils",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-plugin",
- "nez-utils-cargo-bin",
- "nez-utils-cli",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "nez-cli"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "app_test_support",
- "assert_cmd",
- "assert_matches",
- "chrono",
- "clap",
- "clap_complete",
- "nez-api",
- "nez-app-server",
- "nez-app-server-client",
- "nez-app-server-daemon",
- "nez-app-server-protocol",
- "nez-app-server-test-client",
- "nez-arg0",
- "nez-aws-auth",
- "nez-build-info",
- "nez-chatgpt",
- "nez-cloud-config",
- "nez-cloud-tasks",
- "nez-config",
- "nez-core",
- "nez-core-plugins",
- "nez-exec",
- "nez-exec-server",
- "nez-execpolicy",
- "nez-extension-api",
- "nez-features",
- "nez-git-attribution",
- "nez-git-utils",
- "nez-history",
- "nez-home",
- "nez-http-client",
- "nez-install-context",
- "nez-login",
- "nez-mcp",
- "nez-memories-write",
- "nez-model-provider",
- "nez-models-manager",
- "nez-plugin",
- "nez-protocol",
- "nez-responses-api-proxy",
- "nez-rmcp-client",
- "nez-rollout",
- "nez-rollout-trace",
- "nez-sandboxing",
- "nez-skills-extension",
- "nez-state",
- "nez-stdio-to-uds",
- "nez-tcp-tunnel",
- "nez-terminal-detection",
- "nez-thread-store",
- "nez-tui",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-cli",
- "nez-utils-path",
- "nez-utils-path-uri",
- "nez-utils-process",
- "nez-utils-pty",
- "nez-utils-redacted-string",
- "nez-websocket-auth",
- "nez-windows-sandbox",
- "crossterm",
- "flate2",
- "futures",
- "http 1.4.0",
- "insta",
- "jsonwebtoken",
- "libc",
- "os_info",
- "owo-colors",
- "predicates",
- "pretty_assertions",
- "regex-lite",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "sqlx",
- "supports-color 3.0.2",
- "sys-locale",
- "tar",
- "tempfile",
- "tikv-jemallocator",
- "tokio",
- "tokio-tungstenite",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "unicode-segmentation",
- "url",
- "vt100",
- "which 8.0.0",
- "windows-sys 0.61.2",
- "wiremock",
- "zstd",
-]
-
-[[package]]
-name = "nez-client"
-version = "0.0.0"
-dependencies = [
- "nez-http-client",
- "eventsource-stream",
- "futures",
- "http 1.4.0",
- "rand 0.9.3",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "nez-cloud-client"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "async-stream",
- "bytes",
- "nez-http-client",
- "futures",
- "http 1.4.0",
- "http-body-util",
- "hyper",
- "hyper-util",
- "pretty_assertions",
- "prost",
- "thiserror 2.0.18",
- "tokio",
- "tokio-rustls",
- "tonic",
- "tonic-prost",
- "tower",
- "url",
-]
-
-[[package]]
-name = "nez-cloud-config"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "chrono",
- "nez-agent-identity",
- "nez-async-utils",
- "nez-backend-client",
- "nez-config",
- "nez-core",
- "nez-http-client",
- "nez-login",
- "nez-otel",
- "nez-protocol",
- "hmac 0.12.1",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-cloud-tasks"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "nez-cloud-tasks-client",
- "nez-cloud-tasks-mock-client",
- "nez-core",
- "nez-git-utils",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-tui",
- "nez-utils-cli",
- "crossterm",
- "http 1.4.0",
- "insta",
- "owo-colors",
- "pretty_assertions",
- "ratatui",
- "serde",
- "serde_json",
- "supports-color 3.0.2",
- "tokio",
- "tokio-stream",
- "tracing",
- "tracing-subscriber",
- "unicode-segmentation",
- "unicode-width 0.2.1",
-]
-
-[[package]]
-name = "nez-cloud-tasks-client"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-api",
- "nez-backend-client",
- "nez-git-utils",
- "nez-http-client",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "nez-cloud-tasks-mock-client"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "nez-cloud-tasks-client",
- "diffy",
-]
-
-[[package]]
-name = "nez-code-mode"
-version = "0.0.0"
-dependencies = [
- "nez-code-mode-protocol",
- "nez-http-client",
- "nez-install-context",
- "nez-otel",
- "nez-protocol",
- "futures",
- "http-body-util",
- "pretty_assertions",
- "prost",
- "rand 0.9.3",
- "reqwest 0.12.28",
- "serde_json",
- "tokio",
- "tokio-util",
- "tonic",
- "tower",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "nez-code-mode-host"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "clap",
- "nez-code-mode",
- "nez-code-mode-protocol",
- "nez-code-mode-runtime",
- "nez-http-client",
- "nez-otel",
- "nez-otel-trace-websocket",
- "nez-protocol",
- "nez-utils-cargo-bin",
- "futures",
- "pretty_assertions",
- "prost",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-stream",
- "tokio-util",
- "tonic",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "nez-code-mode-protocol"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "glob",
- "pretty_assertions",
- "prost",
- "protoc-bin-vendored",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "tonic",
- "tonic-prost",
- "tonic-prost-build",
-]
-
-[[package]]
-name = "nez-code-mode-runtime"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-code-mode-protocol",
- "nez-protocol",
- "deno_core_icudata",
- "futures",
- "opentelemetry",
- "pretty_assertions",
- "serde_json",
- "tokio",
- "tokio-util",
- "tracing",
- "v8",
-]
-
-[[package]]
-name = "nez-collaboration-mode-templates"
-version = "0.0.0"
-
-[[package]]
-name = "nez-config"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "nez-execpolicy",
- "nez-features",
- "nez-file-system",
- "nez-git-utils",
- "nez-model-provider-info",
- "nez-network-proxy",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path",
- "nez-utils-path-uri",
- "nez-utils-redacted-string",
- "nez-windows-sandbox",
- "core-foundation 0.9.4",
- "dns-lookup",
- "dunce",
- "futures",
- "gethostname",
- "indexmap 2.14.0",
- "libc",
- "multimap",
- "pretty_assertions",
- "prost",
- "regex-lite",
- "schemars 0.8.22",
- "serde",
- "serde_ignored",
- "serde_json",
- "serde_path_to_error",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "toml 0.9.11+spec-1.1.0",
- "toml_edit 0.24.0+spec-1.1.0",
- "tonic",
- "tonic-prost",
- "tonic-prost-build",
- "tracing",
- "wildmatch",
- "winapi-util",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-config-schema"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "nez-config",
-]
-
-[[package]]
-name = "nez-connectors"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "arc-swap",
- "nez-config",
- "nez-login",
- "nez-otel",
- "nez-plugin",
- "nez-protocol",
- "indexmap 2.14.0",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha1 0.10.6",
- "tempfile",
- "tokio",
- "tracing",
- "urlencoding",
-]
-
-[[package]]
-name = "nez-connectors-extension"
-version = "0.0.0"
-dependencies = [
- "nez-connectors",
- "nez-core-plugins",
- "nez-file-system",
- "nez-plugin",
- "nez-utils-path-uri",
- "serde_json",
- "thiserror 2.0.18",
- "tracing",
-]
-
-[[package]]
-name = "nez-context-fragments"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "nez-utils-string",
- "pretty_assertions",
- "serde_json",
-]
-
-[[package]]
-name = "nez-core"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "arc-swap",
- "assert_cmd",
- "assert_matches",
- "async-channel",
- "base64 0.22.1",
- "bm25",
- "chrono",
- "nez-agent-graph-store",
- "nez-agent-message-board-client",
- "nez-agent-message-board-extension",
- "nez-agent-roles",
- "nez-analytics",
- "nez-api",
- "nez-app-server-protocol",
- "nez-apply-patch",
- "nez-async-utils",
- "nez-attachment-store",
- "nez-client",
- "nez-code-mode",
- "nez-config",
- "nez-connectors",
- "nez-context-fragments",
- "nez-core-plugins",
- "nez-diagnostics",
- "nez-exec-server",
- "nez-exec-server-test-support",
- "nez-execpolicy",
- "nez-extension-api",
- "nez-extension-items",
- "nez-features",
- "nez-feedback",
- "nez-file-system",
- "nez-git-utils",
- "nez-guardian-context",
- "nez-guardian-reviewer",
- "nez-history",
- "nez-home",
- "nez-hooks",
- "nez-http-client",
- "nez-image-generation-extension",
- "nez-install-context",
- "nez-login",
- "nez-mcp",
- "nez-mcp-extension",
- "nez-memories-read",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-models-manager",
- "nez-network-proxy",
- "nez-otel",
- "nez-plugin",
- "nez-prompts",
- "nez-protocol",
- "nez-response-debug-context",
- "nez-rmcp-client",
- "nez-rollout",
- "nez-rollout-trace",
- "nez-sandboxing",
- "nez-shell-command",
- "nez-skills",
- "nez-skills-extension",
- "nez-state",
- "nez-terminal-detection",
- "nez-test-binary-support",
- "nez-thread-store",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-audio",
- "nez-utils-cache",
- "nez-utils-cargo-bin",
- "nez-utils-git-discovery",
- "nez-utils-home-dir",
- "nez-utils-image",
- "nez-utils-output-truncation",
- "nez-utils-path",
- "nez-utils-path-uri",
- "nez-utils-plugins",
- "nez-utils-process",
- "nez-utils-pty",
- "nez-utils-redacted-string",
- "nez-utils-stream-parser",
- "nez-utils-string",
- "nez-web-search-extension",
- "nez-windows-sandbox",
- "nez-windows-sandbox-test-support",
- "core_test_support",
- "ctor 0.6.3",
- "dirs",
- "dunce",
- "eventsource-stream",
- "futures",
- "http 1.4.0",
- "hyper-util",
- "iana-time-zone",
- "image",
- "indexmap 2.14.0",
- "insta",
- "libc",
- "maplit",
- "once_cell",
- "openssl-sys",
- "opentelemetry",
- "opentelemetry_sdk",
- "predicates",
- "pretty_assertions",
- "rand 0.9.3",
- "regex-lite",
- "rmcp",
- "serde",
- "serde_json",
- "serial_test",
- "sha1 0.10.6",
- "shlex",
- "similar",
- "tempfile",
- "test-case",
- "test-log",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite",
- "tokio-util",
- "toml 0.9.11+spec-1.1.0",
- "toml_edit 0.24.0+spec-1.1.0",
- "tonic",
- "tower",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "tracing-test",
- "url",
- "uuid",
- "walkdir",
- "which 8.0.0",
- "whoami 1.6.1",
- "windows-sys 0.61.2",
- "wiremock",
- "zstd",
-]
-
-[[package]]
-name = "nez-core-api"
-version = "0.0.0"
-dependencies = [
- "nez-analytics",
- "nez-app-server-protocol",
- "nez-arg0",
- "nez-config",
- "nez-core",
- "nez-exec-server",
- "nez-extension-api",
- "nez-features",
- "nez-history",
- "nez-home",
- "nez-image-generation-extension",
- "nez-login",
- "nez-model-provider-info",
- "nez-models-manager",
- "nez-protocol",
- "nez-state",
- "nez-utils-absolute-path",
-]
-
-[[package]]
-name = "nez-core-plugin-common"
-version = "0.0.0"
-dependencies = [
- "nez-utils-absolute-path",
- "semver",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "nez-core-plugins"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-analytics",
- "nez-app-server-protocol",
- "nez-config",
- "nez-connectors",
- "nez-core-plugin-common",
- "nez-exec-server",
- "nez-exec-server-test-support",
- "nez-git-utils",
- "nez-hooks",
- "nez-http-client",
- "nez-login",
- "nez-mcp",
- "nez-model-provider",
- "nez-otel",
- "nez-plugin",
- "nez-protocol",
- "nez-shell-command",
- "nez-skills",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-path",
- "nez-utils-path-uri",
- "nez-utils-plugins",
- "nez-utils-process",
- "dirs",
- "flate2",
- "futures",
- "http 1.4.0",
- "libc",
- "pretty_assertions",
- "regex",
- "serde",
- "serde_json",
- "serde_with",
- "serde_yaml",
- "sha2 0.10.9",
- "tar",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
- "tracing-subscriber",
- "tracing-test",
- "url",
- "uuid",
- "wiremock",
- "zip",
-]
-
-[[package]]
-name = "nez-diagnostics"
-version = "0.0.0"
-dependencies = [
- "libc",
- "pretty_assertions",
-]
-
-[[package]]
-name = "nez-exec"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "clap",
- "nez-app-server-client",
- "nez-app-server-protocol",
- "nez-apply-patch",
- "nez-arg0",
- "nez-cloud-config",
- "nez-config",
- "nez-core",
- "nez-features",
- "nez-feedback",
- "nez-git-utils",
- "nez-history",
- "nez-login",
- "nez-model-provider-info",
- "nez-otel",
- "nez-protocol",
- "nez-rollout",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-cli",
- "nez-utils-oss",
- "nez-utils-path-uri",
- "nez-utils-sandbox-summary",
- "nez-worktree",
- "core_test_support",
- "insta",
- "libc",
- "opentelemetry",
- "opentelemetry_sdk",
- "owo-colors",
- "predicates",
- "pretty_assertions",
- "serde",
- "serde_json",
- "supports-color 3.0.2",
- "tempfile",
- "tokio",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "ts-rs",
- "uuid",
- "walkdir",
- "wiremock",
- "zstd",
-]
-
-[[package]]
-name = "nez-exec-server"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "arc-swap",
- "axum",
- "base64 0.22.1",
- "bytes",
- "clatter",
- "nez-api",
- "nez-build-info",
- "nez-config",
- "nez-core-plugin-common",
- "nez-exec-server-protocol",
- "nez-exec-server-test-support",
- "nez-file-system",
- "nez-file-watcher",
- "nez-http-client",
- "nez-linux-sandbox",
- "nez-mxc-sandbox",
- "nez-network-proxy",
- "nez-otel",
- "nez-protocol",
- "nez-sandboxing",
- "nez-shell-command",
- "nez-skills",
- "nez-test-binary-support",
- "nez-uds",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-home-dir",
- "nez-utils-path-uri",
- "nez-utils-process",
- "nez-utils-pty",
- "nez-utils-redacted-string",
- "nez-utils-rustls-provider",
- "nez-websocket-auth",
- "nez-websocket-client",
- "nez-windows-sandbox-test-support",
- "ctor 0.6.3",
- "dirs",
- "futures",
- "http 1.4.0",
- "libc",
- "opentelemetry",
- "opentelemetry_sdk",
- "pretty_assertions",
- "prost",
- "rcgen",
- "rustix 1.1.4",
- "rustls",
- "serde",
- "serde_json",
- "serial_test",
- "tempfile",
- "test-case",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite",
- "tokio-util",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "url",
- "uuid",
- "which 8.0.0",
- "windows-sys 0.61.2",
- "wiremock",
-]
-
-[[package]]
-name = "nez-exec-server-protocol"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-file-system",
- "nez-install-context",
- "nez-mxc-sandbox",
- "nez-network-proxy",
- "nez-protocol",
- "nez-shell-command",
- "nez-skills",
- "nez-utils-path-uri",
- "pretty_assertions",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "nez-exec-server-test-support"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-exec-server",
- "nez-http-client",
- "futures",
- "prost",
- "serde_json",
- "tokio",
- "tokio-tungstenite",
- "wiremock",
-]
-
-[[package]]
-name = "nez-execpolicy"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "nez-utils-absolute-path",
- "multimap",
- "pretty_assertions",
- "serde",
- "serde_json",
- "shlex",
- "starlark",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
-]
-
-[[package]]
-name = "nez-experimental-api-macros"
-version = "0.0.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
-name = "nez-extension-api"
-version = "0.0.0"
-dependencies = [
- "nez-api",
- "nez-config",
- "nez-context-fragments",
- "nez-exec-server-protocol",
- "nez-file-system",
- "nez-guardian-context",
- "nez-history",
- "nez-mcp",
- "nez-protocol",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "futures",
- "pretty_assertions",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "nez-extension-items"
-version = "0.0.0"
-dependencies = [
- "nez-utils-absolute-path",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "ts-rs",
-]
-
-[[package]]
-name = "nez-external-agent-migration"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "nez-analytics",
- "nez-app-server-protocol",
- "nez-config",
- "nez-core",
- "nez-core-plugins",
- "nez-hooks",
- "nez-login",
- "nez-memories-write",
- "nez-otel",
- "nez-plugin",
- "nez-protocol",
- "nez-rollout",
- "nez-thread-store",
- "nez-utils-output-truncation",
- "linkify",
- "pretty_assertions",
- "serde",
- "serde_json",
- "serde_yaml",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
-]
-
-[[package]]
-name = "nez-features"
-version = "0.0.0"
-dependencies = [
- "nez-network-proxy",
- "nez-protocol",
- "nez-utils-redacted-string",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
-]
-
-[[package]]
-name = "nez-feedback"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytes",
- "nez-http-client",
- "nez-login",
- "nez-protocol",
- "nez-rollout",
- "nez-state",
- "flate2",
- "http 1.4.0",
- "httpdate",
- "log",
- "mime_guess",
- "pretty_assertions",
- "sentry",
- "serde_json",
- "tar",
- "tempfile",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "wiremock",
-]
-
-[[package]]
-name = "nez-file-search"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "crossbeam-channel",
- "ignore",
- "nucleo",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "nez-file-system"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "futures",
- "serde",
-]
-
-[[package]]
-name = "nez-file-watcher"
-version = "0.0.0"
-dependencies = [
- "notify",
- "pretty_assertions",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-git-attribution"
-version = "0.0.0"
-dependencies = [
- "nez-backend-client",
- "nez-extension-api",
- "nez-http-client",
- "nez-login",
- "serde_json",
- "tokio",
- "wiremock",
-]
-
-[[package]]
-name = "nez-git-utils"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-file-system",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-path-uri",
- "nez-utils-process",
- "nez-utils-pty",
- "futures",
- "gix",
- "once_cell",
- "pretty_assertions",
- "regex",
- "schemars 0.8.22",
- "serde",
- "similar",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "ts-rs",
- "walkdir",
-]
-
-[[package]]
-name = "nez-goal-extension"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-analytics",
- "nez-core",
- "nez-extension-api",
- "nez-otel",
- "nez-prompts",
- "nez-protocol",
- "nez-rollout",
- "nez-state",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-template",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-guardian-context"
-version = "0.0.0"
-dependencies = [
- "nez-context-fragments",
- "nez-history",
- "nez-protocol",
- "pretty_assertions",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "nez-guardian-reviewer"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-analytics",
- "nez-extension-api",
- "nez-feedback",
- "nez-guardian-context",
- "nez-mcp",
- "nez-otel",
- "nez-prompts",
- "nez-protocol",
- "opentelemetry",
- "opentelemetry_sdk",
- "pretty_assertions",
- "rand 0.9.3",
- "serde",
- "serde_json",
- "test-case",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "nez-guardian-v2"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-analytics",
- "nez-api",
- "nez-config",
- "nez-context-fragments",
- "nez-core",
- "nez-extension-api",
- "nez-features",
- "nez-guardian-context",
- "nez-guardian-reviewer",
- "nez-history",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-prompts",
- "nez-protocol",
- "nez-utils-cargo-bin",
- "nez-websocket-client",
- "core_test_support",
- "dirs",
- "http 1.4.0",
- "insta",
- "pretty_assertions",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "uuid",
- "wiremock",
- "zstd",
-]
-
-[[package]]
-name = "nez-history"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-protocol",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "nez-history-notes-extension"
-version = "0.0.0"
-dependencies = [
- "nez-analytics",
- "nez-client",
- "nez-config",
- "nez-core",
- "nez-extension-api",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-protocol",
- "nez-tools",
- "nez-utils-output-truncation",
- "core_test_support",
- "http 1.4.0",
- "pretty_assertions",
- "serde_json",
- "tempfile",
- "tokio",
- "wiremock",
-]
-
-[[package]]
-name = "nez-home"
-version = "0.0.0"
-dependencies = [
- "nez-extension-api",
- "nez-utils-absolute-path",
- "pretty_assertions",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-hooks"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "async-channel",
- "chrono",
- "nez-config",
- "nez-plugin",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-output-truncation",
- "nez-utils-path-uri",
- "nez-utils-process",
- "nez-utils-pty",
- "futures",
- "libc",
- "pretty_assertions",
- "regex",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "nez-http-client"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "nez-utils-cargo-bin",
- "nez-utils-rustls-provider",
- "futures",
- "http 1.4.0",
- "http-body 1.0.1",
- "httpdate",
- "native-tls",
- "opentelemetry",
- "opentelemetry_sdk",
- "pretty_assertions",
- "rcgen",
- "reqwest 0.12.28",
- "rustls",
- "rustls-native-certs",
- "rustls-pki-types",
- "rustls-platform-verifier",
- "serde",
- "serde_json",
- "serde_urlencoded",
- "sha2 0.10.9",
- "system-configuration",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "windows-sys 0.61.2",
- "zstd",
-]
-
-[[package]]
-name = "nez-image-generation-extension"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-api",
- "nez-core",
- "nez-exec-server",
- "nez-extension-api",
- "nez-extension-items",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-protocol",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-image",
- "nez-utils-path-uri",
- "http 1.4.0",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-install-context"
-version = "0.0.0"
-dependencies = [
- "nez-utils-absolute-path",
- "nez-utils-home-dir",
- "pretty_assertions",
- "semver",
- "serde",
- "serde_json",
- "tempfile",
-]
-
-[[package]]
-name = "nez-keyring-store"
-version = "0.0.0"
-dependencies = [
- "keyring",
- "pretty_assertions",
- "secret-service",
- "security-framework 3.5.1",
- "tracing",
-]
-
-[[package]]
-name = "nez-linux-sandbox"
-version = "0.0.0"
-dependencies = [
- "clap",
- "nez-core",
- "nez-install-context",
- "nez-network-proxy",
- "nez-process-hardening",
- "nez-protocol",
- "nez-sandboxing",
- "nez-uds",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "globset",
- "landlock",
- "libc",
- "pretty_assertions",
- "rustix 1.1.4",
- "seccompiler",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "test-case",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "nez-lmstudio"
-version = "0.0.0"
-dependencies = [
- "nez-core",
- "nez-http-client",
- "nez-model-provider-info",
- "serde_json",
- "tokio",
- "tracing",
- "which 8.0.0",
- "wiremock",
-]
-
-[[package]]
-name = "nez-login"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "chrono",
- "nez-agent-identity",
- "nez-config",
- "nez-http-client",
- "nez-keyring-store",
- "nez-model-provider-info",
- "nez-otel",
- "nez-protocol",
- "nez-secrets",
- "nez-terminal-detection",
- "nez-utils-cargo-bin",
- "nez-utils-process",
- "nez-utils-template",
- "nez-workload-identity",
- "core_test_support",
- "http 1.4.0",
- "jsonwebtoken",
- "keyring",
- "once_cell",
- "opentelemetry_sdk",
- "os_info",
- "pretty_assertions",
- "rand 0.9.3",
- "regex-lite",
- "serde",
- "serde_json",
- "serial_test",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 2.0.18",
- "tiny_http",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
- "urlencoding",
- "webbrowser",
- "wiremock",
-]
-
-[[package]]
-name = "nez-mcp"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "arc-swap",
- "assert_matches",
- "async-channel",
- "nez-api",
- "nez-async-utils",
- "nez-config",
- "nez-connectors",
- "nez-diagnostics",
- "nez-exec-server",
- "nez-exec-server-test-support",
- "nez-login",
- "nez-model-provider",
- "nez-otel",
- "nez-plugin",
- "nez-protocol",
- "nez-rmcp-client",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-path-uri",
- "nez-utils-plugins",
- "nez-utils-process",
- "futures",
- "insta",
- "lru",
- "pretty_assertions",
- "regex-lite",
- "rmcp",
- "serde",
- "serde_json",
- "sha1 0.10.6",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tokio-util",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "nez-mcp-extension"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "nez-config",
- "nez-connectors",
- "nez-connectors-extension",
- "nez-core",
- "nez-core-plugins",
- "nez-exec-server",
- "nez-exec-server-test-support",
- "nez-extension-api",
- "nez-features",
- "nez-login",
- "nez-mcp",
- "nez-plugin",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "core_test_support",
- "futures",
- "pretty_assertions",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tokio-util",
- "tracing",
- "wiremock",
-]
-
-[[package]]
-name = "nez-memories-extension"
-version = "0.0.0"
-dependencies = [
- "nez-core",
- "nez-extension-api",
- "nez-features",
- "nez-otel",
- "nez-protocol",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-output-truncation",
- "nez-utils-template",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
-]
-
-[[package]]
-name = "nez-memories-read"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "nez-shell-command",
- "nez-utils-absolute-path",
- "pretty_assertions",
-]
-
-[[package]]
-name = "nez-memories-write"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-backend-client",
- "nez-config",
- "nez-core",
- "nez-features",
- "nez-git-utils",
- "nez-login",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-models-manager",
- "nez-otel",
- "nez-protocol",
- "nez-rollout",
- "nez-rollout-trace",
- "nez-secrets",
- "nez-state",
- "nez-terminal-detection",
- "nez-utils-absolute-path",
- "nez-utils-output-truncation",
- "nez-utils-template",
- "core_test_support",
- "futures",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "uuid",
- "wiremock",
-]
-
-[[package]]
-name = "nez-mermaid"
-version = "0.0.0"
-dependencies = [
- "insta",
- "pretty_assertions",
- "unicode-width 0.2.1",
-]
-
-[[package]]
-name = "nez-message-history"
-version = "0.0.0"
-dependencies = [
- "nez-config",
- "memchr",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-model-provider"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "chrono",
- "nez-agent-identity",
- "nez-api",
- "nez-aws-auth",
- "nez-feedback",
- "nez-http-client",
- "nez-keyring-store",
- "nez-login",
- "nez-model-provider-info",
- "nez-models-manager",
- "nez-otel",
- "nez-protocol",
- "nez-response-debug-context",
- "nez-secrets",
- "nez-utils-cargo-bin",
- "nez-utils-process",
- "nez-utils-redacted-string",
- "http 1.4.0",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tracing",
- "url",
- "wiremock",
-]
-
-[[package]]
-name = "nez-model-provider-info"
-version = "0.0.0"
-dependencies = [
- "nez-client",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-redacted-string",
- "http 1.4.0",
- "maplit",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "tempfile",
- "toml 0.9.11+spec-1.1.0",
- "url",
-]
-
-[[package]]
-name = "nez-models-manager"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "nez-http-client",
- "nez-login",
- "nez-otel",
- "nez-prompts",
- "nez-protocol",
- "nez-utils-output-truncation",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-mxc-sandbox"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "appcontainer_common",
- "nez-network-proxy",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "nez-windows-sandbox",
- "learning_mode_windows",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tracelogging",
- "windows-sys 0.61.2",
- "wxc_common",
-]
-
-[[package]]
-name = "nez-network-proxy"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "chrono",
- "clap",
- "nez-utils-absolute-path",
- "nez-utils-home-dir",
- "nez-utils-path-uri",
- "nez-utils-rustls-provider",
- "nez-windows-sandbox",
- "globset",
- "libc",
- "opentelemetry",
- "pretty_assertions",
- "rama-core",
- "rama-dns",
- "rama-http",
- "rama-http-backend",
- "rama-net",
- "rama-socks5",
- "rama-tcp",
- "rama-tls-rustls",
- "rama-unix",
- "rand 0.9.3",
- "rand_regex",
- "regex",
- "regex-automata",
- "regex-syntax",
- "rustls-native-certs",
- "schannel",
- "schemars 0.8.22",
- "security-framework 3.5.1",
- "serde",
- "serde_ignored",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 2.0.18",
- "time",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-ollama"
-version = "0.0.0"
-dependencies = [
- "assert_matches",
- "async-stream",
- "bytes",
- "nez-core",
- "nez-http-client",
- "nez-model-provider-info",
- "futures",
- "memchr",
- "pretty_assertions",
- "semver",
- "serde_json",
- "tokio",
- "tracing",
- "wiremock",
-]
-
-[[package]]
-name = "nez-otel"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "chrono",
- "nez-api",
- "nez-http-client",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-stream-parser",
- "nez-utils-string",
- "eventsource-stream",
- "gethostname",
- "http 1.4.0",
- "libc",
- "opentelemetry",
- "opentelemetry-appender-tracing",
- "opentelemetry-http",
- "opentelemetry-otlp",
- "opentelemetry-semantic-conventions",
- "opentelemetry_sdk",
- "os_info",
- "pretty_assertions",
- "reqwest 0.12.28",
- "seccompiler",
- "serde",
- "serde_json",
- "strum_macros 0.28.0",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite",
- "tracing",
- "tracing-opentelemetry",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "nez-otel-trace-websocket"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "futures",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-plugin"
-version = "0.0.0"
-dependencies = [
- "nez-config",
- "nez-core-plugin-common",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "nez-utils-plugins",
- "pretty_assertions",
- "serde_json",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "nez-process-hardening"
-version = "0.0.0"
-dependencies = [
- "libc",
- "pretty_assertions",
-]
-
-[[package]]
-name = "nez-prompts"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-collaboration-mode-templates",
- "nez-context-fragments",
- "nez-execpolicy",
- "nez-git-utils",
- "nez-guardian-context",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-template",
- "pretty_assertions",
- "tracing",
-]
-
-[[package]]
-name = "nez-protocol"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chardetng",
- "chrono",
- "nez-async-utils",
- "nez-execpolicy",
- "nez-extension-items",
- "nez-http-client",
- "nez-network-proxy",
- "nez-utils-absolute-path",
- "nez-utils-image",
- "nez-utils-path-uri",
- "nez-utils-redacted-string",
- "nez-utils-string",
- "derive_more 2.1.1",
- "encoding_rs",
- "gix-url",
- "globset",
- "http 1.4.0",
- "icu_decimal",
- "icu_locale_core",
- "icu_provider",
- "landlock",
- "pretty_assertions",
- "quick-xml 0.41.0",
- "schemars 0.8.22",
- "seccompiler",
- "serde",
- "serde_json",
- "serde_with",
- "strum 0.27.2",
- "strum_macros 0.28.0",
- "sys-locale",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "ts-rs",
- "uuid",
- "wildmatch",
-]
-
-[[package]]
-name = "nez-queue-extension"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-core",
- "nez-extension-api",
- "nez-protocol",
- "nez-state",
- "nez-thread-store",
- "nez-utils-absolute-path",
- "core_test_support",
- "pretty_assertions",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "nez-realtime-webrtc"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-build-info",
- "nez-install-context",
- "nez-utils-cargo-bin",
- "nez-utils-pty",
- "ctor 0.6.3",
- "futures",
- "libc",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-response-debug-context"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-api",
- "http 1.4.0",
- "pretty_assertions",
- "serde_json",
-]
-
-[[package]]
-name = "nez-responses-api-proxy"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "nez-process-hardening",
- "ctor 0.6.3",
- "libc",
- "pretty_assertions",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tiny_http",
- "zeroize",
-]
-
-[[package]]
-name = "nez-rmcp-client"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "base64 0.22.1",
- "bytes",
- "nez-api",
- "nez-config",
- "nez-exec-server",
- "nez-http-client",
- "nez-keyring-store",
- "nez-network-proxy",
- "nez-otel",
- "nez-protocol",
- "nez-secrets",
- "nez-utils-cargo-bin",
- "nez-utils-home-dir",
- "nez-utils-path-uri",
- "nez-utils-pty",
- "futures",
- "http 1.4.0",
- "keyring",
- "libc",
- "memchr",
- "oauth2",
- "opentelemetry_sdk",
- "pretty_assertions",
- "rmcp",
- "serde",
- "serde_json",
- "serial_test",
- "sha2 0.10.9",
- "sse-stream",
- "tempfile",
- "thiserror 2.0.18",
- "tiny_http",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-subscriber",
- "tracing-test",
- "url",
- "urlencoding",
- "webbrowser",
- "which 8.0.0",
- "windows-sys 0.61.2",
- "wiremock",
-]
-
-[[package]]
-name = "nez-rollout"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-extension-items",
- "nez-file-search",
- "nez-git-utils",
- "nez-history",
- "nez-otel",
- "nez-protocol",
- "nez-state",
- "nez-utils-absolute-path",
- "nez-utils-output-truncation",
- "nez-utils-path",
- "nez-utils-process",
- "nez-utils-string",
- "memchr",
- "pretty_assertions",
- "regex",
- "serde",
- "serde_json",
- "tempfile",
- "time",
- "tokio",
- "tracing",
- "uuid",
- "zstd",
-]
-
-[[package]]
-name = "nez-rollout-trace"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-code-mode",
- "nez-protocol",
- "http 1.4.0",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "nez-sandboxing"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-mxc-sandbox",
- "nez-network-proxy",
- "nez-otel",
- "nez-protocol",
- "nez-uds",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-home-dir",
- "nez-utils-path-uri",
- "nez-utils-pty",
- "nez-windows-sandbox",
- "dunce",
- "libc",
- "pretty_assertions",
- "regex-lite",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "url",
- "which 8.0.0",
-]
-
-[[package]]
-name = "nez-secrets"
-version = "0.0.0"
-dependencies = [
- "age",
- "anyhow",
- "base64 0.22.1",
- "nez-git-utils",
- "nez-keyring-store",
- "keyring",
- "pretty_assertions",
- "rand 0.9.3",
- "regex",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tracing",
-]
-
-[[package]]
-name = "nez-shell-command"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "nez-protocol",
- "nez-utils-absolute-path",
- "libc",
- "once_cell",
- "pretty_assertions",
- "regex",
- "serde",
- "serde_json",
- "shlex",
- "tempfile",
- "tree-sitter",
- "tree-sitter-bash",
- "tree-sitter-powershell",
- "url",
- "which 8.0.0",
-]
-
-[[package]]
-name = "nez-skills"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "nez-shell-command",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "include_dir",
- "pretty_assertions",
- "serde",
- "serde_yaml",
- "shlex",
- "thiserror 2.0.18",
- "tracing",
-]
-
-[[package]]
-name = "nez-skills-extension"
-version = "0.0.0"
-dependencies = [
- "assert_matches",
- "blake3",
- "nez-analytics",
- "nez-config",
- "nez-exec-server",
- "nez-extension-api",
- "nez-mcp",
- "nez-models-manager",
- "nez-otel",
- "nez-protocol",
- "nez-skills",
- "nez-tools",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-path-uri",
- "nez-utils-plugins",
- "nez-utils-string",
- "dirs",
- "dunce",
- "futures",
- "insta",
- "opentelemetry_sdk",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "toml 0.9.11+spec-1.1.0",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "nez-state"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "nez-git-utils",
- "nez-history",
- "nez-protocol",
- "nez-utils-absolute-path",
- "file-id",
- "libsqlite3-sys",
- "log",
- "pretty_assertions",
- "scopeguard",
- "serde",
- "serde_json",
- "sqlx",
- "sqlx-macros",
- "sqlx-sqlite",
- "strum 0.27.2",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "nez-stdio-to-uds"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-uds",
- "nez-utils-cargo-bin",
- "pretty_assertions",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "nez-tcp-tunnel"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bytes",
- "clap",
- "h3",
- "h3-quinn",
- "http 1.4.0",
- "pretty_assertions",
- "quinn",
- "rand 0.9.3",
- "rcgen",
- "rustls",
- "rustls-native-certs",
- "serde_json",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "nez-terminal-detection"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "tracing",
-]
-
-[[package]]
-name = "nez-test-binary-support"
-version = "0.0.0"
-dependencies = [
- "nez-arg0",
- "tempfile",
-]
-
-[[package]]
-name = "nez-thread-manager-sample"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "nez-core-api",
- "serde_json",
- "tracing",
-]
-
-[[package]]
-name = "nez-thread-store"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "nez-app-server-protocol",
- "nez-extension-items",
- "nez-git-utils",
- "nez-install-context",
- "nez-otel",
- "nez-protocol",
- "nez-rollout",
- "nez-state",
- "nez-utils-absolute-path",
- "nez-utils-path",
- "nez-utils-path-uri",
- "futures",
- "pretty_assertions",
- "pulldown-cmark",
- "serde",
- "serde_json",
- "sqlx",
- "sqlx-macros",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "uuid",
- "zstd",
-]
-
-[[package]]
-name = "nez-tools"
-version = "0.0.0"
-dependencies = [
- "bitflags 2.13.1",
- "nez-code-mode",
- "nez-connectors",
- "nez-extension-items",
- "nez-features",
- "nez-file-system",
- "nez-protocol",
- "nez-utils-cargo-bin",
- "nez-utils-output-truncation",
- "nez-utils-path-uri",
- "nez-utils-string",
- "jsonptr",
- "pretty_assertions",
- "rmcp",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "urlencoding",
-]
-
-[[package]]
-name = "nez-tui"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "app_test_support",
- "arboard",
- "assert_matches",
- "axum",
- "base64 0.22.1",
- "chrono",
- "clap",
- "nez-ansi-escape",
- "nez-app-server-client",
- "nez-app-server-daemon",
- "nez-app-server-protocol",
- "nez-arg0",
- "nez-backend-client",
- "nez-build-info",
- "nez-cloud-config",
- "nez-config",
- "nez-connectors",
- "nez-context-fragments",
- "nez-core-plugins",
- "nez-exec-server",
- "nez-features",
- "nez-feedback",
- "nez-file-search",
- "nez-git-utils",
- "nez-history",
- "nez-http-client",
- "nez-install-context",
- "nez-login",
- "nez-mcp",
- "nez-mermaid",
- "nez-message-history",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-models-manager",
- "nez-otel",
- "nez-plugin",
- "nez-protocol",
- "nez-realtime-webrtc",
- "nez-rollout",
- "nez-sandboxing",
- "nez-shell-command",
- "nez-state",
- "nez-terminal-detection",
- "nez-uds",
- "nez-utils-absolute-path",
- "nez-utils-approval-presets",
- "nez-utils-cargo-bin",
- "nez-utils-cli",
- "nez-utils-elapsed",
- "nez-utils-fuzzy-match",
- "nez-utils-home-dir",
- "nez-utils-oss",
- "nez-utils-path",
- "nez-utils-path-uri",
- "nez-utils-plugins",
- "nez-utils-sandbox-summary",
- "nez-utils-sleep-inhibitor",
- "nez-utils-string",
- "nez-windows-sandbox",
- "nez-worktree",
- "color-eyre",
- "core_test_support",
- "crossterm",
- "derive_more 2.1.1",
- "diffy",
- "dirs",
- "dunce",
- "futures",
- "http 1.4.0",
- "image",
- "insta",
- "itertools 0.14.0",
- "lazy_static",
- "libc",
- "objc2-app-kit",
- "objc2-foundation",
- "opentelemetry_sdk",
- "pathdiff",
- "pretty_assertions",
- "pulldown-cmark",
- "rand 0.9.3",
- "ratatui",
- "ratatui-macros",
- "regex-lite",
- "rmcp",
- "semver",
- "serde",
- "serde_json",
- "serial_test",
- "sha2 0.10.9",
- "shlex",
- "strum 0.27.2",
- "strum_macros 0.28.0",
- "supports-color 3.0.2",
- "syntect",
- "tempfile",
- "textwrap 0.16.2",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tokio-tungstenite",
- "tokio-util",
- "toml 0.9.11+spec-1.1.0",
- "toml_edit 0.24.0+spec-1.1.0",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "two-face",
- "unicode-segmentation",
- "unicode-width 0.2.1",
- "url",
- "urlencoding",
- "uuid",
- "vt100",
- "webbrowser",
- "which 8.0.0",
- "windows-sys 0.61.2",
- "winsplit",
- "wiremock",
- "zbus",
-]
-
-[[package]]
-name = "nez-uds"
-version = "0.0.0"
-dependencies = [
- "async-io",
- "libc",
- "pretty_assertions",
- "tempfile",
- "tokio",
- "tokio-util",
- "uds_windows",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-user-verification"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "block2",
- "core-foundation 0.10.1",
- "dirs",
- "objc2",
- "objc2-foundation",
- "objc2-local-authentication",
- "p256",
- "pretty_assertions",
- "security-framework 3.5.1",
- "security-framework-sys",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 2.0.18",
- "tracing",
-]
-
-[[package]]
-name = "nez-utils-absolute-path"
-version = "0.0.0"
-dependencies = [
- "dirs",
- "dunce",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "tempfile",
- "ts-rs",
-]
-
-[[package]]
-name = "nez-utils-approval-presets"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
-]
-
-[[package]]
-name = "nez-utils-audio"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-protocol",
- "nez-utils-cache",
- "nez-utils-string",
- "pretty_assertions",
- "symphonia",
- "thiserror 2.0.18",
- "tracing",
-]
-
-[[package]]
-name = "nez-utils-cache"
-version = "0.0.0"
-dependencies = [
- "lru",
- "sha1 0.10.6",
- "tokio",
-]
-
-[[package]]
-name = "nez-utils-cargo-bin"
-version = "0.0.0"
-dependencies = [
- "assert_cmd",
- "runfiles",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "nez-utils-cli"
-version = "0.0.0"
-dependencies = [
- "clap",
- "nez-protocol",
- "nez-shell-command",
- "pretty_assertions",
- "serde",
- "toml 0.9.11+spec-1.1.0",
-]
-
-[[package]]
-name = "nez-utils-elapsed"
-version = "0.0.0"
-
-[[package]]
-name = "nez-utils-fuzzy-match"
-version = "0.0.0"
-
-[[package]]
-name = "nez-utils-git-discovery"
-version = "0.0.0"
-dependencies = [
- "nez-git-utils",
- "nez-utils-absolute-path",
- "futures",
- "pretty_assertions",
- "tempfile",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "nez-utils-home-dir"
-version = "0.0.0"
-dependencies = [
- "nez-utils-absolute-path",
- "dirs",
- "pretty_assertions",
- "tempfile",
-]
-
-[[package]]
-name = "nez-utils-image"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-utils-cache",
- "divan",
- "image",
- "mime_guess",
- "png",
- "thiserror 2.0.18",
- "tokio",
-]
-
-[[package]]
-name = "nez-utils-json-to-toml"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "serde_json",
- "toml 0.9.11+spec-1.1.0",
-]
-
-[[package]]
-name = "nez-utils-oss"
-version = "0.0.0"
-dependencies = [
- "nez-core",
- "nez-lmstudio",
- "nez-model-provider-info",
- "nez-ollama",
-]
-
-[[package]]
-name = "nez-utils-output-truncation"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "nez-utils-string",
- "pretty_assertions",
- "serde_json",
-]
-
-[[package]]
-name = "nez-utils-path"
-version = "0.0.0"
-dependencies = [
- "nez-utils-absolute-path",
- "dunce",
- "pretty_assertions",
- "tempfile",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-utils-path-uri"
-version = "0.0.0"
-dependencies = [
- "base64 0.22.1",
- "nez-utils-absolute-path",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "ts-rs",
- "url",
- "urlencoding",
-]
-
-[[package]]
-name = "nez-utils-plugins"
-version = "0.0.0"
-dependencies = [
- "nez-exec-server",
- "nez-exec-server-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "nez-utils-process"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "tokio",
-]
-
-[[package]]
-name = "nez-utils-pty"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-utils-cargo-bin",
- "ctor 0.6.3",
- "filedescriptor",
- "lazy_static",
- "libc",
- "log",
- "portable-pty",
- "pretty_assertions",
- "shared_library",
- "tempfile",
- "tokio",
- "winapi",
-]
-
-[[package]]
-name = "nez-utils-readiness"
-version = "0.0.0"
-dependencies = [
- "assert_matches",
- "thiserror 2.0.18",
- "time",
- "tokio",
-]
-
-[[package]]
-name = "nez-utils-redacted-string"
-version = "0.0.0"
-dependencies = [
- "schemars 0.8.22",
- "serde",
-]
-
-[[package]]
-name = "nez-utils-rustls-provider"
-version = "0.0.0"
-dependencies = [
- "rustls",
-]
-
-[[package]]
-name = "nez-utils-sandbox-summary"
-version = "0.0.0"
-dependencies = [
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-path-uri",
- "pretty_assertions",
-]
-
-[[package]]
-name = "nez-utils-sleep-inhibitor"
-version = "0.0.0"
-dependencies = [
- "core-foundation 0.9.4",
- "libc",
- "tracing",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-utils-stream-parser"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
-]
-
-[[package]]
-name = "nez-utils-string"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "regex-lite",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "nez-utils-template"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
-]
-
-[[package]]
-name = "nez-v8-poc"
-version = "0.0.0"
-dependencies = [
- "pretty_assertions",
- "v8",
-]
-
-[[package]]
-name = "nez-voice-host"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-install-context",
- "nez-process-hardening",
- "nez-realtime-webrtc",
- "nez-utils-cargo-bin",
- "cpal",
- "crossbeam-queue",
- "futures",
- "gstreamer",
- "gstreamer-app",
- "gstreamer-audio",
- "libloading",
- "opus",
- "pretty_assertions",
- "rand 0.9.3",
- "rtc",
- "rubato",
- "sonora",
- "tempfile",
- "tokio",
- "webrtc",
-]
-
-[[package]]
-name = "nez-web-search-extension"
-version = "0.0.0"
-dependencies = [
- "nez-api",
- "nez-core",
- "nez-extension-api",
- "nez-extension-items",
- "nez-http-client",
- "nez-login",
- "nez-model-provider",
- "nez-model-provider-info",
- "nez-otel",
- "nez-protocol",
- "nez-tools",
- "http 1.4.0",
- "pretty_assertions",
- "schemars 0.8.22",
- "serde_json",
- "url",
-]
-
-[[package]]
-name = "nez-websocket-auth"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "clap",
- "nez-utils-absolute-path",
- "constant_time_eq",
- "hmac 0.12.1",
- "http 1.4.0",
- "jsonwebtoken",
- "pretty_assertions",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "time",
-]
-
-[[package]]
-name = "nez-websocket-client"
-version = "0.0.0"
-dependencies = [
- "nez-http-client",
- "nez-utils-rustls-provider",
- "futures",
- "pretty_assertions",
- "rcgen",
- "rustls",
- "tokio",
- "tokio-rustls",
- "tokio-tungstenite",
- "url",
-]
-
-[[package]]
-name = "nez-windows-sandbox"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "chrono",
- "nez-http-client",
- "nez-otel",
- "nez-protocol",
- "nez-utils-absolute-path",
- "nez-utils-cargo-bin",
- "nez-utils-process",
- "nez-utils-pty",
- "nez-utils-string",
- "nez-windows-sandbox-test-support",
- "dirs-next",
- "dunce",
- "glob",
- "pretty_assertions",
- "rand 0.8.6",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing-appender",
- "windows 0.58.0",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-windows-sandbox-service"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-cloud-config",
- "nez-config",
- "nez-core",
- "nez-windows-sandbox",
- "pretty_assertions",
- "serde_json",
- "tokio",
- "toml 0.9.11+spec-1.1.0",
- "windows 0.58.0",
- "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "nez-windows-sandbox-test-support"
-version = "0.0.0"
-dependencies = [
- "dirs",
-]
-
-[[package]]
-name = "nez-workload-identity"
-version = "0.0.0"
-dependencies = [
- "nez-http-client",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "url",
- "wiremock",
-]
-
-[[package]]
-name = "nez-worktree"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "nez-git-utils",
- "nez-protocol",
- "nez-utils-cargo-bin",
- "dunce",
- "pretty_assertions",
- "serde",
- "serde_json",
- "tempfile",
- "uuid",
-]
-
-[[package]]
 name = "color-eyre"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5636,6 +2125,8 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "base64 0.22.1",
+ "ctor 0.6.3",
+ "futures",
  "nez-analytics",
  "nez-arg0",
  "nez-attachment-store",
@@ -5656,8 +2147,6 @@ dependencies = [
  "nez-utils-absolute-path",
  "nez-utils-cargo-bin",
  "nez-utils-path-uri",
- "ctor 0.6.3",
- "futures",
  "notify",
  "opentelemetry",
  "opentelemetry_sdk",
@@ -10472,6 +6961,3375 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee6cda3051665f1fb8d9e08fc35c96d5a244fb1be711a03b71118828afc9a873"
 dependencies = [
  "jni-sys 0.3.1",
+]
+
+[[package]]
+name = "nez-agent-extension"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "core_test_support",
+ "nez-core",
+ "nez-protocol",
+ "pretty_assertions",
+ "tokio",
+]
+
+[[package]]
+name = "nez-agent-graph-store"
+version = "0.0.0"
+dependencies = [
+ "nez-protocol",
+ "nez-state",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
+name = "nez-agent-identity"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "crypto_box",
+ "ed25519-dalek",
+ "http 1.4.0",
+ "jsonwebtoken",
+ "nez-http-client",
+ "nez-protocol",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
+name = "nez-agent-message-board-client"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "eventsource-stream",
+ "futures",
+ "http 1.4.0",
+ "nez-agent-message-board-extension",
+ "nez-extension-api",
+ "nez-http-client",
+ "nez-protocol",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-agent-message-board-extension"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "caseless",
+ "chrono",
+ "futures",
+ "nez-extension-api",
+ "nez-protocol",
+ "nez-state",
+ "nez-tools",
+ "nez-utils-output-truncation",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "nez-agent-roles"
+version = "0.0.0"
+dependencies = [
+ "nez-config",
+ "nez-file-system",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "serde",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+]
+
+[[package]]
+name = "nez-analytics"
+version = "0.0.0"
+dependencies = [
+ "nez-app-server-protocol",
+ "nez-git-utils",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-state",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "os_info",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha1 0.10.6",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-ansi-escape"
+version = "0.0.0"
+dependencies = [
+ "ansi-to-tui",
+ "pretty_assertions",
+ "ratatui",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "nez-api"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "assert_matches",
+ "async-channel",
+ "base64 0.22.1",
+ "bytes",
+ "chrono",
+ "eventsource-stream",
+ "futures",
+ "http 1.4.0",
+ "nez-client",
+ "nez-http-client",
+ "nez-protocol",
+ "nez-utils-rustls-provider",
+ "nez-websocket-client",
+ "pretty_assertions",
+ "rcgen",
+ "regex-lite",
+ "rustls",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-test",
+ "tokio-tungstenite",
+ "tokio-util",
+ "tracing",
+ "tungstenite",
+ "url",
+ "uuid",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-app-server"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "app_test_support",
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "clap",
+ "core_test_support",
+ "flate2",
+ "futures",
+ "hmac 0.12.1",
+ "http 1.4.0",
+ "keyring",
+ "libc",
+ "nez-agent-extension",
+ "nez-analytics",
+ "nez-app-server-protocol",
+ "nez-app-server-transport",
+ "nez-arg0",
+ "nez-aws-auth",
+ "nez-backend-client",
+ "nez-chatgpt",
+ "nez-cloud-config",
+ "nez-code-mode",
+ "nez-config",
+ "nez-connectors",
+ "nez-core",
+ "nez-core-plugins",
+ "nez-diagnostics",
+ "nez-exec-server",
+ "nez-extension-api",
+ "nez-external-agent-migration",
+ "nez-features",
+ "nez-feedback",
+ "nez-file-search",
+ "nez-file-watcher",
+ "nez-git-attribution",
+ "nez-git-utils",
+ "nez-goal-extension",
+ "nez-guardian-v2",
+ "nez-history-notes-extension",
+ "nez-home",
+ "nez-hooks",
+ "nez-http-client",
+ "nez-image-generation-extension",
+ "nez-login",
+ "nez-mcp",
+ "nez-mcp-extension",
+ "nez-memories-extension",
+ "nez-memories-write",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-models-manager",
+ "nez-network-proxy",
+ "nez-otel",
+ "nez-plugin",
+ "nez-prompts",
+ "nez-protocol",
+ "nez-queue-extension",
+ "nez-rmcp-client",
+ "nez-rollout",
+ "nez-sandboxing",
+ "nez-shell-command",
+ "nez-skills",
+ "nez-skills-extension",
+ "nez-state",
+ "nez-thread-store",
+ "nez-tools",
+ "nez-uds",
+ "nez-user-verification",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-cli",
+ "nez-utils-json-to-toml",
+ "nez-utils-path-uri",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "nez-web-search-extension",
+ "nez-websocket-auth",
+ "nez-windows-sandbox",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "rcgen",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha2 0.10.9",
+ "shlex",
+ "sqlx",
+ "tar",
+ "tempfile",
+ "test-case",
+ "thiserror 2.0.18",
+ "tikv-jemallocator",
+ "time",
+ "tokio",
+ "tokio-rustls",
+ "tokio-tungstenite",
+ "tokio-util",
+ "toml 0.9.11+spec-1.1.0",
+ "toml_edit 0.24.0+spec-1.1.0",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-app-server-client"
+version = "0.0.0"
+dependencies = [
+ "futures",
+ "nez-app-server",
+ "nez-app-server-protocol",
+ "nez-arg0",
+ "nez-config",
+ "nez-core",
+ "nez-exec-server",
+ "nez-feedback",
+ "nez-protocol",
+ "nez-uds",
+ "nez-utils-absolute-path",
+ "nez-utils-rustls-provider",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "nez-app-server-daemon"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "blake3",
+ "futures",
+ "libc",
+ "nez-app-server-protocol",
+ "nez-app-server-transport",
+ "nez-features",
+ "nez-http-client",
+ "nez-install-context",
+ "nez-uds",
+ "nez-utils-cargo-bin",
+ "nez-utils-home-dir",
+ "pretty_assertions",
+ "semver",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite",
+ "tracing",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-app-server-protocol"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "inventory",
+ "nez-app-server-protocol-noop-macros",
+ "nez-experimental-api-macros",
+ "nez-extension-items",
+ "nez-history",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-secrets",
+ "nez-shell-command",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-path-uri",
+ "nez-utils-redacted-string",
+ "pretty_assertions",
+ "rmcp",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "similar",
+ "strum_macros 0.28.0",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tracing",
+ "ts-rs",
+ "uuid",
+ "zstd",
+]
+
+[[package]]
+name = "nez-app-server-protocol-noop-macros"
+version = "0.0.0"
+
+[[package]]
+name = "nez-app-server-transport"
+version = "0.0.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "futures",
+ "gethostname",
+ "httpdate",
+ "libc",
+ "nez-api",
+ "nez-app-server-protocol",
+ "nez-config",
+ "nez-core",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-protocol",
+ "nez-state",
+ "nez-uds",
+ "nez-utils-absolute-path",
+ "nez-utils-rustls-provider",
+ "nez-websocket-auth",
+ "nez-websocket-client",
+ "owo-colors",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "signal-hook",
+ "tempfile",
+ "time",
+ "tokio",
+ "tokio-tungstenite",
+ "tokio-util",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "nez-apply-patch"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "assert_matches",
+ "nez-exec-server",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "similar",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tree-sitter",
+ "tree-sitter-bash",
+]
+
+[[package]]
+name = "nez-arg0"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "dotenvy",
+ "nez-apply-patch",
+ "nez-async-utils",
+ "nez-exec-server",
+ "nez-install-context",
+ "nez-linux-sandbox",
+ "nez-sandboxing",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-home-dir",
+ "nez-utils-pty",
+ "nez-windows-sandbox",
+ "pathdiff",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "nez-async-utils"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "rand 0.9.3",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "nez-attachment-store"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "serde",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-aws-auth"
+version = "0.0.0"
+dependencies = [
+ "aws-config",
+ "aws-credential-types",
+ "aws-sigv4",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "aws-types",
+ "bytes",
+ "http 1.4.0",
+ "http-body 1.0.1",
+ "http-body-util",
+ "nez-http-client",
+ "nez-utils-rustls-provider",
+ "pretty_assertions",
+ "rcgen",
+ "rustls",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-rustls",
+ "url",
+]
+
+[[package]]
+name = "nez-backend-client"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "http 1.4.0",
+ "nez-api",
+ "nez-backend-openapi-models",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-protocol",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tokio",
+ "url",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-backend-openapi-models"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "serde_with",
+]
+
+[[package]]
+name = "nez-build-info"
+version = "0.0.0"
+dependencies = [
+ "nez-install-context",
+ "pretty_assertions",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+]
+
+[[package]]
+name = "nez-bwrap"
+version = "0.0.0"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
+name = "nez-chatgpt"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "nez-connectors",
+ "nez-core",
+ "nez-git-utils",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-plugin",
+ "nez-utils-cargo-bin",
+ "nez-utils-cli",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "nez-cli"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "app_test_support",
+ "assert_cmd",
+ "assert_matches",
+ "chrono",
+ "clap",
+ "clap_complete",
+ "crossterm",
+ "flate2",
+ "futures",
+ "http 1.4.0",
+ "insta",
+ "jsonwebtoken",
+ "libc",
+ "nez-api",
+ "nez-app-server",
+ "nez-app-server-client",
+ "nez-app-server-daemon",
+ "nez-app-server-protocol",
+ "nez-arg0",
+ "nez-aws-auth",
+ "nez-build-info",
+ "nez-chatgpt",
+ "nez-cloud-config",
+ "nez-config",
+ "nez-core",
+ "nez-core-plugins",
+ "nez-exec",
+ "nez-exec-server",
+ "nez-execpolicy",
+ "nez-extension-api",
+ "nez-features",
+ "nez-git-attribution",
+ "nez-git-utils",
+ "nez-history",
+ "nez-home",
+ "nez-http-client",
+ "nez-install-context",
+ "nez-login",
+ "nez-mcp",
+ "nez-memories-write",
+ "nez-model-provider",
+ "nez-models-manager",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-rmcp-client",
+ "nez-rollout",
+ "nez-rollout-trace",
+ "nez-sandboxing",
+ "nez-skills-extension",
+ "nez-state",
+ "nez-stdio-to-uds",
+ "nez-tcp-tunnel",
+ "nez-terminal-detection",
+ "nez-thread-store",
+ "nez-tui",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-cli",
+ "nez-utils-path",
+ "nez-utils-path-uri",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "nez-utils-redacted-string",
+ "nez-websocket-auth",
+ "nez-windows-sandbox",
+ "os_info",
+ "owo-colors",
+ "predicates",
+ "pretty_assertions",
+ "regex-lite",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "supports-color 3.0.2",
+ "sys-locale",
+ "tar",
+ "tempfile",
+ "tikv-jemallocator",
+ "tokio",
+ "tokio-tungstenite",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "unicode-segmentation",
+ "url",
+ "vt100",
+ "which 8.0.0",
+ "windows-sys 0.61.2",
+ "wiremock",
+ "zstd",
+]
+
+[[package]]
+name = "nez-client"
+version = "0.0.0"
+dependencies = [
+ "eventsource-stream",
+ "futures",
+ "http 1.4.0",
+ "nez-http-client",
+ "rand 0.9.3",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "nez-cloud-config"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "chrono",
+ "hmac 0.12.1",
+ "nez-agent-identity",
+ "nez-async-utils",
+ "nez-backend-client",
+ "nez-config",
+ "nez-core",
+ "nez-http-client",
+ "nez-login",
+ "nez-otel",
+ "nez-protocol",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-code-mode"
+version = "0.0.0"
+dependencies = [
+ "futures",
+ "http-body-util",
+ "nez-code-mode-protocol",
+ "nez-http-client",
+ "nez-install-context",
+ "nez-otel",
+ "nez-protocol",
+ "pretty_assertions",
+ "prost",
+ "rand 0.9.3",
+ "reqwest 0.12.28",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tonic",
+ "tower",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "nez-code-mode-host"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "clap",
+ "futures",
+ "nez-code-mode",
+ "nez-code-mode-protocol",
+ "nez-code-mode-runtime",
+ "nez-http-client",
+ "nez-otel",
+ "nez-otel-trace-websocket",
+ "nez-protocol",
+ "nez-utils-cargo-bin",
+ "pretty_assertions",
+ "prost",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-stream",
+ "tokio-util",
+ "tonic",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "nez-code-mode-protocol"
+version = "0.0.0"
+dependencies = [
+ "glob",
+ "nez-protocol",
+ "pretty_assertions",
+ "prost",
+ "protoc-bin-vendored",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+]
+
+[[package]]
+name = "nez-code-mode-runtime"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "deno_core_icudata",
+ "futures",
+ "nez-code-mode-protocol",
+ "nez-protocol",
+ "opentelemetry",
+ "pretty_assertions",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "v8",
+]
+
+[[package]]
+name = "nez-collaboration-mode-templates"
+version = "0.0.0"
+
+[[package]]
+name = "nez-config"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "core-foundation 0.9.4",
+ "dns-lookup",
+ "dunce",
+ "futures",
+ "gethostname",
+ "indexmap 2.14.0",
+ "libc",
+ "multimap",
+ "nez-execpolicy",
+ "nez-features",
+ "nez-file-system",
+ "nez-git-utils",
+ "nez-model-provider-info",
+ "nez-network-proxy",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path",
+ "nez-utils-path-uri",
+ "nez-utils-redacted-string",
+ "nez-windows-sandbox",
+ "pretty_assertions",
+ "prost",
+ "regex-lite",
+ "schemars 0.8.22",
+ "serde",
+ "serde_ignored",
+ "serde_json",
+ "serde_path_to_error",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "toml 0.9.11+spec-1.1.0",
+ "toml_edit 0.24.0+spec-1.1.0",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
+ "tracing",
+ "wildmatch",
+ "winapi-util",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-config-schema"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "nez-config",
+]
+
+[[package]]
+name = "nez-connectors"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arc-swap",
+ "indexmap 2.14.0",
+ "nez-config",
+ "nez-login",
+ "nez-otel",
+ "nez-plugin",
+ "nez-protocol",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha1 0.10.6",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "urlencoding",
+]
+
+[[package]]
+name = "nez-connectors-extension"
+version = "0.0.0"
+dependencies = [
+ "nez-connectors",
+ "nez-core-plugins",
+ "nez-file-system",
+ "nez-plugin",
+ "nez-utils-path-uri",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tracing",
+]
+
+[[package]]
+name = "nez-context-fragments"
+version = "0.0.0"
+dependencies = [
+ "nez-protocol",
+ "nez-utils-string",
+ "pretty_assertions",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-core"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arc-swap",
+ "assert_cmd",
+ "assert_matches",
+ "async-channel",
+ "base64 0.22.1",
+ "bm25",
+ "chrono",
+ "core_test_support",
+ "ctor 0.6.3",
+ "dirs",
+ "dunce",
+ "eventsource-stream",
+ "futures",
+ "http 1.4.0",
+ "hyper-util",
+ "iana-time-zone",
+ "image",
+ "indexmap 2.14.0",
+ "insta",
+ "libc",
+ "maplit",
+ "nez-agent-graph-store",
+ "nez-agent-message-board-client",
+ "nez-agent-message-board-extension",
+ "nez-agent-roles",
+ "nez-analytics",
+ "nez-api",
+ "nez-app-server-protocol",
+ "nez-apply-patch",
+ "nez-async-utils",
+ "nez-attachment-store",
+ "nez-client",
+ "nez-code-mode",
+ "nez-config",
+ "nez-connectors",
+ "nez-context-fragments",
+ "nez-core-plugins",
+ "nez-diagnostics",
+ "nez-exec-server",
+ "nez-exec-server-test-support",
+ "nez-execpolicy",
+ "nez-extension-api",
+ "nez-extension-items",
+ "nez-features",
+ "nez-feedback",
+ "nez-file-system",
+ "nez-git-utils",
+ "nez-guardian-context",
+ "nez-guardian-reviewer",
+ "nez-history",
+ "nez-home",
+ "nez-hooks",
+ "nez-http-client",
+ "nez-image-generation-extension",
+ "nez-install-context",
+ "nez-login",
+ "nez-mcp",
+ "nez-mcp-extension",
+ "nez-memories-read",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-models-manager",
+ "nez-network-proxy",
+ "nez-otel",
+ "nez-plugin",
+ "nez-prompts",
+ "nez-protocol",
+ "nez-response-debug-context",
+ "nez-rmcp-client",
+ "nez-rollout",
+ "nez-rollout-trace",
+ "nez-sandboxing",
+ "nez-shell-command",
+ "nez-skills",
+ "nez-skills-extension",
+ "nez-state",
+ "nez-terminal-detection",
+ "nez-test-binary-support",
+ "nez-thread-store",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-audio",
+ "nez-utils-cache",
+ "nez-utils-cargo-bin",
+ "nez-utils-git-discovery",
+ "nez-utils-home-dir",
+ "nez-utils-image",
+ "nez-utils-output-truncation",
+ "nez-utils-path",
+ "nez-utils-path-uri",
+ "nez-utils-plugins",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "nez-utils-redacted-string",
+ "nez-utils-stream-parser",
+ "nez-utils-string",
+ "nez-web-search-extension",
+ "nez-windows-sandbox",
+ "nez-windows-sandbox-test-support",
+ "once_cell",
+ "openssl-sys",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "predicates",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "regex-lite",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha1 0.10.6",
+ "shlex",
+ "similar",
+ "tempfile",
+ "test-case",
+ "test-log",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite",
+ "tokio-util",
+ "toml 0.9.11+spec-1.1.0",
+ "toml_edit 0.24.0+spec-1.1.0",
+ "tonic",
+ "tower",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "tracing-test",
+ "url",
+ "uuid",
+ "walkdir",
+ "which 8.0.0",
+ "whoami 1.6.1",
+ "windows-sys 0.61.2",
+ "wiremock",
+ "zstd",
+]
+
+[[package]]
+name = "nez-core-api"
+version = "0.0.0"
+dependencies = [
+ "nez-analytics",
+ "nez-app-server-protocol",
+ "nez-arg0",
+ "nez-config",
+ "nez-core",
+ "nez-exec-server",
+ "nez-extension-api",
+ "nez-features",
+ "nez-history",
+ "nez-home",
+ "nez-image-generation-extension",
+ "nez-login",
+ "nez-model-provider-info",
+ "nez-models-manager",
+ "nez-protocol",
+ "nez-state",
+ "nez-utils-absolute-path",
+]
+
+[[package]]
+name = "nez-core-plugin-common"
+version = "0.0.0"
+dependencies = [
+ "nez-utils-absolute-path",
+ "semver",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "nez-core-plugins"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "dirs",
+ "flate2",
+ "futures",
+ "http 1.4.0",
+ "libc",
+ "nez-analytics",
+ "nez-app-server-protocol",
+ "nez-config",
+ "nez-connectors",
+ "nez-core-plugin-common",
+ "nez-exec-server",
+ "nez-exec-server-test-support",
+ "nez-git-utils",
+ "nez-hooks",
+ "nez-http-client",
+ "nez-login",
+ "nez-mcp",
+ "nez-model-provider",
+ "nez-otel",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-shell-command",
+ "nez-skills",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-path",
+ "nez-utils-path-uri",
+ "nez-utils-plugins",
+ "nez-utils-process",
+ "pretty_assertions",
+ "regex",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "serde_yaml",
+ "sha2 0.10.9",
+ "tar",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-test",
+ "url",
+ "uuid",
+ "wiremock",
+ "zip",
+]
+
+[[package]]
+name = "nez-diagnostics"
+version = "0.0.0"
+dependencies = [
+ "libc",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "nez-exec"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "core_test_support",
+ "insta",
+ "libc",
+ "nez-app-server-client",
+ "nez-app-server-protocol",
+ "nez-apply-patch",
+ "nez-arg0",
+ "nez-cloud-config",
+ "nez-config",
+ "nez-core",
+ "nez-features",
+ "nez-feedback",
+ "nez-git-utils",
+ "nez-history",
+ "nez-login",
+ "nez-model-provider-info",
+ "nez-otel",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-cli",
+ "nez-utils-oss",
+ "nez-utils-path-uri",
+ "nez-utils-sandbox-summary",
+ "nez-worktree",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "owo-colors",
+ "predicates",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "supports-color 3.0.2",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "ts-rs",
+ "uuid",
+ "walkdir",
+ "wiremock",
+ "zstd",
+]
+
+[[package]]
+name = "nez-exec-server"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arc-swap",
+ "axum",
+ "base64 0.22.1",
+ "bytes",
+ "clatter",
+ "ctor 0.6.3",
+ "dirs",
+ "futures",
+ "http 1.4.0",
+ "libc",
+ "nez-api",
+ "nez-build-info",
+ "nez-config",
+ "nez-core-plugin-common",
+ "nez-exec-server-protocol",
+ "nez-exec-server-test-support",
+ "nez-file-system",
+ "nez-file-watcher",
+ "nez-http-client",
+ "nez-linux-sandbox",
+ "nez-mxc-sandbox",
+ "nez-network-proxy",
+ "nez-otel",
+ "nez-protocol",
+ "nez-sandboxing",
+ "nez-shell-command",
+ "nez-skills",
+ "nez-test-binary-support",
+ "nez-uds",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-home-dir",
+ "nez-utils-path-uri",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "nez-utils-redacted-string",
+ "nez-utils-rustls-provider",
+ "nez-websocket-auth",
+ "nez-websocket-client",
+ "nez-windows-sandbox-test-support",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "prost",
+ "rcgen",
+ "rustix 1.1.4",
+ "rustls",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "tempfile",
+ "test-case",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite",
+ "tokio-util",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+ "which 8.0.0",
+ "windows-sys 0.61.2",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-exec-server-protocol"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "nez-file-system",
+ "nez-install-context",
+ "nez-mxc-sandbox",
+ "nez-network-proxy",
+ "nez-protocol",
+ "nez-shell-command",
+ "nez-skills",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-exec-server-test-support"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "nez-exec-server",
+ "nez-http-client",
+ "prost",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-execpolicy"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "multimap",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "shlex",
+ "starlark",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
+name = "nez-experimental-api-macros"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
+]
+
+[[package]]
+name = "nez-extension-api"
+version = "0.0.0"
+dependencies = [
+ "futures",
+ "nez-api",
+ "nez-config",
+ "nez-context-fragments",
+ "nez-exec-server-protocol",
+ "nez-file-system",
+ "nez-guardian-context",
+ "nez-history",
+ "nez-mcp",
+ "nez-protocol",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "nez-extension-items"
+version = "0.0.0"
+dependencies = [
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "ts-rs",
+]
+
+[[package]]
+name = "nez-external-agent-migration"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "linkify",
+ "nez-analytics",
+ "nez-app-server-protocol",
+ "nez-config",
+ "nez-core",
+ "nez-core-plugins",
+ "nez-hooks",
+ "nez-login",
+ "nez-memories-write",
+ "nez-otel",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-thread-store",
+ "nez-utils-output-truncation",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+]
+
+[[package]]
+name = "nez-features"
+version = "0.0.0"
+dependencies = [
+ "nez-network-proxy",
+ "nez-protocol",
+ "nez-utils-redacted-string",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+]
+
+[[package]]
+name = "nez-feedback"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "flate2",
+ "http 1.4.0",
+ "httpdate",
+ "log",
+ "mime_guess",
+ "nez-http-client",
+ "nez-login",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-state",
+ "pretty_assertions",
+ "sentry",
+ "serde_json",
+ "tar",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-file-search"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "crossbeam-channel",
+ "ignore",
+ "nucleo",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "nez-file-system"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "serde",
+]
+
+[[package]]
+name = "nez-file-watcher"
+version = "0.0.0"
+dependencies = [
+ "notify",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-git-attribution"
+version = "0.0.0"
+dependencies = [
+ "nez-backend-client",
+ "nez-extension-api",
+ "nez-http-client",
+ "nez-login",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-git-utils"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "futures",
+ "gix",
+ "nez-file-system",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-path-uri",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "once_cell",
+ "pretty_assertions",
+ "regex",
+ "schemars 0.8.22",
+ "serde",
+ "similar",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "ts-rs",
+ "walkdir",
+]
+
+[[package]]
+name = "nez-goal-extension"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "nez-analytics",
+ "nez-core",
+ "nez-extension-api",
+ "nez-otel",
+ "nez-prompts",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-state",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-template",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-guardian-context"
+version = "0.0.0"
+dependencies = [
+ "nez-context-fragments",
+ "nez-history",
+ "nez-protocol",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-guardian-reviewer"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "nez-analytics",
+ "nez-extension-api",
+ "nez-feedback",
+ "nez-guardian-context",
+ "nez-mcp",
+ "nez-otel",
+ "nez-prompts",
+ "nez-protocol",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "serde",
+ "serde_json",
+ "test-case",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "nez-guardian-v2"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "core_test_support",
+ "dirs",
+ "http 1.4.0",
+ "insta",
+ "nez-analytics",
+ "nez-api",
+ "nez-config",
+ "nez-context-fragments",
+ "nez-core",
+ "nez-extension-api",
+ "nez-features",
+ "nez-guardian-context",
+ "nez-guardian-reviewer",
+ "nez-history",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-prompts",
+ "nez-protocol",
+ "nez-utils-cargo-bin",
+ "nez-websocket-client",
+ "pretty_assertions",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "uuid",
+ "wiremock",
+ "zstd",
+]
+
+[[package]]
+name = "nez-history"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "nez-protocol",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-history-notes-extension"
+version = "0.0.0"
+dependencies = [
+ "core_test_support",
+ "http 1.4.0",
+ "nez-analytics",
+ "nez-client",
+ "nez-config",
+ "nez-core",
+ "nez-extension-api",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-protocol",
+ "nez-tools",
+ "nez-utils-output-truncation",
+ "pretty_assertions",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-home"
+version = "0.0.0"
+dependencies = [
+ "nez-extension-api",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-hooks"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "async-channel",
+ "chrono",
+ "futures",
+ "libc",
+ "nez-config",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-output-truncation",
+ "nez-utils-path-uri",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "pretty_assertions",
+ "regex",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "nez-http-client"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "http 1.4.0",
+ "http-body 1.0.1",
+ "httpdate",
+ "native-tls",
+ "nez-utils-cargo-bin",
+ "nez-utils-rustls-provider",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "rcgen",
+ "reqwest 0.12.28",
+ "rustls",
+ "rustls-native-certs",
+ "rustls-pki-types",
+ "rustls-platform-verifier",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "sha2 0.10.9",
+ "system-configuration",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+ "windows-sys 0.61.2",
+ "zstd",
+]
+
+[[package]]
+name = "nez-image-generation-extension"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "http 1.4.0",
+ "nez-api",
+ "nez-core",
+ "nez-exec-server",
+ "nez-extension-api",
+ "nez-extension-items",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-protocol",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-image",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-install-context"
+version = "0.0.0"
+dependencies = [
+ "nez-utils-absolute-path",
+ "nez-utils-home-dir",
+ "pretty_assertions",
+ "semver",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
+name = "nez-keyring-store"
+version = "0.0.0"
+dependencies = [
+ "keyring",
+ "pretty_assertions",
+ "secret-service",
+ "security-framework 3.5.1",
+ "tracing",
+]
+
+[[package]]
+name = "nez-linux-sandbox"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "globset",
+ "landlock",
+ "libc",
+ "nez-core",
+ "nez-install-context",
+ "nez-network-proxy",
+ "nez-process-hardening",
+ "nez-protocol",
+ "nez-sandboxing",
+ "nez-uds",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "pretty_assertions",
+ "rustix 1.1.4",
+ "seccompiler",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "test-case",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "nez-lmstudio"
+version = "0.0.0"
+dependencies = [
+ "nez-core",
+ "nez-http-client",
+ "nez-model-provider-info",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "which 8.0.0",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-login"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "core_test_support",
+ "http 1.4.0",
+ "jsonwebtoken",
+ "keyring",
+ "nez-agent-identity",
+ "nez-config",
+ "nez-http-client",
+ "nez-keyring-store",
+ "nez-model-provider-info",
+ "nez-otel",
+ "nez-protocol",
+ "nez-secrets",
+ "nez-terminal-detection",
+ "nez-utils-cargo-bin",
+ "nez-utils-process",
+ "nez-utils-template",
+ "nez-workload-identity",
+ "once_cell",
+ "opentelemetry_sdk",
+ "os_info",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "regex-lite",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tiny_http",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "urlencoding",
+ "webbrowser",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-mcp"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arc-swap",
+ "assert_matches",
+ "async-channel",
+ "futures",
+ "insta",
+ "lru",
+ "nez-api",
+ "nez-async-utils",
+ "nez-config",
+ "nez-connectors",
+ "nez-diagnostics",
+ "nez-exec-server",
+ "nez-exec-server-test-support",
+ "nez-login",
+ "nez-model-provider",
+ "nez-otel",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-rmcp-client",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-path-uri",
+ "nez-utils-plugins",
+ "nez-utils-process",
+ "pretty_assertions",
+ "regex-lite",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "sha1 0.10.6",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "nez-mcp-extension"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "core_test_support",
+ "futures",
+ "nez-config",
+ "nez-connectors",
+ "nez-connectors-extension",
+ "nez-core",
+ "nez-core-plugins",
+ "nez-exec-server",
+ "nez-exec-server-test-support",
+ "nez-extension-api",
+ "nez-features",
+ "nez-login",
+ "nez-mcp",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-memories-extension"
+version = "0.0.0"
+dependencies = [
+ "nez-core",
+ "nez-extension-api",
+ "nez-features",
+ "nez-otel",
+ "nez-protocol",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-output-truncation",
+ "nez-utils-template",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
+name = "nez-memories-read"
+version = "0.0.0"
+dependencies = [
+ "nez-protocol",
+ "nez-shell-command",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "nez-memories-write"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "core_test_support",
+ "futures",
+ "nez-backend-client",
+ "nez-config",
+ "nez-core",
+ "nez-features",
+ "nez-git-utils",
+ "nez-login",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-models-manager",
+ "nez-otel",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-rollout-trace",
+ "nez-secrets",
+ "nez-state",
+ "nez-terminal-detection",
+ "nez-utils-absolute-path",
+ "nez-utils-output-truncation",
+ "nez-utils-template",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "uuid",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-mermaid"
+version = "0.0.0"
+dependencies = [
+ "insta",
+ "pretty_assertions",
+ "unicode-width 0.2.1",
+]
+
+[[package]]
+name = "nez-message-history"
+version = "0.0.0"
+dependencies = [
+ "memchr",
+ "nez-config",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-model-provider"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "chrono",
+ "http 1.4.0",
+ "nez-agent-identity",
+ "nez-api",
+ "nez-aws-auth",
+ "nez-feedback",
+ "nez-http-client",
+ "nez-keyring-store",
+ "nez-login",
+ "nez-model-provider-info",
+ "nez-models-manager",
+ "nez-otel",
+ "nez-protocol",
+ "nez-response-debug-context",
+ "nez-secrets",
+ "nez-utils-cargo-bin",
+ "nez-utils-process",
+ "nez-utils-redacted-string",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-model-provider-info"
+version = "0.0.0"
+dependencies = [
+ "http 1.4.0",
+ "maplit",
+ "nez-client",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-redacted-string",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "tempfile",
+ "toml 0.9.11+spec-1.1.0",
+ "url",
+]
+
+[[package]]
+name = "nez-models-manager"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "nez-http-client",
+ "nez-login",
+ "nez-otel",
+ "nez-prompts",
+ "nez-protocol",
+ "nez-utils-output-truncation",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-mxc-sandbox"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "appcontainer_common",
+ "learning_mode_windows",
+ "nez-network-proxy",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "nez-windows-sandbox",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tracelogging",
+ "windows-sys 0.61.2",
+ "wxc_common",
+]
+
+[[package]]
+name = "nez-network-proxy"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "clap",
+ "globset",
+ "libc",
+ "nez-utils-absolute-path",
+ "nez-utils-home-dir",
+ "nez-utils-path-uri",
+ "nez-utils-rustls-provider",
+ "nez-windows-sandbox",
+ "opentelemetry",
+ "pretty_assertions",
+ "rama-core",
+ "rama-dns",
+ "rama-http",
+ "rama-http-backend",
+ "rama-net",
+ "rama-socks5",
+ "rama-tcp",
+ "rama-tls-rustls",
+ "rama-unix",
+ "rand 0.9.3",
+ "rand_regex",
+ "regex",
+ "regex-automata",
+ "regex-syntax",
+ "rustls-native-certs",
+ "schannel",
+ "schemars 0.8.22",
+ "security-framework 3.5.1",
+ "serde",
+ "serde_ignored",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 2.0.18",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-ollama"
+version = "0.0.0"
+dependencies = [
+ "assert_matches",
+ "async-stream",
+ "bytes",
+ "futures",
+ "memchr",
+ "nez-core",
+ "nez-http-client",
+ "nez-model-provider-info",
+ "pretty_assertions",
+ "semver",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-otel"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "chrono",
+ "eventsource-stream",
+ "gethostname",
+ "http 1.4.0",
+ "libc",
+ "nez-api",
+ "nez-http-client",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-stream-parser",
+ "nez-utils-string",
+ "opentelemetry",
+ "opentelemetry-appender-tracing",
+ "opentelemetry-http",
+ "opentelemetry-otlp",
+ "opentelemetry-semantic-conventions",
+ "opentelemetry_sdk",
+ "os_info",
+ "pretty_assertions",
+ "reqwest 0.12.28",
+ "seccompiler",
+ "serde",
+ "serde_json",
+ "strum_macros 0.28.0",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "nez-otel-trace-websocket"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "futures",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-plugin"
+version = "0.0.0"
+dependencies = [
+ "nez-config",
+ "nez-core-plugin-common",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "nez-utils-plugins",
+ "pretty_assertions",
+ "serde_json",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "nez-process-hardening"
+version = "0.0.0"
+dependencies = [
+ "libc",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "nez-prompts"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "nez-collaboration-mode-templates",
+ "nez-context-fragments",
+ "nez-execpolicy",
+ "nez-git-utils",
+ "nez-guardian-context",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-template",
+ "pretty_assertions",
+ "tracing",
+]
+
+[[package]]
+name = "nez-protocol"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chardetng",
+ "chrono",
+ "derive_more 2.1.1",
+ "encoding_rs",
+ "gix-url",
+ "globset",
+ "http 1.4.0",
+ "icu_decimal",
+ "icu_locale_core",
+ "icu_provider",
+ "landlock",
+ "nez-async-utils",
+ "nez-execpolicy",
+ "nez-extension-items",
+ "nez-http-client",
+ "nez-network-proxy",
+ "nez-utils-absolute-path",
+ "nez-utils-image",
+ "nez-utils-path-uri",
+ "nez-utils-redacted-string",
+ "nez-utils-string",
+ "pretty_assertions",
+ "quick-xml 0.41.0",
+ "schemars 0.8.22",
+ "seccompiler",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "strum 0.27.2",
+ "strum_macros 0.28.0",
+ "sys-locale",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "ts-rs",
+ "uuid",
+ "wildmatch",
+]
+
+[[package]]
+name = "nez-queue-extension"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "core_test_support",
+ "nez-core",
+ "nez-extension-api",
+ "nez-protocol",
+ "nez-state",
+ "nez-thread-store",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "nez-realtime-webrtc"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ctor 0.6.3",
+ "futures",
+ "libc",
+ "nez-build-info",
+ "nez-install-context",
+ "nez-utils-cargo-bin",
+ "nez-utils-pty",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-response-debug-context"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "http 1.4.0",
+ "nez-api",
+ "pretty_assertions",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-rmcp-client"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "base64 0.22.1",
+ "bytes",
+ "futures",
+ "http 1.4.0",
+ "keyring",
+ "libc",
+ "memchr",
+ "nez-api",
+ "nez-config",
+ "nez-exec-server",
+ "nez-http-client",
+ "nez-keyring-store",
+ "nez-network-proxy",
+ "nez-otel",
+ "nez-protocol",
+ "nez-secrets",
+ "nez-utils-cargo-bin",
+ "nez-utils-home-dir",
+ "nez-utils-path-uri",
+ "nez-utils-pty",
+ "oauth2",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha2 0.10.9",
+ "sse-stream",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tiny_http",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-test",
+ "url",
+ "urlencoding",
+ "webbrowser",
+ "which 8.0.0",
+ "windows-sys 0.61.2",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-rollout"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "memchr",
+ "nez-extension-items",
+ "nez-file-search",
+ "nez-git-utils",
+ "nez-history",
+ "nez-otel",
+ "nez-protocol",
+ "nez-state",
+ "nez-utils-absolute-path",
+ "nez-utils-output-truncation",
+ "nez-utils-path",
+ "nez-utils-process",
+ "nez-utils-string",
+ "pretty_assertions",
+ "regex",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "time",
+ "tokio",
+ "tracing",
+ "uuid",
+ "zstd",
+]
+
+[[package]]
+name = "nez-rollout-trace"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "http 1.4.0",
+ "nez-code-mode",
+ "nez-protocol",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "nez-sandboxing"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "dunce",
+ "libc",
+ "nez-mxc-sandbox",
+ "nez-network-proxy",
+ "nez-otel",
+ "nez-protocol",
+ "nez-uds",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-home-dir",
+ "nez-utils-path-uri",
+ "nez-utils-pty",
+ "nez-windows-sandbox",
+ "pretty_assertions",
+ "regex-lite",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+ "which 8.0.0",
+]
+
+[[package]]
+name = "nez-secrets"
+version = "0.0.0"
+dependencies = [
+ "age",
+ "anyhow",
+ "base64 0.22.1",
+ "keyring",
+ "nez-git-utils",
+ "nez-keyring-store",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "regex",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tracing",
+]
+
+[[package]]
+name = "nez-shell-command"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "libc",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "once_cell",
+ "pretty_assertions",
+ "regex",
+ "serde",
+ "serde_json",
+ "shlex",
+ "tempfile",
+ "tree-sitter",
+ "tree-sitter-bash",
+ "tree-sitter-powershell",
+ "url",
+ "which 8.0.0",
+]
+
+[[package]]
+name = "nez-skills"
+version = "0.0.0"
+dependencies = [
+ "include_dir",
+ "nez-protocol",
+ "nez-shell-command",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "serde",
+ "serde_yaml",
+ "shlex",
+ "thiserror 2.0.18",
+ "tracing",
+]
+
+[[package]]
+name = "nez-skills-extension"
+version = "0.0.0"
+dependencies = [
+ "assert_matches",
+ "blake3",
+ "dirs",
+ "dunce",
+ "futures",
+ "insta",
+ "nez-analytics",
+ "nez-config",
+ "nez-exec-server",
+ "nez-extension-api",
+ "nez-mcp",
+ "nez-models-manager",
+ "nez-otel",
+ "nez-protocol",
+ "nez-skills",
+ "nez-tools",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-path-uri",
+ "nez-utils-plugins",
+ "nez-utils-string",
+ "opentelemetry_sdk",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "toml 0.9.11+spec-1.1.0",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "nez-state"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "file-id",
+ "libsqlite3-sys",
+ "log",
+ "nez-git-utils",
+ "nez-history",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "scopeguard",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "sqlx-macros",
+ "sqlx-sqlite",
+ "strum 0.27.2",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "nez-stdio-to-uds"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "nez-uds",
+ "nez-utils-cargo-bin",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "nez-tcp-tunnel"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "clap",
+ "h3",
+ "h3-quinn",
+ "http 1.4.0",
+ "pretty_assertions",
+ "quinn",
+ "rand 0.9.3",
+ "rcgen",
+ "rustls",
+ "rustls-native-certs",
+ "serde_json",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "nez-terminal-detection"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "tracing",
+]
+
+[[package]]
+name = "nez-test-binary-support"
+version = "0.0.0"
+dependencies = [
+ "nez-arg0",
+ "tempfile",
+]
+
+[[package]]
+name = "nez-thread-store"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "futures",
+ "nez-app-server-protocol",
+ "nez-extension-items",
+ "nez-git-utils",
+ "nez-install-context",
+ "nez-otel",
+ "nez-protocol",
+ "nez-rollout",
+ "nez-state",
+ "nez-utils-absolute-path",
+ "nez-utils-path",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+ "pulldown-cmark",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "sqlx-macros",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "uuid",
+ "zstd",
+]
+
+[[package]]
+name = "nez-tools"
+version = "0.0.0"
+dependencies = [
+ "bitflags 2.13.1",
+ "jsonptr",
+ "nez-code-mode",
+ "nez-connectors",
+ "nez-extension-items",
+ "nez-features",
+ "nez-file-system",
+ "nez-protocol",
+ "nez-utils-cargo-bin",
+ "nez-utils-output-truncation",
+ "nez-utils-path-uri",
+ "nez-utils-string",
+ "pretty_assertions",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "urlencoding",
+]
+
+[[package]]
+name = "nez-tui"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "app_test_support",
+ "arboard",
+ "assert_matches",
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "clap",
+ "color-eyre",
+ "core_test_support",
+ "crossterm",
+ "derive_more 2.1.1",
+ "diffy",
+ "dirs",
+ "dunce",
+ "futures",
+ "http 1.4.0",
+ "image",
+ "insta",
+ "itertools 0.14.0",
+ "lazy_static",
+ "libc",
+ "nez-ansi-escape",
+ "nez-app-server-client",
+ "nez-app-server-daemon",
+ "nez-app-server-protocol",
+ "nez-arg0",
+ "nez-backend-client",
+ "nez-build-info",
+ "nez-cloud-config",
+ "nez-config",
+ "nez-connectors",
+ "nez-context-fragments",
+ "nez-core-plugins",
+ "nez-exec-server",
+ "nez-features",
+ "nez-feedback",
+ "nez-file-search",
+ "nez-git-utils",
+ "nez-history",
+ "nez-http-client",
+ "nez-install-context",
+ "nez-login",
+ "nez-mcp",
+ "nez-mermaid",
+ "nez-message-history",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-models-manager",
+ "nez-otel",
+ "nez-plugin",
+ "nez-protocol",
+ "nez-realtime-webrtc",
+ "nez-rollout",
+ "nez-sandboxing",
+ "nez-shell-command",
+ "nez-state",
+ "nez-terminal-detection",
+ "nez-uds",
+ "nez-utils-absolute-path",
+ "nez-utils-approval-presets",
+ "nez-utils-cargo-bin",
+ "nez-utils-cli",
+ "nez-utils-elapsed",
+ "nez-utils-fuzzy-match",
+ "nez-utils-home-dir",
+ "nez-utils-oss",
+ "nez-utils-path",
+ "nez-utils-path-uri",
+ "nez-utils-plugins",
+ "nez-utils-sandbox-summary",
+ "nez-utils-sleep-inhibitor",
+ "nez-utils-string",
+ "nez-windows-sandbox",
+ "nez-worktree",
+ "objc2-app-kit",
+ "objc2-foundation",
+ "opentelemetry_sdk",
+ "pathdiff",
+ "pretty_assertions",
+ "pulldown-cmark",
+ "rand 0.9.3",
+ "ratatui",
+ "ratatui-macros",
+ "regex-lite",
+ "rmcp",
+ "semver",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha2 0.10.9",
+ "shlex",
+ "strum 0.27.2",
+ "strum_macros 0.28.0",
+ "supports-color 3.0.2",
+ "syntect",
+ "tempfile",
+ "textwrap 0.16.2",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "tokio-tungstenite",
+ "tokio-util",
+ "toml 0.9.11+spec-1.1.0",
+ "toml_edit 0.24.0+spec-1.1.0",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "two-face",
+ "unicode-segmentation",
+ "unicode-width 0.2.1",
+ "url",
+ "urlencoding",
+ "uuid",
+ "vt100",
+ "webbrowser",
+ "which 8.0.0",
+ "windows-sys 0.61.2",
+ "winsplit",
+ "wiremock",
+ "zbus",
+]
+
+[[package]]
+name = "nez-uds"
+version = "0.0.0"
+dependencies = [
+ "async-io",
+ "libc",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "uds_windows",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-user-verification"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "block2",
+ "core-foundation 0.10.1",
+ "dirs",
+ "objc2",
+ "objc2-foundation",
+ "objc2-local-authentication",
+ "p256",
+ "pretty_assertions",
+ "security-framework 3.5.1",
+ "security-framework-sys",
+ "sha2 0.10.9",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tracing",
+]
+
+[[package]]
+name = "nez-utils-absolute-path"
+version = "0.0.0"
+dependencies = [
+ "dirs",
+ "dunce",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "ts-rs",
+]
+
+[[package]]
+name = "nez-utils-approval-presets"
+version = "0.0.0"
+dependencies = [
+ "nez-protocol",
+]
+
+[[package]]
+name = "nez-utils-audio"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "nez-protocol",
+ "nez-utils-cache",
+ "nez-utils-string",
+ "pretty_assertions",
+ "symphonia",
+ "thiserror 2.0.18",
+ "tracing",
+]
+
+[[package]]
+name = "nez-utils-cache"
+version = "0.0.0"
+dependencies = [
+ "lru",
+ "sha1 0.10.6",
+ "tokio",
+]
+
+[[package]]
+name = "nez-utils-cargo-bin"
+version = "0.0.0"
+dependencies = [
+ "assert_cmd",
+ "runfiles",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "nez-utils-cli"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "nez-protocol",
+ "nez-shell-command",
+ "pretty_assertions",
+ "serde",
+ "toml 0.9.11+spec-1.1.0",
+]
+
+[[package]]
+name = "nez-utils-elapsed"
+version = "0.0.0"
+
+[[package]]
+name = "nez-utils-fuzzy-match"
+version = "0.0.0"
+
+[[package]]
+name = "nez-utils-git-discovery"
+version = "0.0.0"
+dependencies = [
+ "futures",
+ "nez-git-utils",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "tempfile",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "nez-utils-home-dir"
+version = "0.0.0"
+dependencies = [
+ "dirs",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "tempfile",
+]
+
+[[package]]
+name = "nez-utils-image"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "divan",
+ "image",
+ "mime_guess",
+ "nez-utils-cache",
+ "png",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
+name = "nez-utils-json-to-toml"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "serde_json",
+ "toml 0.9.11+spec-1.1.0",
+]
+
+[[package]]
+name = "nez-utils-oss"
+version = "0.0.0"
+dependencies = [
+ "nez-core",
+ "nez-lmstudio",
+ "nez-model-provider-info",
+ "nez-ollama",
+]
+
+[[package]]
+name = "nez-utils-output-truncation"
+version = "0.0.0"
+dependencies = [
+ "nez-protocol",
+ "nez-utils-string",
+ "pretty_assertions",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-utils-path"
+version = "0.0.0"
+dependencies = [
+ "dunce",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "tempfile",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-utils-path-uri"
+version = "0.0.0"
+dependencies = [
+ "base64 0.22.1",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "ts-rs",
+ "url",
+ "urlencoding",
+]
+
+[[package]]
+name = "nez-utils-plugins"
+version = "0.0.0"
+dependencies = [
+ "nez-exec-server",
+ "nez-exec-server-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
+name = "nez-utils-process"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "tokio",
+]
+
+[[package]]
+name = "nez-utils-pty"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ctor 0.6.3",
+ "filedescriptor",
+ "lazy_static",
+ "libc",
+ "log",
+ "nez-utils-cargo-bin",
+ "portable-pty",
+ "pretty_assertions",
+ "shared_library",
+ "tempfile",
+ "tokio",
+ "winapi",
+]
+
+[[package]]
+name = "nez-utils-readiness"
+version = "0.0.0"
+dependencies = [
+ "assert_matches",
+ "thiserror 2.0.18",
+ "time",
+ "tokio",
+]
+
+[[package]]
+name = "nez-utils-redacted-string"
+version = "0.0.0"
+dependencies = [
+ "schemars 0.8.22",
+ "serde",
+]
+
+[[package]]
+name = "nez-utils-rustls-provider"
+version = "0.0.0"
+dependencies = [
+ "rustls",
+]
+
+[[package]]
+name = "nez-utils-sandbox-summary"
+version = "0.0.0"
+dependencies = [
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-path-uri",
+ "pretty_assertions",
+]
+
+[[package]]
+name = "nez-utils-sleep-inhibitor"
+version = "0.0.0"
+dependencies = [
+ "core-foundation 0.9.4",
+ "libc",
+ "tracing",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-utils-stream-parser"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+]
+
+[[package]]
+name = "nez-utils-string"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "regex-lite",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "nez-utils-template"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+]
+
+[[package]]
+name = "nez-voice-host"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "cpal",
+ "crossbeam-queue",
+ "futures",
+ "gstreamer",
+ "gstreamer-app",
+ "gstreamer-audio",
+ "libloading",
+ "nez-install-context",
+ "nez-process-hardening",
+ "nez-realtime-webrtc",
+ "nez-utils-cargo-bin",
+ "opus",
+ "pretty_assertions",
+ "rand 0.9.3",
+ "rtc",
+ "rubato",
+ "sonora",
+ "tempfile",
+ "tokio",
+ "webrtc",
+]
+
+[[package]]
+name = "nez-web-search-extension"
+version = "0.0.0"
+dependencies = [
+ "http 1.4.0",
+ "nez-api",
+ "nez-core",
+ "nez-extension-api",
+ "nez-extension-items",
+ "nez-http-client",
+ "nez-login",
+ "nez-model-provider",
+ "nez-model-provider-info",
+ "nez-otel",
+ "nez-protocol",
+ "nez-tools",
+ "pretty_assertions",
+ "schemars 0.8.22",
+ "serde_json",
+ "url",
+]
+
+[[package]]
+name = "nez-websocket-auth"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "clap",
+ "constant_time_eq",
+ "hmac 0.12.1",
+ "http 1.4.0",
+ "jsonwebtoken",
+ "nez-utils-absolute-path",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "time",
+]
+
+[[package]]
+name = "nez-websocket-client"
+version = "0.0.0"
+dependencies = [
+ "futures",
+ "nez-http-client",
+ "nez-utils-rustls-provider",
+ "pretty_assertions",
+ "rcgen",
+ "rustls",
+ "tokio",
+ "tokio-rustls",
+ "tokio-tungstenite",
+ "url",
+]
+
+[[package]]
+name = "nez-windows-sandbox"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "chrono",
+ "dirs-next",
+ "dunce",
+ "glob",
+ "nez-http-client",
+ "nez-otel",
+ "nez-protocol",
+ "nez-utils-absolute-path",
+ "nez-utils-cargo-bin",
+ "nez-utils-process",
+ "nez-utils-pty",
+ "nez-utils-string",
+ "nez-windows-sandbox-test-support",
+ "pretty_assertions",
+ "rand 0.8.6",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing-appender",
+ "windows 0.58.0",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-windows-sandbox-service"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "nez-cloud-config",
+ "nez-config",
+ "nez-core",
+ "nez-windows-sandbox",
+ "pretty_assertions",
+ "serde_json",
+ "tokio",
+ "toml 0.9.11+spec-1.1.0",
+ "windows 0.58.0",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nez-windows-sandbox-test-support"
+version = "0.0.0"
+dependencies = [
+ "dirs",
+]
+
+[[package]]
+name = "nez-workload-identity"
+version = "0.0.0"
+dependencies = [
+ "nez-http-client",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "url",
+ "wiremock",
+]
+
+[[package]]
+name = "nez-worktree"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "dunce",
+ "nez-git-utils",
+ "nez-protocol",
+ "nez-utils-cargo-bin",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "uuid",
 ]
 
 [[package]]

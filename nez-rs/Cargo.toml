@@ -7,7 +7,6 @@ members = [
     "agent-identity",
     "agent-roles",
     "backend-client",
-    "cloud-client",
     "bwrap",
     "build-info",
     "ansi-escape",
@@ -19,7 +18,6 @@ members = [
     "app-server-client",
     "app-server-protocol",
     "app-server-protocol-noop-macros",
-    "app-server-test-client",
     "apply-patch",
     "arg0",
     "feedback",
@@ -32,9 +30,6 @@ members = [
     "code-mode-runtime",
     "nez-home",
     "cloud-config",
-    "cloud-tasks",
-    "cloud-tasks-client",
-    "cloud-tasks-mock-client",
     "cli",
     "collaboration-mode-templates",
     "connectors",
@@ -99,7 +94,6 @@ members = [
     "rollout",
     "rollout-trace",
     "rmcp-client",
-    "responses-api-proxy",
     "response-debug-context",
     "sandboxing",
     "stdio-to-uds",
@@ -109,7 +103,6 @@ members = [
     "tui",
     "user-verification",
     "tools",
-    "v8-poc",
     "websocket-auth",
     "websocket-client",
     "windows-sandbox-rs/tests/support",
@@ -149,7 +142,6 @@ members = [
     "state",
     "terminal-detection",
     "test-binary-support",
-    "thread-manager-sample",
     "thread-store",
     "uds",
     "nez-experimental-api-macros",
@@ -185,7 +177,6 @@ nez-app-server-daemon = { path = "app-server-daemon" }
 nez-app-server-client = { path = "app-server-client" }
 nez-app-server-protocol = { path = "app-server-protocol" }
 nez-app-server-protocol-noop-macros = { path = "app-server-protocol-noop-macros" }
-nez-app-server-test-client = { path = "app-server-test-client" }
 nez-apply-patch = { path = "apply-patch" }
 nez-arg0 = { path = "arg0" }
 nez-async-utils = { path = "async-utils" }
@@ -195,8 +186,6 @@ nez-chatgpt = { path = "chatgpt" }
 nez-client = { path = "nez-client" }
 nez-collaboration-mode-templates = { path = "collaboration-mode-templates" }
 nez-cloud-config = { path = "cloud-config" }
-nez-cloud-tasks-client = { path = "cloud-tasks-client" }
-nez-cloud-tasks-mock-client = { path = "cloud-tasks-mock-client" }
 nez-code-mode = { path = "code-mode" }
 nez-code-mode-protocol = { path = "code-mode-protocol" }
 nez-code-mode-runtime = { path = "code-mode-runtime" }
@@ -266,7 +255,6 @@ nez-process-hardening = { path = "process-hardening" }
 nez-protocol = { path = "protocol" }
 nez-prompts = { path = "prompts" }
 nez-queue-extension = { path = "ext/queue" }
-nez-responses-api-proxy = { path = "responses-api-proxy" }
 nez-response-debug-context = { path = "response-debug-context" }
 nez-rmcp-client = { path = "rmcp-client" }
 nez-rollout = { path = "rollout" }
@@ -313,7 +301,6 @@ nez-utils-stream-parser = { path = "utils/stream-parser" }
 nez-utils-string = { path = "utils/string" }
 nez-utils-template = { path = "utils/template" }
 nez-user-verification = { path = "user-verification" }
-nez-v8-poc = { path = "v8-poc" }
 nez-workload-identity = { path = "workload-identity" }
 nez-windows-sandbox = { path = "windows-sandbox-rs" }
 nez-windows-sandbox-test-support = { path = "windows-sandbox-rs/tests/support" }
@@ -602,7 +589,6 @@ unwrap_used = "deny"
 ignored = [
     "icu_provider",
     "openssl-sys",
-    "nez-v8-poc",
 ]
 
 [profile.dev]

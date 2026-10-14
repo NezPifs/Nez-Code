@@ -241,9 +241,6 @@ deny = [
         "nez-http-client",
         # Intentional exception: gRPC uses reqwest directly as tonic's HTTP/2 transport.
         "nez-code-mode",
-        # Intentional exception: this standalone, privileged Responses API proxy owns its blocking
-        # upstream HTTP transport independently of Nez.
-        "nez-responses-api-proxy",
         # Temporary migration exceptions.
         "nez-otel",
         # Third-party crates that own their reqwest integration. These are not part of the

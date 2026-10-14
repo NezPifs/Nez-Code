@@ -35,14 +35,12 @@ clap_complete = { workspace = true }
 nez-app-server = { workspace = true }
 nez-app-server-daemon = { workspace = true }
 nez-app-server-protocol = { workspace = true }
-nez-app-server-test-client = { workspace = true }
 nez-arg0 = { workspace = true }
 nez-build-info = { workspace = true }
 nez-api = { workspace = true }
 nez-aws-auth = { workspace = true }
 nez-chatgpt = { workspace = true }
 nez-cloud-config = { workspace = true }
-nez-cloud-tasks = { path = "../cloud-tasks" }
 nez-utils-cli = { workspace = true }
 nez-config = { workspace = true }
 nez-core = { workspace = true }
@@ -65,7 +63,6 @@ nez-model-provider = { workspace = true }
 nez-models-manager = { workspace = true }
 nez-plugin = { workspace = true }
 nez-protocol = { workspace = true }
-nez-responses-api-proxy = { workspace = true }
 nez-tcp-tunnel = { workspace = true }
 nez-rmcp-client = { workspace = true }
 nez-rollout = { workspace = true }
