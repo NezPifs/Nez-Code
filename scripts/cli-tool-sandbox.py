@@ -306,6 +306,7 @@ def run_case(nez: Path, case: Case, out: Path, live: Optional[str], timeout: int
         args += ["--", case.prompt]
         try:
             completed = subprocess.run(args, cwd=project, env=env, capture_output=True, text=True,
+                                       stdin=subprocess.DEVNULL,
                                        timeout=timeout, encoding="utf-8", errors="replace")
             code, stdout, stderr = completed.returncode, completed.stdout, completed.stderr
         except subprocess.TimeoutExpired as exc:
@@ -466,6 +467,60 @@ def native_tools_sent(run: Run) -> list[str]:
     return failures
 
 
+def empty_reply_recovered(run: Run) -> list[str]:
+    failures = []
+    if len(run.requests) < 2:
+        return ["the empty reply was not retried"]
+    retry = run.requests[1]
+    if retry.get("tools"):
+        failures.append("the retry still sent native tools")
+    last = retry["messages"][-1]
+    if last.get("role") != "user" or "Your last reply was empty" not in str(last.get("content")):
+        failures.append(f"the retry did not nudge the model: {last!r}")
+    if not any("cat calculator.py" in c.get("command", "") for c in run.commands()):
+        failures.append("the tool call from the retry did not run")
+    return failures
+
+
+def repeated_failure_stopped(run: Run) -> list[str]:
+    failures = []
+    if len(run.requests) != 3:
+        failures.append(f"expected 3 model requests before stopping, got {len(run.requests)}")
+    if "failed 3 times in a row" not in run.final_message():
+        failures.append(f"final message does not explain the stop: {run.final_message()!r}")
+    return failures
+
+
+def internal_state_refused(run: Run) -> list[str]:
+    if len(run.requests) < 2:
+        return ["the refusal never reached the model"]
+    history = json.dumps(run.requests[1]["messages"])
+    failures = []
+    if "Refusing to touch" not in history:
+        failures.append("the command was not refused")
+    if run.commands():
+        failures.append("a command ran against NEZ_HOME")
+    return failures
+
+
+def image_sent(run: Run) -> list[str]:
+    if not run.requests:
+        return ["no model request"]
+    user = [m for m in run.requests[0]["messages"] if m.get("role") == "user"]
+    if not any(m.get("images") for m in user):
+        return ["the attached image did not reach the vision model"]
+    return []
+
+
+def text_only_image_rejected(run: Run) -> list[str]:
+    failures = []
+    if run.requests:
+        failures.append("the request was sent to a text-only model")
+    if "cannot read images" not in run.stdout + run.stderr:
+        failures.append("no clear error for the text-only model")
+    return failures
+
+
 def combine(*checks: Callable[[Run], list[str]]) -> Callable[[Run], list[str]]:
     return lambda run: [f for check in checks for f in check(run)]
 
@@ -486,6 +541,18 @@ def cases() -> list[Case]:
         Case("text-unknown-tool", [envelope("", {"name": "DeleteEverything", "arguments": {}})],
              unknown_tool_reported, model="deepseek-coder-v2:16b", capabilities=["completion"],
              prompt="Clean up."),
+        Case("empty-reply-recovery", [Turn(), envelope("", shell("cat calculator.py"))],
+             empty_reply_recovered, prompt="Show me calculator.py."),
+        Case("repeated-failure-stops",
+             [Turn(calls=[shell(f"{python_cmd()} missing_script.py")]) for _ in range(4)],
+             repeated_failure_stopped, prompt="Run missing_script.py."),
+        Case("internal-state-refused", [Turn(calls=[shell("ls $NEZ_HOME/sessions")])],
+             internal_state_refused, prompt="List my past Nez sessions."),
+        Case("vision-image-attached", [Turn(text="It is a red square.")], image_sent,
+             capabilities=["completion", "tools", "vision"], images=["red-square.png"],
+             prompt="What is in this image?"),
+        Case("text-only-model-rejects-image", [], text_only_image_rejected,
+             images=["red-square.png"], prompt="What is in this image?", expect_exit=1),
     ]
 
 
