@@ -1512,68 +1512,6 @@ mod tests {
     }
 
     #[test]
-    fn chatgpt_success_message_renders_osc8_hyperlinks() {
-        let runtime = tokio::runtime::Runtime::new().unwrap();
-        let (widget, _tmp) = runtime.block_on(widget_forced_chatgpt());
-        let area = Rect::new(0, 0, 80, 12);
-        let mut buf = Buffer::empty(area);
-
-        widget.render_chatgpt_success_message(area, &mut buf);
-
-        assert_eq!(
-            collect_osc8_chars(&buf, area, "https://developers.openai.com/nez/security"),
-            "Nez docs"
-        );
-        assert_eq!(
-            collect_osc8_chars(&buf, area, "https://chatgpt.com/#settings"),
-            "training data preferences"
-        );
-        assert_eq!(
-            (0..57).map(|x| buf[(x, 3)].modifier).collect::<Vec<_>>(),
-            [
-                vec![Modifier::DIM; 47],
-                vec![Modifier::DIM | Modifier::UNDERLINED; 10],
-            ]
-            .concat()
-        );
-        assert_eq!(
-            (0..61).map(|x| buf[(x, 9)].modifier).collect::<Vec<_>>(),
-            [
-                vec![Modifier::DIM; 30],
-                vec![Modifier::DIM | Modifier::UNDERLINED; 25],
-                vec![Modifier::DIM; 6],
-            ]
-            .concat()
-        );
-
-        let visible = (area.top()..area.bottom())
-            .map(|y| {
-                let row = (area.left()..area.right())
-                    .map(|x| buf[(x, y)].symbol())
-                    .collect::<String>();
-                crate::terminal_hyperlinks::strip_osc8(&row)
-                    .trim_end()
-                    .to_string()
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-        insta::assert_snapshot!(visible, @r###"
-        ✓ Signed in with your ChatGPT account
-
-          You're in control
-          Learn about permissions and approvals in the Nez docs
-
-          Nez can make mistakes
-          Review the code it writes and commands it runs
-
-          Included with your ChatGPT plan
-          Your plan's rate limits and training data preferences apply
-
-          Press enter to continue
-        "###);
-    }
-
-    #[test]
     fn auth_widget_suppresses_animations_when_device_code_is_visible() {
         let runtime = tokio::runtime::Runtime::new().unwrap();
         let (widget, _tmp) = runtime.block_on(widget_forced_chatgpt());

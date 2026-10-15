@@ -3,8 +3,7 @@ source: tui/src/model_migration.rs
 expression: terminal.backend()
 ---
 
-  Nez just got an upgrade. Introducing
-  gpt-5.1-nez-max.
+  Nez just got an upgrade. Introducing gpt-5.1-nez-max.
 
   Upgrade to gpt-5.2-nez for the latest and greatest
   agentic coding model.

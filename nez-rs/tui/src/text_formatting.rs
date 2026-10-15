@@ -465,7 +465,7 @@ mod tests {
         );
         let truncated = center_truncate_path(&path, /*max_width*/ 36);
 
-        let expected = format!("C:{sep}Users{sep}nez{sep}…{sep}path{sep}file.txt");
+        let expected = format!("C:{sep}Users{sep}nez{sep}…{sep}windows{sep}path{sep}file.txt");
 
         assert_eq!(truncated, expected);
     }

@@ -3,11 +3,11 @@ source: tui/src/chatwidget/tests/permissions.rs
 expression: visible
 ---
                                         
-  Set up the Nez agent sandbox to     
+  Set up the Nez agent sandbox to       
   protect your files and control        
   network access. Learn more            
-  <https://developers.openai.com/nez  
-  /windows>                             
+  <https://developers.openai.com/nez/w  
+  indows>                               
                                         
                                         
 › 1. Set up default sandbox (requires   

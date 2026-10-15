@@ -1,6 +1,5 @@
 ---
 source: tui/src/chatwidget/tests/popups_and_settings.rs
-assertion_line: 3203
 expression: popup
 ---
   Experimental features
@@ -10,8 +9,8 @@ expression: popup
 
 › [ ] Network proxy                Apply network proxy restrictions to sandboxed
                                    sessions that already have network access.
-  [ ] Prevent sleep while running  Keep your computer awake while Nez is
-                                   running a thread.
+  [ ] Prevent sleep while running  Keep your computer awake while Nez is running
+                                   a thread.
 
 
   space toggle · enter save · esc save/close

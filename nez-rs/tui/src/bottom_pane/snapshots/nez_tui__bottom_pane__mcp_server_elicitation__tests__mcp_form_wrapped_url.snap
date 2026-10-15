@@ -4,9 +4,9 @@ expression: snapshot_buffer(&buf)
 ---
                                         
   Field 1/1 (1 required unanswered)     
-  Review https://github.com/openai/     
-  nez/pull/12345?diff=split before    
-  choosing.                             
+  Review https://github.com/NezPifs/    
+  Nez-Code/pull/12345?diff=split        
+  before choosing.                      
                                         
   Continue                              
   › 1. True                             

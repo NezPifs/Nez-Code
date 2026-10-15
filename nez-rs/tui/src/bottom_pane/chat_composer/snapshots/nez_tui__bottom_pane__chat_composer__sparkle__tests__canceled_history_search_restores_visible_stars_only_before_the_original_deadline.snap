@@ -5,7 +5,7 @@ expression: "snapshots.join(\"\\n\\n\")"
 expires while open: false
 initial:
                             ⠈     ⢀     ⠁                 ⠂
-›⠁Ask Nez to do anything         ⠈      ⠁
+›⠁Ask Nez to do anything           ⠈      ⠁
        ⢀            ⠠     ⠄         ⠠          ⢀    ⠠     ⡀
   ? for shortcuts                                            100% context left
 searching:
@@ -15,14 +15,14 @@ searching:
   reverse-i-search: stored  enter accept · esc cancel
 after escape:
                                         ⠁               ⡀   ⠄           ⠄   ⠄
-› Ask Nez to do anything                                   ⠈
+› Ask Nez to do anything                                     ⠈
       ⠠                             ⠠        ⢀ ⢀     ⡀                         ⠄
   ? for shortcuts                                            100% context left
 
 expires while open: true
 initial:
                             ⠈     ⢀     ⠁                 ⠂
-›⠁Ask Nez to do anything         ⠈      ⠁
+›⠁Ask Nez to do anything           ⠈      ⠁
        ⢀            ⠠     ⠄         ⠠          ⢀    ⠠     ⡀
   ? for shortcuts                                            100% context left
 searching:

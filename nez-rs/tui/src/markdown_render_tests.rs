@@ -1293,9 +1293,9 @@ fn unordered_list_local_file_link_stays_inline_with_following_text() {
     assert_eq!(
         rendered,
         vec![
-            "• binary (nez-rs/README.md:93): core is the agent/business logic, tui",
-            "  is the terminal UI, exec is the headless automation surface, and cli",
-            "  is the top-level multitool binary.",
+            "• binary (nez-rs/README.md:93): core is the agent/business logic, tui is",
+            "  the terminal UI, exec is the headless automation surface, and cli is",
+            "  the top-level multitool binary.",
         ]
     );
 }
@@ -1344,8 +1344,8 @@ fn consecutive_unordered_list_local_file_links_do_not_detach_paths() {
         rendered,
         vec![
             "• binary (nez-rs/README.md:93): cli is the top-level multitool binary.",
-            "• expectations (nez-rs/core/README.md:1): nez-core owns the real",
-            "  runtime behavior.",
+            "• expectations (nez-rs/core/README.md:1): nez-core owns the real runtime",
+            "  behavior.",
         ]
     );
 }

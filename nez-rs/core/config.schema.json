@@ -844,15 +844,6 @@
             "code_mode_tool_search": {
               "type": "boolean"
             },
-            "nez_apps_mcp_2026_07_28": {
-              "type": "boolean"
-            },
-            "nez_git_commit": {
-              "type": "boolean"
-            },
-            "nez_hooks": {
-              "type": "boolean"
-            },
             "collab": {
               "type": "boolean"
             },
@@ -1065,6 +1056,15 @@
             },
             "network_proxy": {
               "$ref": "#/definitions/FeatureToml_for_NetworkProxyConfigToml"
+            },
+            "nez_apps_mcp_2026_07_28": {
+              "type": "boolean"
+            },
+            "nez_git_commit": {
+              "type": "boolean"
+            },
+            "nez_hooks": {
+              "type": "boolean"
             },
             "non_prefixed_mcp_tool_names": {
               "$ref": "#/definitions/FeatureToml_for_NonPrefixedMcpToolNamesConfigToml"
@@ -7175,15 +7175,6 @@
         "code_mode_tool_search": {
           "type": "boolean"
         },
-        "nez_apps_mcp_2026_07_28": {
-          "type": "boolean"
-        },
-        "nez_git_commit": {
-          "type": "boolean"
-        },
-        "nez_hooks": {
-          "type": "boolean"
-        },
         "collab": {
           "type": "boolean"
         },
@@ -7396,6 +7387,15 @@
         },
         "network_proxy": {
           "$ref": "#/definitions/FeatureToml_for_NetworkProxyConfigToml"
+        },
+        "nez_apps_mcp_2026_07_28": {
+          "type": "boolean"
+        },
+        "nez_git_commit": {
+          "type": "boolean"
+        },
+        "nez_hooks": {
+          "type": "boolean"
         },
         "non_prefixed_mcp_tool_names": {
           "$ref": "#/definitions/FeatureToml_for_NonPrefixedMcpToolNamesConfigToml"

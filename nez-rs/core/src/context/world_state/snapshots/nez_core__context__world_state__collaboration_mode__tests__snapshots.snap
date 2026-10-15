@@ -5,17 +5,17 @@ expression: "render_section_cases(&[(Absent, Absent), (Absent, Known(&default)),
 Absent -> Absent
 None
 
-Absent -> {"instructions":"90f8f6675171813762488f76c60b062fc8adeaec","mode":"default","model":"test-model"} (role - developer)
+Absent -> {"instructions":"a642e0d968a07c448c00b9c97992ccdf89d98412","mode":"default","model":"test-model"} (role - developer)
 <collaboration_mode>pair with the user</collaboration_mode>
 
-{"instructions":"90f8f6675171813762488f76c60b062fc8adeaec","mode":"default","model":"test-model"} -> {"instructions":"90f8f6675171813762488f76c60b062fc8adeaec","mode":"default","model":"test-model"}
+{"instructions":"a642e0d968a07c448c00b9c97992ccdf89d98412","mode":"default","model":"test-model"} -> {"instructions":"a642e0d968a07c448c00b9c97992ccdf89d98412","mode":"default","model":"test-model"}
 None
 
-{"instructions":"1bfc0435f0536e09f08dbfe37c09920d3344e925","mode":"default","model":"test-model"} -> {"instructions":"8c3a0740268ef8f622810f31715b1924540de415","mode":"default","model":"test-model"} (role - developer)
+{"instructions":"c3e37238bf5b6834b1555115eddc53a4c620e06e","mode":"default","model":"test-model"} -> {"instructions":"0d1943f184fdbfc91a4a4e3408e3bac73967ccd8","mode":"default","model":"test-model"} (role - developer)
 <collaboration_mode>new instructions</collaboration_mode>
 
-{"instructions":"90f8f6675171813762488f76c60b062fc8adeaec","mode":"default","model":"test-model"} -> {"instructions":"bc50ed412c1138502df45ef1b6634a6ef618da4c","mode":"plan","model":"test-model"} (role - developer)
+{"instructions":"a642e0d968a07c448c00b9c97992ccdf89d98412","mode":"default","model":"test-model"} -> {"instructions":"977d2d0182f56b5ddc294eee24eae719c2b8b558","mode":"plan","model":"test-model"} (role - developer)
 <collaboration_mode>make a plan</collaboration_mode>
 
-Unknown -> {"instructions":"90f8f6675171813762488f76c60b062fc8adeaec","mode":"default","model":"test-model"} (role - developer)
+Unknown -> {"instructions":"a642e0d968a07c448c00b9c97992ccdf89d98412","mode":"default","model":"test-model"} (role - developer)
 <collaboration_mode>pair with the user</collaboration_mode>

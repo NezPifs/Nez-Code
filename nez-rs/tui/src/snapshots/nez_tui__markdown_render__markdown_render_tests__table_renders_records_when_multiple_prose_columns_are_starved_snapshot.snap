@@ -10,7 +10,7 @@ expression: "plain_lines(&text).join(\"\\n\")"
              path.
 ────────────────────────────────────────────────────────────────────────────
  Issue       #23926: Vim composer e stalls at word end (https://github.com/
-             openai/nez/issues/23926)
+             NezPifs/Nez-Code/issues/23926)
  Activity    +1 0, comments 0
  Complexity  Low
  Why start   Standing best quick win; deterministic motion bug.
