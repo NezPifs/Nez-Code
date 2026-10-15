@@ -1,0 +1,49 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-memories-write"
+version.workspace = true
+
+[lib]
+name = "nez_memories_write"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+chrono = { workspace = true }
+nez-backend-client = { workspace = true }
+nez-core = { workspace = true }
+nez-config = { workspace = true }
+nez-features = { workspace = true }
+nez-git-utils = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-otel = { workspace = true }
+nez-protocol = { workspace = true }
+nez-rollout = { workspace = true }
+nez-rollout-trace = { workspace = true }
+nez-secrets = { workspace = true }
+nez-state = { workspace = true }
+nez-terminal-detection = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-output-truncation = { workspace = true }
+nez-utils-template = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["fs", "rt", "sync", "time"] }
+tracing = { workspace = true, features = ["log"] }
+uuid = { workspace = true, features = ["v4", "v5"] }
+
+[dev-dependencies]
+nez-model-provider-info = { workspace = true }
+nez-models-manager = { workspace = true }
+core_test_support = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["fs", "macros"] }
+wiremock = { workspace = true }

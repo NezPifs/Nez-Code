@@ -1,0 +1,164 @@
+[package]
+name = "nez-app-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "nez-app-server"
+path = "src/main.rs"
+
+[[bin]]
+name = "nez-app-server-test-notify-capture"
+path = "src/bin/notify_capture.rs"
+
+[[bin]]
+name = "exec-server"
+path = "src/bin/exec_server.rs"
+
+[lib]
+name = "nez_app_server"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-utils-process = { workspace = true }
+anyhow = { workspace = true }
+base64 = { workspace = true }
+axum = { workspace = true, default-features = false, features = [
+    "http1",
+    "json",
+    "tokio",
+    "ws",
+] }
+nez-analytics = { workspace = true }
+nez-agent-extension = { workspace = true }
+nez-arg0 = { workspace = true }
+nez-aws-auth = { workspace = true }
+nez-cloud-config = { workspace = true }
+nez-code-mode = { workspace = true }
+nez-config = { workspace = true }
+nez-network-proxy = { workspace = true }
+nez-connectors = { workspace = true }
+nez-core = { workspace = true }
+nez-core-plugins = { workspace = true }
+nez-diagnostics = { workspace = true }
+nez-home = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-external-agent-migration = { workspace = true }
+nez-features = { workspace = true }
+nez-goal-extension = { workspace = true }
+nez-git-attribution = { workspace = true }
+nez-guardian-v2 = { workspace = true }
+nez-git-utils = { workspace = true }
+nez-file-watcher = { workspace = true }
+nez-hooks = { workspace = true }
+nez-history-notes-extension = { workspace = true }
+nez-http-client = { workspace = true }
+nez-otel = { workspace = true }
+nez-plugin = { workspace = true }
+nez-shell-command = { workspace = true }
+nez-skills = { workspace = true }
+nez-skills-extension = { workspace = true }
+nez-utils-cli = { workspace = true }
+nez-user-verification = { workspace = true }
+nez-utils-pty = { workspace = true }
+nez-backend-client = { workspace = true }
+nez-file-search = { workspace = true }
+nez-chatgpt = { workspace = true }
+nez-login = { workspace = true }
+nez-image-generation-extension = { workspace = true }
+nez-memories-extension = { workspace = true }
+nez-web-search-extension = { workspace = true }
+nez-websocket-auth = { workspace = true }
+nez-memories-write = { workspace = true }
+nez-mcp = { workspace = true }
+nez-mcp-extension = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-models-manager = { workspace = true }
+nez-prompts = { workspace = true }
+nez-protocol = { workspace = true }
+nez-queue-extension = { workspace = true }
+nez-app-server-protocol = { workspace = true }
+nez-app-server-transport = { workspace = true }
+nez-feedback = { workspace = true }
+nez-rmcp-client = { workspace = true }
+nez-rollout = { workspace = true }
+nez-sandboxing = { workspace = true }
+nez-state = { workspace = true }
+nez-thread-store = { workspace = true }
+nez-tools = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-json-to-toml = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+futures = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+tempfile = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true }
+toml = { workspace = true }
+toml_edit = { workspace = true }
+tokio = { workspace = true, features = [
+    "io-std",
+    "macros",
+    "process",
+    "rt-multi-thread",
+    "signal",
+] }
+tokio-util = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+tracing-subscriber = { workspace = true, features = ["env-filter", "fmt", "json"] }
+url = { workspace = true }
+uuid = { workspace = true, features = ["serde", "v7"] }
+
+[target.'cfg(all(target_os = "linux", target_env = "musl", any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+nez-windows-sandbox = { workspace = true }
+
+[dev-dependencies]
+nez-uds = { workspace = true }
+app_test_support = { workspace = true }
+axum = { workspace = true, default-features = false, features = [
+    "http1",
+    "json",
+    "tokio",
+] }
+base64 = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+core_test_support = { workspace = true }
+flate2 = { workspace = true }
+hmac = { workspace = true }
+http = { workspace = true }
+keyring = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+pretty_assertions = { workspace = true }
+rcgen = { workspace = true }
+rmcp = { workspace = true, default-features = false, features = [
+    "elicitation",
+    "server",
+    "transport-streamable-http-server",
+] }
+serial_test = { workspace = true }
+shlex = { workspace = true }
+sqlx = { workspace = true }
+tar = { workspace = true }
+test-case = "3.3.1"
+tokio-rustls = { workspace = true }
+tokio-tungstenite = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+wiremock = { workspace = true }

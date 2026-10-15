@@ -1,0 +1,44 @@
+name: Bug report
+description: Something in Nez-Code does not work as expected.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Nez-Code version
+      description: Output of `nez --version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux]
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Provider and model
+      description: For example `ollama / qwen3.5:9b` or `deepseek / deepseek-chat`.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `nez` in ...
+        2. Ask ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant output from `~/.nez/log/` or `nez doctor`. Remove API keys and other secrets.
+      render: text

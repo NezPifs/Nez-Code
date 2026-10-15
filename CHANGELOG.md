@@ -1,5 +1,8 @@
-The changelog can be found on the [releases page](https://github.com/openai/codex/releases).
+# Changelog
 
-## Unreleased
+All notable changes to Nez-Code are documented in this file.
 
-- Fix missing command lifecycle events when unified exec cannot create a process, preserving approval rejection and sandbox retry behavior. Thanks @Marvinthebored ([#44557](https://github.com/openai/codex/issues/44557)).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]

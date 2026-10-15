@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  CARGO_PROFILE_DEV_DEBUG: "0"
+  CARGO_PROFILE_TEST_DEBUG: "0"
+  RUST_MIN_STACK: "8388608"
+
+defaults:
+  run:
+    working-directory: nez-rs
+
+jobs:
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup show active-toolchain
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/free-disk-space
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
+      - run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: clippy
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/free-disk-space
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
+      - name: Allow unprivileged user namespaces for the bubblewrap sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: test
+      - name: Run tests
+        run: ../scripts/ci-test.sh crates
+
+  unit:
+    name: engine and TUI unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/free-disk-space
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
+      - name: Allow unprivileged user namespaces for the bubblewrap sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: unit
+      - name: Add swap for the TUI test build
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 12G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -m
+      - name: Run unit tests
+        # Linking the TUI test binary peaks above the runner's 16 GB of RAM
+        # when other crates compile alongside it.
+        env:
+          CARGO_BUILD_JOBS: "1"
+        run: ../scripts/ci-test.sh unit
+
+  windows:
+    name: windows build
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: windows
+      - run: cargo build --locked --bin nez

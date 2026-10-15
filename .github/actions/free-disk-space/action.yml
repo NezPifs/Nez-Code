@@ -1,0 +1,10 @@
+name: Free disk space
+description: Remove preinstalled toolchains that Nez-Code builds do not use.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+        sudo docker image prune --all --force >/dev/null 2>&1 || true
+        df -h /

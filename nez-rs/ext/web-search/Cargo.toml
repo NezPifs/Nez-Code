@@ -1,0 +1,33 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-web-search-extension"
+version.workspace = true
+
+[lib]
+name = "nez_web_search_extension"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-api = { workspace = true }
+nez-core = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-extension-items = { workspace = true }
+nez-http-client = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-otel = { workspace = true }
+nez-protocol = { workspace = true }
+nez-tools = { workspace = true }
+http = { workspace = true }
+schemars = { workspace = true }
+serde_json = { workspace = true }
+url = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

@@ -1,0 +1,36 @@
+[package]
+name = "nez-arg0"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "nez_arg0"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-apply-patch = { workspace = true }
+nez-async-utils = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-install-context = { workspace = true }
+nez-linux-sandbox = { workspace = true }
+nez-sandboxing = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-home-dir = { workspace = true }
+nez-utils-pty = { workspace = true }
+dotenvy = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+
+[target.'cfg(windows)'.dependencies]
+nez-windows-sandbox = { workspace = true }
+pathdiff = { workspace = true }
+
+[dev-dependencies]
+nez-utils-cargo-bin = { workspace = true }
+pretty_assertions = { workspace = true }

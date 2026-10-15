@@ -1,0 +1,36 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-guardian-reviewer"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_guardian_reviewer"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-analytics = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-feedback = { workspace = true }
+nez-guardian-context = { workspace = true }
+nez-mcp = { workspace = true }
+nez-otel = { workspace = true }
+nez-prompts = { workspace = true }
+nez-protocol = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true, features = ["rt"] }
+tracing = { workspace = true }
+
+[dev-dependencies]
+opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true, features = ["experimental_metrics_custom_reader", "metrics"] }
+test-case = "3.3.1"
+pretty_assertions = { workspace = true }

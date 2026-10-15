@@ -1,0 +1,29 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-model-provider-info"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_model_provider_info"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-client = { workspace = true }
+nez-protocol = { workspace = true }
+nez-utils-redacted-string = { workspace = true }
+http = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+url = { workspace = true }
+
+[dev-dependencies]
+nez-utils-absolute-path = { workspace = true }
+maplit = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+toml = { workspace = true }

@@ -1,0 +1,56 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-rollout"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_rollout"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-utils-process = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+nez-extension-items = { workspace = true }
+nez-file-search = { workspace = true }
+nez-git-utils = { workspace = true }
+nez-history = { workspace = true }
+nez-otel = { workspace = true }
+nez-protocol = { workspace = true }
+nez-state = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-output-truncation = { workspace = true }
+nez-utils-path = { workspace = true }
+nez-utils-string = { workspace = true }
+memchr = { workspace = true }
+regex = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tempfile = { workspace = true }
+time = { workspace = true, features = [
+    "formatting",
+    "local-offset",
+    "macros",
+    "parsing",
+] }
+tokio = { workspace = true, features = [
+    "fs",
+    "io-util",
+    "macros",
+    "process",
+    "rt",
+    "sync",
+    "time",
+] }
+tracing = { workspace = true }
+uuid = { workspace = true }
+zstd = { workspace = true }
+
+[dev-dependencies]
+nez-utils-absolute-path = { workspace = true }
+pretty_assertions = { workspace = true }

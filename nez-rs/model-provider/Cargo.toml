@@ -1,0 +1,46 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-model-provider"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "nez_model_provider"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+nez-utils-process = { workspace = true }
+chrono = { workspace = true }
+nez-api = { workspace = true }
+nez-agent-identity = { workspace = true }
+nez-aws-auth = { workspace = true }
+nez-http-client = { workspace = true }
+nez-feedback = { workspace = true }
+nez-login = { workspace = true }
+nez-keyring-store = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-models-manager = { workspace = true }
+nez-otel = { workspace = true }
+nez-protocol = { workspace = true }
+nez-response-debug-context = { workspace = true }
+nez-secrets = { workspace = true }
+http = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+tokio = { workspace = true, features = ["io-util", "process", "sync", "time"] }
+tracing = { workspace = true, features = ["log"] }
+url = { workspace = true }
+
+[dev-dependencies]
+base64 = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+nez-utils-redacted-string = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }
+wiremock = { workspace = true }

@@ -1,0 +1,33 @@
+---
+source: core/src/context/world_state/permissions_tests.rs
+expression: "render_section_cases(&[(Absent, Absent), (Absent, Known(&read_only)),\n(Known(&read_only), Known(&read_only)),\n(Known(&read_only), Known(&full_access)),\n(Known(&read_only), Known(&never_ask)), (Unknown, Known(&read_only)),])"
+---
+Absent -> Absent
+None
+
+Absent -> {"approved_command_prefixes":[],"instructions":"ee4e3dcfe1b41736d1ef5fe42750843e1445049f"} (role - developer)
+<permissions instructions>
+Read only.
+Ask for approval.
+</permissions instructions>
+
+{"approved_command_prefixes":[],"instructions":"ee4e3dcfe1b41736d1ef5fe42750843e1445049f"} -> {"approved_command_prefixes":[],"instructions":"ee4e3dcfe1b41736d1ef5fe42750843e1445049f"}
+None
+
+{"approved_command_prefixes":[],"instructions":"ee4e3dcfe1b41736d1ef5fe42750843e1445049f"} -> {"approved_command_prefixes":[],"instructions":"5d26162deb0a6f65c325782722a1ad6f0ec298c9"} (role - developer)
+<permissions instructions>
+Full access.
+Ask for approval.
+</permissions instructions>
+
+{"approved_command_prefixes":[],"instructions":"ee4e3dcfe1b41736d1ef5fe42750843e1445049f"} -> {"approved_command_prefixes":[],"instructions":"3c6354747b1448391cb497ac68a382275318ec19"} (role - developer)
+<permissions instructions>
+Read only.
+Approval policy is currently never. Do not provide the `sandbox_permissions` for any reason, commands will be rejected.
+</permissions instructions>
+
+Unknown -> {"approved_command_prefixes":[],"instructions":"ee4e3dcfe1b41736d1ef5fe42750843e1445049f"} (role - developer)
+<permissions instructions>
+Read only.
+Ask for approval.
+</permissions instructions>

@@ -1,0 +1,50 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-guardian-v2"
+version.workspace = true
+
+[lib]
+name = "nez_guardian_v2"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+nez-analytics = { workspace = true }
+nez-api = { workspace = true }
+nez-config = { workspace = true }
+nez-context-fragments = { workspace = true }
+nez-core = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-features = { workspace = true }
+nez-guardian-context = { workspace = true }
+nez-guardian-reviewer = { workspace = true }
+nez-history = { workspace = true }
+nez-http-client = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-protocol = { workspace = true }
+nez-prompts = { workspace = true }
+nez-websocket-client = { workspace = true }
+dirs = { workspace = true }
+http = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["time"] }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+nez-model-provider-info = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+core_test_support = { workspace = true }
+insta = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+wiremock = { workspace = true }
+zstd = { workspace = true }

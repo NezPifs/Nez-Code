@@ -1,0 +1,49 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-skills-extension"
+version.workspace = true
+
+[lib]
+name = "nez_skills_extension"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+blake3 = { workspace = true }
+nez-analytics = { workspace = true }
+nez-config = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-mcp = { workspace = true }
+nez-otel = { workspace = true }
+nez-protocol = { workspace = true }
+nez-skills = { workspace = true }
+nez-tools = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+nez-utils-plugins = { workspace = true }
+nez-utils-string = { workspace = true }
+dirs = { workspace = true }
+futures = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["rt", "sync", "time"] }
+toml = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+assert_matches = { workspace = true }
+nez-models-manager = { workspace = true }
+nez-utils-cargo-bin = { workspace = true }
+dunce = { workspace = true }
+insta = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing-subscriber = { workspace = true }

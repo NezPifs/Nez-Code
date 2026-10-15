@@ -1,0 +1,39 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "nez-image-generation-extension"
+version.workspace = true
+
+[lib]
+name = "nez_image_generation_extension"
+path = "src/lib.rs"
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+base64 = { workspace = true }
+nez-api = { workspace = true }
+nez-core = { workspace = true }
+nez-exec-server = { workspace = true }
+nez-extension-api = { workspace = true }
+nez-extension-items = { workspace = true }
+nez-http-client = { workspace = true }
+nez-login = { workspace = true }
+nez-model-provider = { workspace = true }
+nez-model-provider-info = { workspace = true }
+nez-protocol = { workspace = true }
+nez-tools = { workspace = true }
+nez-utils-absolute-path = { workspace = true }
+nez-utils-image = { workspace = true }
+nez-utils-path-uri = { workspace = true }
+http = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }

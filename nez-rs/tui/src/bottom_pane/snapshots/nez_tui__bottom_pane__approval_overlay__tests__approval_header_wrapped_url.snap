@@ -1,0 +1,9 @@
+---
+source: tui/src/bottom_pane/approval_overlay.rs
+expression: visible
+---
+Reason:
+https://github.com/NezPifs/Nez-C
+ode/pull/12345?diff=split
+
+$ echo hi
