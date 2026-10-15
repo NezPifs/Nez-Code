@@ -82,13 +82,19 @@ jobs:
         with:
           workspaces: nez-rs
           shared-key: unit
-      - name: Report resources while building
+      - name: Add swap for the TUI test build
         run: |
-          (while true; do date +%T; df -h / | tail -1; free -m | sed -n 2p; sleep 120; done) &
+          sudo swapoff -a || true
+          sudo fallocate -l 12G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -m
       - name: Run unit tests
-        # The TUI test binary is large; two jobs keeps peak memory in bounds.
+        # Linking the TUI test binary peaks above the runner's 16 GB of RAM
+        # when other crates compile alongside it.
         env:
-          CARGO_BUILD_JOBS: "2"
+          CARGO_BUILD_JOBS: "1"
         run: ../scripts/ci-test.sh unit
 
   windows:
