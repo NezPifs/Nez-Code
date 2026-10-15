@@ -13,6 +13,7 @@
 mod capabilities;
 mod convert;
 mod stream;
+mod text_tools;
 
 use crate::auth::SharedAuthProvider;
 use crate::common::ResponseEvent;
@@ -41,6 +42,7 @@ pub use capabilities::ModelCapabilities;
 pub use capabilities::ollama_capabilities;
 pub use capabilities::ollama_root;
 pub use convert::IMAGE_OMITTED_TEXT;
+pub use nez_model_profiles::TextToolFormat;
 
 /// Which chat protocol a provider speaks.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -66,6 +68,12 @@ pub struct ChatOptions {
     pub send_reasoning_effort: bool,
     /// Send tools as native function definitions.
     pub native_tools: bool,
+    /// Describe tools in the system prompt and parse calls out of the reply
+    /// instead. Takes precedence over `native_tools`.
+    pub text_tools: Option<TextToolFormat>,
+    /// Constrain text-protocol replies with a JSON schema. Only the Ollama
+    /// dialect supports arbitrary schemas; requests with images skip it.
+    pub structured_output: bool,
     /// Forward image content. When false, images are replaced with a note.
     pub allow_images: bool,
     pub max_output_tokens: Option<u32>,
@@ -81,6 +89,8 @@ impl ChatOptions {
             think: None,
             send_reasoning_effort: false,
             native_tools: true,
+            text_tools: None,
+            structured_output: false,
             allow_images: true,
             max_output_tokens: None,
         }
@@ -176,6 +186,8 @@ impl<T: HttpTransport + 'static> ChatClient<T> {
 pub(crate) struct Prepared {
     pub body: Value,
     pub tools: convert::ChatTools,
+    /// Tool calls arrive as text and are parsed when the reply completes.
+    pub text_tools: bool,
 }
 
 /// Builds the provider request body.
@@ -202,22 +214,31 @@ pub(crate) fn prepare(
         }
     }
     let tools = convert::convert_tools(Some(&Value::Array(tool_values)));
+    let text_format = options.text_tools.filter(|_| !tools.is_empty());
+    let native_tools = options.native_tools && text_format.is_none();
 
-    let messages = convert::convert_input(
+    let mut messages = convert::convert_input(
         "",
         &input,
         convert::ConvertOptions {
             dialect: options.dialect,
             allow_images: options.allow_images,
-            native_tools: options.native_tools,
+            native_tools,
         },
     );
+    if let Some(format) = text_format {
+        append_system_text(
+            &mut messages,
+            &text_tools::protocol_instructions(&tools, format),
+        );
+    }
 
+    let images_present = has_images(&messages);
     let mut body = Map::new();
     body.insert("model".to_string(), Value::String(request.model.clone()));
     body.insert("messages".to_string(), Value::Array(messages));
     body.insert("stream".to_string(), Value::Bool(true));
-    let send_tools = options.native_tools && !tools.is_empty();
+    let send_tools = native_tools && !tools.is_empty();
     if send_tools {
         body.insert("tools".to_string(), Value::Array(tools.definitions.clone()));
     }
@@ -225,7 +246,16 @@ pub(crate) fn prepare(
         .text
         .as_ref()
         .and_then(|text| text.format.as_ref())
-        .map(|format| format.schema.clone());
+        .map(|format| format.schema.clone())
+        .or_else(|| {
+            // Schema-constrained decoding removes most malformed tool blocks,
+            // but vision models handle images poorly under it.
+            (text_format.is_some()
+                && options.structured_output
+                && options.dialect == ChatDialect::Ollama
+                && !images_present)
+                .then(|| text_tools::structured_output_schema(&tools))
+        });
 
     match options.dialect {
         ChatDialect::OpenAi => {
@@ -287,6 +317,41 @@ pub(crate) fn prepare(
     Ok(Prepared {
         body: Value::Object(body),
         tools,
+        text_tools: text_format.is_some(),
+    })
+}
+
+/// Appends a paragraph to the leading system message, creating one if needed.
+fn append_system_text(messages: &mut Vec<Value>, text: &str) {
+    if let Some(first) = messages.first_mut()
+        && first.get("role").and_then(Value::as_str) == Some("system")
+        && let Some(content) = first.get("content").and_then(Value::as_str)
+    {
+        let joined = if content.trim().is_empty() {
+            text.to_string()
+        } else {
+            format!("{content}\n\n{text}")
+        };
+        first["content"] = Value::String(joined);
+        return;
+    }
+    messages.insert(0, json!({"role": "system", "content": text}));
+}
+
+fn has_images(messages: &[Value]) -> bool {
+    messages.iter().any(|message| {
+        message
+            .get("images")
+            .and_then(Value::as_array)
+            .is_some_and(|images| !images.is_empty())
+            || message
+                .get("content")
+                .and_then(Value::as_array)
+                .is_some_and(|parts| {
+                    parts
+                        .iter()
+                        .any(|part| part.get("type").and_then(Value::as_str) == Some("image_url"))
+                })
     })
 }
 
@@ -333,7 +398,9 @@ async fn pump(
         for line in lines {
             match stream::parse_line(dialect, &line) {
                 Ok(Some(chunk)) => {
-                    for event in acc.push(chunk, /*stream_text*/ true) {
+                    // Text-protocol replies are parsed as a whole; streaming
+                    // them would show raw tool blocks to the user.
+                    for event in acc.push(chunk, !prepared.text_tools) {
                         if tx.send(Ok(event)).await.is_err() {
                             return;
                         }
@@ -354,7 +421,7 @@ async fn pump(
         }
     }
 
-    for event in finish(&mut acc, &prepared.tools) {
+    for event in finish(&mut acc, &prepared.tools, prepared.text_tools) {
         if tx.send(Ok(event)).await.is_err() {
             return;
         }
@@ -365,6 +432,7 @@ async fn pump(
 pub(crate) fn finish(
     acc: &mut stream::Accumulator,
     tools: &convert::ChatTools,
+    text_tools: bool,
 ) -> Vec<ResponseEvent> {
     let mut events = Vec::new();
     let response_id = acc.message_id().trim_end_matches("_msg").to_string();
@@ -373,12 +441,34 @@ pub(crate) fn finish(
     {
         events.push(ResponseEvent::OutputItemDone(item));
     }
-    if !acc.text.is_empty() || acc.message_started() {
+    if text_tools {
+        let parsed = text_tools::parse(&acc.text, tools);
+        let mut text = parsed.text;
+        for error in &parsed.errors {
+            if !text.is_empty() {
+                text.push_str("\n\n");
+            }
+            text.push_str(&format!("Tool call not run: {error}"));
+        }
+        if !text.is_empty() {
+            events.push(ResponseEvent::OutputItemDone(stream::assistant_message(
+                &acc.message_id(),
+                &text,
+            )));
+        }
+        for (index, call) in parsed.calls.into_iter().enumerate() {
+            let call_id = format!("{response_id}_text_call_{index}");
+            if let Some(item) = stream::tool_call_item(tools, &call.name, call.arguments, call_id) {
+                events.push(ResponseEvent::OutputItemDone(item));
+            }
+        }
+    } else if !acc.text.is_empty() || acc.message_started() {
         events.push(ResponseEvent::OutputItemDone(stream::assistant_message(
             &acc.message_id(),
             &acc.text,
         )));
     }
+    // Some servers still return structured calls in text mode; run those too.
     for item in acc.take_tool_calls(tools) {
         events.push(ResponseEvent::OutputItemDone(item));
     }

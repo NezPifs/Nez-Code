@@ -143,7 +143,7 @@ fn finish_emits_reasoning_message_calls_then_completion() {
             acc.push(chunk, true);
         }
     }
-    let events = finish(&mut acc, &tools);
+    let events = finish(&mut acc, &tools, /*text_tools*/ false);
     let kinds: Vec<&str> = events
         .iter()
         .map(|event| match event {
@@ -165,5 +165,97 @@ fn finish_emits_reasoning_message_calls_then_completion() {
             assert_eq!(token_usage.as_ref().map(|u| u.total_tokens), Some(7));
         }
         other => panic!("expected completion, got {other:?}"),
+    }
+}
+
+fn text_options() -> ChatOptions {
+    let mut options = ChatOptions::new(ChatDialect::Ollama);
+    options.native_tools = false;
+    options.text_tools = Some(TextToolFormat::Json);
+    options.structured_output = true;
+    options
+}
+
+#[test]
+fn text_protocol_requests_describe_tools_instead_of_sending_them() {
+    let prepared = prepare(&request(Some(shell_tool())), &text_options()).expect("prepare");
+    let body = prepared.body;
+    assert!(prepared.text_tools);
+    assert_eq!(body.get("tools"), None);
+    let system = body["messages"][0].clone();
+    assert_eq!(system["role"], "system");
+    let content = system["content"].as_str().unwrap_or_default();
+    assert!(
+        content.contains("shell_command(command?: string)"),
+        "{content}"
+    );
+    assert_eq!(
+        body["format"]["properties"]["tool_calls"]["items"]["properties"]["tool"]["enum"],
+        json!(["shell_command"])
+    );
+}
+
+#[test]
+fn text_protocol_without_tools_is_a_plain_request() {
+    let prepared = prepare(&request(None), &text_options()).expect("prepare");
+    assert!(!prepared.text_tools);
+    assert_eq!(prepared.body.get("format"), None);
+    assert_eq!(prepared.body["messages"][0]["role"], "user");
+}
+
+#[test]
+fn finish_turns_text_tool_blocks_into_calls() {
+    let tools = convert::convert_tools(Some(&shell_tool()));
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let line = r#"{"message":{"role":"assistant","content":"Listing.\n{\"tool\": \"shell_command\", \"input\": {\"command\": \"ls\"}}"},"done":true}"#;
+    let chunk = stream::parse_line(ChatDialect::Ollama, line)
+        .expect("parse")
+        .expect("chunk");
+    assert!(acc.push(chunk, /*stream_text*/ false).is_empty());
+    let events = finish(&mut acc, &tools, /*text_tools*/ true);
+    let items: Vec<&ResponseItem> = events
+        .iter()
+        .filter_map(|event| match event {
+            ResponseEvent::OutputItemDone(item) => Some(item),
+            _ => None,
+        })
+        .collect();
+    match items.as_slice() {
+        [
+            ResponseItem::Message { content, .. },
+            ResponseItem::FunctionCall {
+                name,
+                arguments,
+                call_id,
+                ..
+            },
+        ] => {
+            assert!(
+                matches!(content.as_slice(), [ContentItem::OutputText { text, .. }] if text == "Listing.")
+            );
+            assert_eq!(name, "shell_command");
+            assert_eq!(arguments, r#"{"command":"ls"}"#);
+            assert_eq!(call_id, "resp_text_call_0");
+        }
+        other => panic!("unexpected items: {other:?}"),
+    }
+}
+
+#[test]
+fn unusable_text_tool_blocks_are_reported_in_the_reply() {
+    let tools = convert::convert_tools(Some(&shell_tool()));
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let line = r#"{"message":{"role":"assistant","content":"<write_file path=\"a.txt\">x</write_file>"},"done":true}"#;
+    let chunk = stream::parse_line(ChatDialect::Ollama, line)
+        .expect("parse")
+        .expect("chunk");
+    acc.push(chunk, false);
+    let events = finish(&mut acc, &tools, true);
+    match &events[0] {
+        ResponseEvent::OutputItemDone(ResponseItem::Message { content, .. }) => assert!(
+            matches!(content.as_slice(), [ContentItem::OutputText { text, .. }]
+                if text == "Tool call not run: File edits are not available in this session.")
+        ),
+        other => panic!("unexpected event: {other:?}"),
     }
 }
