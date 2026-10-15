@@ -7118,8 +7118,11 @@ dependencies = [
  "nez-login",
  "nez-mcp",
  "nez-memories-write",
+ "nez-model-profiles",
  "nez-model-provider",
+ "nez-model-provider-info",
  "nez-models-manager",
+ "nez-ollama",
  "nez-plugin",
  "nez-protocol",
  "nez-rmcp-client",
@@ -7160,6 +7163,7 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "toml 0.9.11+spec-1.1.0",
+ "toml_edit 0.24.0+spec-1.1.0",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
@@ -8595,8 +8599,10 @@ name = "nez-model-provider-info"
 version = "0.0.0"
 dependencies = [
  "http 1.4.0",
+ "keyring",
  "maplit",
  "nez-client",
+ "nez-keyring-store",
  "nez-protocol",
  "nez-utils-absolute-path",
  "nez-utils-redacted-string",
@@ -8605,6 +8611,7 @@ dependencies = [
  "serde",
  "tempfile",
  "toml 0.9.11+spec-1.1.0",
+ "tracing",
  "url",
 ]
 
