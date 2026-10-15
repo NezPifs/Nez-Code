@@ -334,9 +334,9 @@ async fn live_agent_message_renders_during_review_mode() {
 async fn review_restores_context_window_indicator() {
     let (mut chat, mut rx, _ops) = make_chatwidget_manual(/*model_override*/ None).await;
 
-    let context_window = 13_000;
-    let pre_review_tokens = 12_700; // ~30% remaining after subtracting baseline.
-    let review_tokens = 12_030; // ~97% remaining after subtracting baseline.
+    let context_window = 48_000;
+    let pre_review_tokens = 37_200; // ~30% remaining after subtracting baseline.
+    let review_tokens = 13_080; // ~97% remaining after subtracting baseline.
 
     handle_token_count(
         &mut chat,

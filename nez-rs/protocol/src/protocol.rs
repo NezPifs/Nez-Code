@@ -2576,12 +2576,14 @@ impl TokenUsage {
     /// baseline, so immediately after the first prompt the UI shows 100% left
     /// and trends toward 0% as the user fills the effective window.
     pub fn percent_of_context_window_remaining(&self, context_window: i64) -> i64 {
-        if context_window <= BASELINE_TOKENS {
+        // Small local windows cannot spare a fixed 12k baseline; scale it.
+        let baseline = BASELINE_TOKENS.min(context_window / 4);
+        if context_window <= baseline {
             return 0;
         }
 
-        let effective_window = context_window - BASELINE_TOKENS;
-        let used = (self.tokens_in_context_window() - BASELINE_TOKENS).max(0);
+        let effective_window = context_window - baseline;
+        let used = (self.tokens_in_context_window() - baseline).max(0);
         let remaining = (effective_window - used).max(0);
         ((remaining as f64 / effective_window as f64) * 100.0)
             .clamp(0.0, 100.0)
@@ -6543,5 +6545,38 @@ mod tests {
                 .expect("new_or_append should return info");
 
         assert_eq!(info.model_context_window, Some(258_400));
+    }
+}
+
+#[cfg(test)]
+mod context_window_percent_tests {
+    use super::TokenUsage;
+    use pretty_assertions::assert_eq;
+
+    fn used(total_tokens: i64) -> TokenUsage {
+        TokenUsage {
+            total_tokens,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn large_windows_subtract_the_full_baseline() {
+        assert_eq!(
+            used(12_000).percent_of_context_window_remaining(272_000),
+            100
+        );
+        assert_eq!(
+            used(142_000).percent_of_context_window_remaining(272_000),
+            50
+        );
+    }
+
+    #[test]
+    fn small_local_windows_scale_the_baseline() {
+        // A fresh 16k session with a 4k prompt is nearly empty, not full.
+        assert_eq!(used(4_096).percent_of_context_window_remaining(16_384), 100);
+        assert_eq!(used(10_240).percent_of_context_window_remaining(16_384), 50);
+        assert_eq!(used(4_000).percent_of_context_window_remaining(8_192), 68);
     }
 }

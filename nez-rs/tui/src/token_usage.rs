@@ -41,11 +41,13 @@ impl TokenUsage {
     }
 
     pub(crate) fn percent_of_context_window_remaining(&self, context_window: i64) -> i64 {
-        if context_window <= BASELINE_TOKENS {
+        // Small local windows cannot spare a fixed 12k baseline; scale it.
+        let baseline = BASELINE_TOKENS.min(context_window / 4);
+        if context_window <= baseline {
             return 0;
         }
-        let effective_window = context_window - BASELINE_TOKENS;
-        let used = (self.tokens_in_context_window() - BASELINE_TOKENS).max(0);
+        let effective_window = context_window - baseline;
+        let used = (self.tokens_in_context_window() - baseline).max(0);
         let remaining = (effective_window - used).max(0);
         ((remaining as f64 / effective_window as f64) * 100.0)
             .clamp(0.0, 100.0)
@@ -85,5 +87,21 @@ impl fmt::Display for TokenUsage {
                 String::new()
             }
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn small_windows_do_not_start_at_zero_percent() {
+        let usage = TokenUsage {
+            total_tokens: 4_096,
+            ..Default::default()
+        };
+        assert_eq!(usage.percent_of_context_window_remaining(16_384), 100);
+        assert_eq!(usage.percent_of_context_window_remaining(272_000), 100);
     }
 }
