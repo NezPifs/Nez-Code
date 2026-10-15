@@ -418,7 +418,7 @@ async fn reconnect_restores_history_permissions_and_resumes_unsent_input() -> Re
             .join("\n");
         if deferred_notice {
             assert_snapshot!(notices, @r###"
-⚠ A background Nez service is running v2.0.0, older than your Nez-Code
+⚠ A background Nez service is running v2.0.0, older than your Nez-Code v2.1.0.
 "###);
         } else if edit_offline {
             assert!(notices.contains("unacknowledged prompt"));
