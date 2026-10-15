@@ -16,6 +16,7 @@ crates=(
   nez-exec
   nez-login
   nez-model-provider-info
+  nez-model-profiles
   nez-models-manager
   nez-ollama
   nez-protocol
