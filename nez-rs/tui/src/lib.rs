@@ -2448,6 +2448,7 @@ pub(crate) mod tests {
 
     async fn build_config(temp_dir: &TempDir) -> std::io::Result<Config> {
         ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
             .nez_home(temp_dir.path().to_path_buf())
             .build()
@@ -2508,11 +2509,13 @@ requires_openai_auth = {requires_openai_auth}
                 false,
             ),
             (
-                "enabled for the default provider",
+                // The wizard belongs to OpenAI sign-in, which the local
+                // default provider never shows.
+                "not offered for the local default provider",
                 enabled,
                 LoginStatus::NotAuthenticated,
                 AppServerTarget::Embedded,
-                true,
+                false,
             ),
             (
                 "explicit provider",
@@ -2704,6 +2707,7 @@ requires_openai_auth = {requires_openai_auth}
                     format!("[features]\nrespect_system_proxy = {managed_respect_system_proxy}\n"),
                 );
             let config = ConfigBuilder::default()
+                .cli_overrides(crate::test_support::openai_provider_overrides())
                 .nez_home(nez_home.path().to_path_buf())
                 .loader_overrides(loader_overrides)
                 .cloud_config_bundle(cloud_config_bundle)
@@ -2831,6 +2835,7 @@ requires_openai_auth = {requires_openai_auth}
             )?;
             let cwd_override = has_explicit_cwd.then_some(explicit_cwd.as_path());
             let config = ConfigBuilder::default()
+                .cli_overrides(crate::test_support::openai_provider_overrides())
                 .nez_home(nez_home.clone())
                 .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
                 .harness_overrides(ConfigOverrides {
@@ -2883,6 +2888,7 @@ requires_openai_auth = {requires_openai_auth}
                 ResolveCwdOutcome::Exit => panic!("configured cwd should not exit startup"),
             };
             let final_config = ConfigBuilder::default()
+                .cli_overrides(crate::test_support::openai_provider_overrides())
                 .nez_home(nez_home)
                 .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
                 .harness_overrides(ConfigOverrides {
@@ -2946,6 +2952,7 @@ requires_openai_auth = {requires_openai_auth}
             "[tui]\nresume_cwd = \"current\"\n",
         )?;
         let config = ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .nez_home(temp_dir.path().to_path_buf())
             .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
             .build()
@@ -3002,6 +3009,7 @@ requires_openai_auth = {requires_openai_auth}
             "[tui]\nresume_cwd = \"session\"\n",
         )?;
         let config = ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .nez_home(temp_dir.path().to_path_buf())
             .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
             .build()
@@ -3509,6 +3517,7 @@ requires_openai_auth = {requires_openai_auth}
         )?;
 
         let mut config = ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .nez_home(temp_dir.path().to_path_buf())
             .harness_overrides(ConfigOverrides {
                 cwd: Some(project_cwd.clone()),
@@ -3629,6 +3638,7 @@ requires_openai_auth = {requires_openai_auth}
         let project_cwd = temp_dir.path().join("project");
         std::fs::create_dir_all(&project_cwd)?;
         let config = ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .nez_home(temp_dir.path().to_path_buf())
             .harness_overrides(ConfigOverrides {
                 cwd: Some(project_cwd.clone()),
@@ -4080,6 +4090,7 @@ trust_level = "untrusted"
             ..Default::default()
         };
         let trusted_config = ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
             .nez_home(nez_home.clone())
             .harness_overrides(trusted_overrides.clone())
@@ -4095,6 +4106,7 @@ trust_level = "untrusted"
             ..trusted_overrides
         };
         let untrusted_config = ConfigBuilder::default()
+            .cli_overrides(crate::test_support::openai_provider_overrides())
             .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
             .nez_home(nez_home)
             .harness_overrides(untrusted_overrides)

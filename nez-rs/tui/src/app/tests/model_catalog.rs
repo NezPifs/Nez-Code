@@ -25,6 +25,11 @@ fn bedrock_model_presets() -> Vec<ModelPreset> {
 #[tokio::test]
 async fn model_picker_refresh_updates_app_catalog_from_app_server() -> Result<()> {
     let (mut app, mut rx, _op_rx) = make_test_app_with_channels().await;
+    // The catalog and service tiers under test come from the hosted provider.
+    std::fs::write(
+        app.config.nez_home.join("config.toml"),
+        "model_provider = \"openai\"\n",
+    )?;
     let mut app_server = start_config_write_test_app_server(&app).await?;
     let mut tui = crate::tui::test_support::make_test_tui()?;
     let fast = Some(ServiceTier::Fast.request_value());

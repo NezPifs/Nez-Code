@@ -11,9 +11,14 @@ pub(super) async fn test_config() -> (tempfile::TempDir, Config) {
         .prefix("chatwidget-tests-")
         .tempdir()
         .expect("tempdir");
+    // Widget tests exercise the hosted Responses flows (rate limits, plans),
+    // so they pin the OpenAI provider rather than the local default.
     let mut config = Config::load_default_with_cli_overrides_for_nez_home(
         nez_home.path().to_path_buf(),
-        Vec::new(),
+        vec![(
+            "model_provider".to_string(),
+            toml::Value::String("openai".to_string()),
+        )],
     )
     .await
     .expect("config");

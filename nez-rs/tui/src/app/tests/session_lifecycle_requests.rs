@@ -489,7 +489,7 @@ pub(super) async fn start_recording_app_server_with_realtime_speech(
     let mut embedded = crate::start_embedded_app_server(
         nez_arg0::Arg0DispatchPaths::default(),
         config.clone(),
-        Vec::new(),
+        crate::test_support::openai_provider_overrides(),
         loader_overrides,
         /*strict_config*/ false,
         nez_config::CloudConfigBundleLoader::default(),
@@ -3760,7 +3760,11 @@ async fn managed_worktree_transitions_bind_owner_and_preserve_only_fork_history(
     let project_pool = dunce::canonicalize(root.path())?.join("project-pool");
     fs::create_dir_all(&home)?;
     fs::create_dir_all(source.join(".nez"))?;
-    fs::write(home.join("config.toml"), "[features]\nworktrees = true\n")?;
+    // The rebuilt config reads the user layer; select the provider the test asserts on.
+    fs::write(
+        home.join("config.toml"),
+        "model_provider = \"openai\"\n[features]\nworktrees = true\n",
+    )?;
     crate::legacy_core::config::set_project_trust_level(
         &home,
         &source,
@@ -3842,7 +3846,7 @@ model_reasoning_effort = "low"
     let contents = fs::read_to_string(&host_config)?;
     fs::write(
         host_config,
-        format!("model_provider = \"ollama\"\n{contents}"),
+        contents.replace("model_provider = \"openai\"", "model_provider = \"ollama\""),
     )?;
     let original = app.chat_widget.thread_id().expect("original thread");
     server.thread_inject_items(original, vec![serde_json::from_value(serde_json::json!({

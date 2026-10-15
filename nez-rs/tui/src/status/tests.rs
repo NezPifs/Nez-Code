@@ -135,6 +135,10 @@ fn app_server_workspace_write_profile(network_enabled: bool) -> PermissionProfil
 async fn test_config(temp_home: &TempDir) -> Config {
     let mut config = ConfigBuilder::default()
         .nez_home(temp_home.path().to_path_buf())
+        .cli_overrides(vec![(
+            "model_provider".to_string(),
+            toml::Value::String("openai".to_string()),
+        )])
         .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
         .build()
         .await
@@ -364,7 +368,10 @@ async fn status_snapshot_shows_chatgpt_plan_without_email() {
         .await;
     std::fs::write(
         &profile_path,
-        format!("chatgpt_base_url = '{}'", server.uri()),
+        format!(
+            "model_provider = 'openai'\nchatgpt_base_url = '{}'",
+            server.uri()
+        ),
     )
     .expect("configure local ChatGPT fixture");
     let mut config = test_config(&temp_home).await;

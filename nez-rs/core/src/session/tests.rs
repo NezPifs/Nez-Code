@@ -4983,6 +4983,7 @@ async fn build_test_config(nez_home: &Path) -> Config {
         .nez_home(nez_home.to_path_buf())
         .harness_overrides(ConfigOverrides {
             model: Some("gpt-5.5".to_string()),
+            model_provider: Some(nez_model_provider_info::OPENAI_PROVIDER_ID.to_string()),
             ..Default::default()
         })
         .build()

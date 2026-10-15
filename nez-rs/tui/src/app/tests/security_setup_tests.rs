@@ -23,7 +23,10 @@ async fn security_setup_fetch_with_default_features_uses_authenticated_nez_endpo
     app.config.cli_auth_credentials_store_mode = AuthCredentialsStoreMode::File;
     std::fs::write(
         app.config.nez_home.join("config.toml"),
-        format!("chatgpt_base_url = {:?}\n", backend.uri()),
+        format!(
+            "model_provider = \"openai\"\nchatgpt_base_url = {:?}\n",
+            backend.uri()
+        ),
     )?;
     write_chatgpt_auth(
         &app.config.nez_home,
