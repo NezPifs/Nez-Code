@@ -259,3 +259,54 @@ fn unusable_text_tool_blocks_are_reported_in_the_reply() {
         other => panic!("unexpected event: {other:?}"),
     }
 }
+
+async fn pump_lines(
+    dialect: ChatDialect,
+    body: &'static str,
+) -> Vec<Result<ResponseEvent, ApiError>> {
+    use futures::StreamExt;
+    let bytes = futures::stream::iter([Ok(bytes::Bytes::from_static(body.as_bytes()))]).boxed();
+    let prepared = prepare(&request(None), &ChatOptions::new(dialect)).expect("prepare");
+    let (tx, mut rx) = mpsc::channel(16);
+    pump(bytes, tx, prepared, dialect, Duration::from_secs(5)).await;
+    let mut events = Vec::new();
+    while let Some(event) = rx.recv().await {
+        events.push(event);
+    }
+    events
+}
+
+#[tokio::test]
+async fn a_stream_cut_off_before_the_terminal_marker_is_an_error() {
+    let events = pump_lines(
+        ChatDialect::Ollama,
+        "{\"message\":{\"role\":\"assistant\",\"content\":\"Half a sen\"},\"done\":false}\n",
+    )
+    .await;
+    assert!(matches!(events.last(), Some(Err(ApiError::Stream(_)))));
+    assert!(
+        !events
+            .iter()
+            .any(|event| matches!(event, Ok(ResponseEvent::Completed { .. })))
+    );
+
+    let events = pump_lines(
+        ChatDialect::OpenAi,
+        "data: {\"choices\":[{\"delta\":{\"content\":\"Half\"}}]}\n\n",
+    )
+    .await;
+    assert!(matches!(events.last(), Some(Err(ApiError::Stream(_)))));
+}
+
+#[tokio::test]
+async fn a_finish_reason_without_done_still_completes() {
+    let events = pump_lines(
+        ChatDialect::OpenAi,
+        "data: {\"choices\":[{\"delta\":{\"content\":\"Hi\"},\"finish_reason\":\"stop\"}]}\n\n",
+    )
+    .await;
+    assert!(matches!(
+        events.last(),
+        Some(Ok(ResponseEvent::Completed { .. }))
+    ));
+}

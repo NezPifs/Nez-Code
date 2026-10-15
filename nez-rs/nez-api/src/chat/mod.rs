@@ -417,6 +417,17 @@ async fn pump(
             }
         }
         if ended {
+            // A connection closed by a proxy or a crashed server looks like a
+            // clean end of stream. Without a terminal marker the reply may be
+            // cut short, so let the caller retry instead of keeping it.
+            if !acc.done && acc.finish_reason.is_none() {
+                let _ = tx
+                    .send(Err(ApiError::Stream(
+                        "model server closed the stream before the reply finished".to_string(),
+                    )))
+                    .await;
+                return;
+            }
             break;
         }
     }

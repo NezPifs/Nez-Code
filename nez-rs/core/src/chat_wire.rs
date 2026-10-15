@@ -31,6 +31,8 @@ pub(crate) struct ChatRequestContext<'a> {
     pub capabilities: &'a ModelCapabilities,
     /// Use the text tool protocol even for models with native tool support.
     pub force_text_tools: bool,
+    /// The user set the reasoning effort to `none`.
+    pub reasoning_disabled: bool,
 }
 
 /// `NEZ_DISABLE_NATIVE_TOOLS=1` switches every model to the text protocol,
@@ -46,6 +48,11 @@ pub(crate) fn chat_options(ctx: &ChatRequestContext<'_>) -> ChatOptions {
     options.top_p = Some(ctx.profile.sampling.top_p);
     if ctx.dialect == ChatDialect::Ollama {
         options.num_ctx = Some(effective_context_tokens(ctx));
+    }
+    if ctx.reasoning_disabled {
+        options.think = Some(false);
+        // An explicit choice, so forward it to OpenAI-compatible servers too.
+        options.send_reasoning_effort = true;
     }
     match ctx
         .profile

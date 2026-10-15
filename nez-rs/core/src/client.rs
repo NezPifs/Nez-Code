@@ -2008,6 +2008,10 @@ impl ResponsesHttpExecutor<'_> {
             profile: &profile,
             capabilities: &capabilities,
             force_text_tools: crate::chat_wire::native_tools_disabled_by_env(),
+            reasoning_disabled: request
+                .reasoning
+                .as_ref()
+                .is_some_and(|reasoning| reasoning.effort == Some(ReasoningEffortConfig::None)),
         });
 
         let path = match dialect {
