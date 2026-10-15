@@ -258,6 +258,71 @@ fn unusable_text_tool_blocks_are_reported_in_the_reply() {
         ),
         other => panic!("unexpected event: {other:?}"),
     }
+    // The turn continues so the model can correct the call.
+    assert!(matches!(
+        events.last(),
+        Some(ResponseEvent::Completed {
+            end_turn: Some(false),
+            ..
+        })
+    ));
+}
+
+fn malformed_reply() -> ResponseItem {
+    serde_json::from_value(json!({
+        "type": "message",
+        "role": "assistant",
+        "content": [{"type": "output_text", "text": "Tool call not run: `ReadFile` needs a `path`."}],
+    }))
+    .expect("assistant message")
+}
+
+#[test]
+fn malformed_tool_replies_are_retried_a_bounded_number_of_times() {
+    let mut req = request(Some(shell_tool()));
+    req.input.push(malformed_reply());
+    let prepared = prepare(&req, &text_options()).expect("prepare");
+    assert!(prepared.retry_malformed_calls);
+    let messages = prepared.body["messages"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
+    let last = messages.last().cloned().unwrap_or_default();
+    assert_eq!(last["role"], "user");
+    assert!(
+        last["content"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("could not be run")
+    );
+
+    req.input.push(malformed_reply());
+    let prepared = prepare(&req, &text_options()).expect("prepare");
+    assert!(!prepared.retry_malformed_calls);
+}
+
+#[test]
+fn output_schema_does_not_replace_the_text_tool_envelope() {
+    let schema = json!({"type": "object", "properties": {"ok": {"type": "boolean"}},
+                        "additionalProperties": false});
+    let mut req = request(Some(shell_tool()));
+    req.text = Some(TextControls {
+        verbosity: None,
+        format: Some(TextFormat {
+            r#type: TextFormatType::JsonSchema,
+            strict: true,
+            schema,
+            name: "x".to_string(),
+        }),
+    });
+    let body = prepare(&req, &text_options()).expect("prepare").body;
+    assert!(body["format"]["properties"].get("tool_calls").is_some());
+    let system = body["messages"][0]["content"].as_str().unwrap_or_default();
+    assert!(system.contains("final answer"), "{system}");
+    assert!(
+        system.contains("\"additionalProperties\":false"),
+        "{system}"
+    );
 }
 
 async fn pump_lines(

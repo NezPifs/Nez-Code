@@ -188,7 +188,16 @@ pub(crate) struct Prepared {
     pub tools: convert::ChatTools,
     /// Tool calls arrive as text and are parsed when the reply completes.
     pub text_tools: bool,
+    /// A reply with only unusable tool blocks asks the model to try again.
+    /// Cleared once it has failed that way `MALFORMED_CALL_RETRIES` times.
+    pub retry_malformed_calls: bool,
 }
+
+/// Prefix of the note that replaces a tool block Nez-Code could not run.
+const TOOL_CALL_NOT_RUN: &str = "Tool call not run:";
+const MALFORMED_CALL_RETRIES: usize = 2;
+const MALFORMED_CALL_NUDGE: &str = "Your last tool call could not be run; the reason is in your \
+     previous message. Fix the call and try again, using the tool format from the system prompt.";
 
 /// Builds the provider request body.
 pub(crate) fn prepare(
@@ -226,11 +235,34 @@ pub(crate) fn prepare(
             native_tools,
         },
     );
+    let output_schema = request
+        .text
+        .as_ref()
+        .and_then(|text| text.format.as_ref())
+        .map(|format| format.schema.clone());
     if let Some(format) = text_format {
         append_system_text(
             &mut messages,
             &text_tools::protocol_instructions(&tools, format),
         );
+        // Tool blocks are plain text here, so constraining the whole reply
+        // to the caller's schema would make tools unreachable. Ask for the
+        // schema in the final answer instead.
+        if let Some(schema) = &output_schema {
+            append_system_text(
+                &mut messages,
+                &format!(
+                    "When you give your final answer, write it as JSON that matches this \
+                     schema and nothing else:\n{schema}"
+                ),
+            );
+        }
+    }
+
+    let malformed_replies = trailing_malformed_replies(&input);
+    if text_format.is_some() && malformed_replies > 0 {
+        // Ollama continues a trailing assistant message instead of answering it.
+        messages.push(json!({"role": "user", "content": MALFORMED_CALL_NUDGE}));
     }
 
     let images_present = has_images(&messages);
@@ -242,20 +274,14 @@ pub(crate) fn prepare(
     if send_tools {
         body.insert("tools".to_string(), Value::Array(tools.definitions.clone()));
     }
-    let schema = request
-        .text
-        .as_ref()
-        .and_then(|text| text.format.as_ref())
-        .map(|format| format.schema.clone())
-        .or_else(|| {
-            // Schema-constrained decoding removes most malformed tool blocks,
-            // but vision models handle images poorly under it.
-            (text_format.is_some()
-                && options.structured_output
-                && options.dialect == ChatDialect::Ollama
-                && !images_present)
-                .then(|| text_tools::structured_output_schema(&tools))
-        });
+    let schema = if text_format.is_some() {
+        // Schema-constrained decoding removes most malformed tool blocks,
+        // but vision models handle images poorly under it.
+        (options.structured_output && options.dialect == ChatDialect::Ollama && !images_present)
+            .then(|| text_tools::structured_output_schema(&tools))
+    } else {
+        output_schema
+    };
 
     match options.dialect {
         ChatDialect::OpenAi => {
@@ -318,7 +344,29 @@ pub(crate) fn prepare(
         body: Value::Object(body),
         tools,
         text_tools: text_format.is_some(),
+        retry_malformed_calls: malformed_replies < MALFORMED_CALL_RETRIES,
     })
+}
+
+/// Counts the assistant replies at the end of the history that only reported
+/// tool calls that could not be run.
+fn trailing_malformed_replies(input: &[Value]) -> usize {
+    input
+        .iter()
+        .rev()
+        .take_while(|item| {
+            item.get("type").and_then(Value::as_str) == Some("message")
+                && item.get("role").and_then(Value::as_str) == Some("assistant")
+        })
+        .filter(|item| {
+            item.get("content")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+                .filter_map(|part| part.get("text").and_then(Value::as_str))
+                .any(|text| text.contains(TOOL_CALL_NOT_RUN))
+        })
+        .count()
 }
 
 /// Appends a paragraph to the leading system message, creating one if needed.
@@ -432,7 +480,15 @@ async fn pump(
         }
     }
 
-    for event in finish(&mut acc, &prepared.tools, prepared.text_tools) {
+    let mut events = finish(&mut acc, &prepared.tools, prepared.text_tools);
+    if !prepared.retry_malformed_calls {
+        for event in &mut events {
+            if let ResponseEvent::Completed { end_turn, .. } = event {
+                *end_turn = None;
+            }
+        }
+    }
+    for event in events {
         if tx.send(Ok(event)).await.is_err() {
             return;
         }
@@ -452,14 +508,20 @@ pub(crate) fn finish(
     {
         events.push(ResponseEvent::OutputItemDone(item));
     }
+    let mut end_turn = None;
     if text_tools {
         let parsed = text_tools::parse(&acc.text, tools);
+        // Only errors: send them back so the model can correct the call
+        // instead of ending the turn on them.
+        if parsed.calls.is_empty() && !parsed.errors.is_empty() {
+            end_turn = Some(false);
+        }
         let mut text = parsed.text;
         for error in &parsed.errors {
             if !text.is_empty() {
                 text.push_str("\n\n");
             }
-            text.push_str(&format!("Tool call not run: {error}"));
+            text.push_str(&format!("{TOOL_CALL_NOT_RUN} {error}"));
         }
         if !text.is_empty() {
             events.push(ResponseEvent::OutputItemDone(stream::assistant_message(
@@ -487,7 +549,7 @@ pub(crate) fn finish(
         response_id,
         token_usage: acc.usage.clone(),
         usage_metadata: None,
-        end_turn: None,
+        end_turn,
     });
     events
 }
