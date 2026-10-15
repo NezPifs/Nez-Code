@@ -845,28 +845,33 @@ pub(super) async fn run_main_inner(
     let feedback_layer = feedback.logger_layer();
     let feedback_metadata_layer = feedback.metadata_layer();
 
-    if cli.oss && model_provider_override.is_some() {
-        // We're in the oss section, so provider_id should be Some
-        // Let's handle None case gracefully though just in case
-        let provider_id = match model_provider_override.as_ref() {
-            Some(id) => id,
-            None => {
-                error!("OSS provider unexpectedly not set when oss flag is used");
-                return Err(std::io::Error::other(
-                    "OSS provider not set but oss flag was used",
-                ));
-            }
-        };
+    let explicit_oss = cli.oss && model_provider_override.is_some();
+    let local_provider = if explicit_oss {
+        model_provider_override.clone()
+    } else {
+        (config.model_provider_id == nez_model_provider_info::OLLAMA_OSS_PROVIDER_ID)
+            .then(|| config.model_provider_id.clone())
+    };
+    if let Some(provider_id) = local_provider {
         startup_draft.flush_pending_events().await?;
-        startup_draft
+        let readiness = startup_draft
             .tui_mut()
             .with_restored(crate::tui::TerminalHandoff::Restore, || async {
                 // Provider setup may print progress or block in an external downloader.
                 // Restore ordinary signal handling so Ctrl+C can interrupt that process.
                 crossterm::terminal::disable_raw_mode()?;
-                ensure_oss_provider_ready(provider_id, &config).await
+                ensure_oss_provider_ready(&provider_id, &config).await
             })
-            .await?;
+            .await;
+        match readiness {
+            // Without `--oss` the session can still start: the user may switch
+            // providers or start Ollama before the first turn.
+            Err(err) if !explicit_oss => {
+                tracing::warn!("local model provider is not ready: {err}");
+                config.startup_warnings.push(err.to_string());
+            }
+            result => result?,
+        }
     }
 
     let otel_logger_layer = otel.as_ref().and_then(|o| o.logger_layer());
