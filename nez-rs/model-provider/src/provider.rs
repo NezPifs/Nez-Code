@@ -394,6 +394,13 @@ impl ConfiguredModelProvider {
                 model_catalog,
             ));
         }
+        // Chat and Ollama servers do not serve the bundled OpenAI catalog.
+        if self.info.wire_api != nez_model_provider_info::WireApi::Responses {
+            return Arc::new(crate::local_models::LocalModelsManager::new(
+                self.info.clone(),
+                self.auth_manager.clone(),
+            ));
+        }
         let endpoint = Arc::new(OpenAiModelsEndpoint::new(
             self.info.clone(),
             self.auth_manager.clone(),

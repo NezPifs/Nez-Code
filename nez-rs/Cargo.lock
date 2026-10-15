@@ -8569,6 +8569,7 @@ dependencies = [
  "nez-http-client",
  "nez-keyring-store",
  "nez-login",
+ "nez-model-profiles",
  "nez-model-provider-info",
  "nez-models-manager",
  "nez-otel",
