@@ -1,0 +1,101 @@
+name: CLI tool sandbox
+
+# Runs the real `nez` binary against scripted model servers and checks the
+# files, command output and history it produces. The optional live job swaps
+# the scripted server for a small model on a CPU-only runner.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      live_model:
+        description: Also run the live CPU model benchmark
+        type: boolean
+        default: false
+
+concurrency:
+  group: cli-sandbox-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  CARGO_PROFILE_DEV_DEBUG: "0"
+
+jobs:
+  scripted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/free-disk-space
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
+      - name: Allow unprivileged user namespaces for the bubblewrap sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: sandbox
+      - name: Build nez
+        working-directory: nez-rs
+        run: cargo build --locked --bin nez
+      - name: Run scripted cases
+        run: python3 scripts/cli-tool-sandbox.py --nez nez-rs/target/debug/nez
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sandbox-scripted
+          path: ${{ runner.temp }}/nez-sandbox-results
+          retention-days: 7
+
+  live:
+    if: github.event_name == 'workflow_dispatch' && inputs.live_model
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BASE_MODEL: qwen3:1.7b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/free-disk-space
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap zstd
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: sandbox
+      - name: Build nez
+        working-directory: nez-rs
+        run: cargo build --locked --bin nez
+      - name: Start Ollama with a small model
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          for _ in $(seq 1 60); do curl -fsS http://127.0.0.1:11434/api/version && break; sleep 1; done
+          ollama pull "$BASE_MODEL"
+          # The sandbox drives the default model name; alias the small model to it.
+          ollama cp "$BASE_MODEL" qwen3.5:9b
+      - name: Live read-edit-run benchmark
+        run: python3 scripts/cli-tool-sandbox.py --nez nez-rs/target/debug/nez --live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sandbox-live
+          path: |
+            ${{ runner.temp }}/nez-sandbox-results
+            ${{ runner.temp }}/ollama.log
+          retention-days: 7
