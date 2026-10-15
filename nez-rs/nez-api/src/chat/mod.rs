@@ -12,6 +12,7 @@
 
 mod capabilities;
 mod convert;
+mod guards;
 mod stream;
 mod text_tools;
 
@@ -33,6 +34,7 @@ use serde::Serialize;
 use serde_json::Map;
 use serde_json::Value;
 use serde_json::json;
+use std::sync::Arc;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
@@ -76,6 +78,9 @@ pub struct ChatOptions {
     pub structured_output: bool,
     /// Forward image content. When false, images are replaced with a note.
     pub allow_images: bool,
+    /// Leave out tools that small local context windows cannot afford
+    /// (sub-agents and goals), see [`is_heavy_tool`].
+    pub lean_tools: bool,
     pub max_output_tokens: Option<u32>,
 }
 
@@ -92,6 +97,7 @@ impl ChatOptions {
             text_tools: None,
             structured_output: false,
             allow_images: true,
+            lean_tools: false,
             max_output_tokens: None,
         }
     }
@@ -110,8 +116,23 @@ fn next_response_id() -> String {
 }
 
 pub struct ChatClient<T: HttpTransport> {
-    session: EndpointSession<T>,
+    session: Arc<EndpointSession<T>>,
     dialect: ChatDialect,
+}
+
+/// Note shown when the model returns nothing, even after the retry.
+pub const EMPTY_REPLY_TEXT: &str = "The model returned an empty reply twice, so the task may be \
+    unfinished. Ask again, or switch to a larger model if this keeps happening.";
+
+const RECOVERY_PROMPT_WITH_TOOLS: &str = "Your last reply was empty. Continue the task now: \
+    reply with a tool call in the JSON format described above, or with your final answer.";
+const RECOVERY_PROMPT: &str = "Your last reply was empty. Answer the last message now.";
+
+/// A second request sent once if the first reply is empty.
+struct Recovery<T: HttpTransport> {
+    session: Arc<EndpointSession<T>>,
+    prepared: Prepared,
+    headers: HeaderMap,
 }
 
 impl<T: HttpTransport + 'static> ChatClient<T> {
@@ -127,7 +148,7 @@ impl<T: HttpTransport + 'static> ChatClient<T> {
             provider.base_url = ollama_root(&provider.base_url);
         }
         Self {
-            session: EndpointSession::new(transport, provider, auth),
+            session: Arc::new(EndpointSession::new(transport, provider, auth)),
             dialect,
         }
     }
@@ -143,23 +164,21 @@ impl<T: HttpTransport + 'static> ChatClient<T> {
             ..options
         };
         let prepared = prepare(request, &options)?;
-        let path = match options.dialect {
-            ChatDialect::OpenAi => "/chat/completions",
-            ChatDialect::Ollama => "/api/chat",
+        if let Some(reply) = prepared.stop_reply.clone() {
+            return Ok(canned_reply(reply));
+        }
+        let recovery = Recovery {
+            session: Arc::clone(&self.session),
+            prepared: prepare_recovery(request, &options)?,
+            headers: extra_headers.clone(),
         };
-        let body = EncodedJsonBody::encode(&prepared.body)
-            .map_err(|e| ApiError::Stream(format!("failed to encode chat request: {e}")))?;
-        let accept = match options.dialect {
-            ChatDialect::OpenAi => "text/event-stream",
-            ChatDialect::Ollama => "application/x-ndjson",
-        };
-        let response = self
-            .session
-            .stream_encoded_json_with(Method::POST, path, extra_headers, Some(body), |req| {
-                req.headers
-                    .insert(http::header::ACCEPT, HeaderValue::from_static(accept));
-            })
-            .await?;
+        let response = send(
+            &self.session,
+            options.dialect,
+            &prepared.body,
+            extra_headers,
+        )
+        .await?;
         let upstream_request_id = response
             .headers
             .get("x-request-id")
@@ -173,6 +192,7 @@ impl<T: HttpTransport + 'static> ChatClient<T> {
             prepared,
             options.dialect,
             idle_timeout,
+            Some(recovery),
         ));
         Ok(ResponseStream {
             rx_event: rx,
@@ -182,12 +202,92 @@ impl<T: HttpTransport + 'static> ChatClient<T> {
     }
 }
 
+async fn send<T: HttpTransport>(
+    session: &EndpointSession<T>,
+    dialect: ChatDialect,
+    body: &Value,
+    extra_headers: HeaderMap,
+) -> Result<nez_client::StreamResponse, ApiError> {
+    let (path, accept) = match dialect {
+        ChatDialect::OpenAi => ("/chat/completions", "text/event-stream"),
+        ChatDialect::Ollama => ("/api/chat", "application/x-ndjson"),
+    };
+    let body = EncodedJsonBody::encode(body)
+        .map_err(|e| ApiError::Stream(format!("failed to encode chat request: {e}")))?;
+    session
+        .stream_encoded_json_with(Method::POST, path, extra_headers, Some(body), |req| {
+            req.headers
+                .insert(http::header::ACCEPT, HeaderValue::from_static(accept));
+        })
+        .await
+}
+
+/// A response produced without calling the model.
+fn canned_reply(text: String) -> ResponseStream {
+    let response_id = next_response_id();
+    let (tx, rx) = mpsc::channel(4);
+    let events = [
+        ResponseEvent::Created {
+            response_id: Some(response_id.clone()),
+        },
+        ResponseEvent::OutputItemDone(stream::assistant_message(
+            &format!("{response_id}_msg"),
+            &text,
+        )),
+        ResponseEvent::Completed {
+            response_id,
+            token_usage: None,
+            usage_metadata: None,
+            end_turn: None,
+        },
+    ];
+    for event in events {
+        // The channel has room for every event, so this cannot fail.
+        let _ = tx.try_send(Ok(event));
+    }
+    ResponseStream {
+        rx_event: rx,
+        upstream_request_id: None,
+        interrupt: None,
+    }
+}
+
+/// The retry for an empty reply: the JSON text protocol, which small models
+/// follow more reliably than a native tool template, plus an explicit nudge.
+fn prepare_recovery(
+    request: &ResponsesApiRequest,
+    options: &ChatOptions,
+) -> Result<Prepared, ApiError> {
+    let options = ChatOptions {
+        native_tools: false,
+        text_tools: Some(TextToolFormat::Json),
+        structured_output: options.dialect == ChatDialect::Ollama,
+        ..options.clone()
+    };
+    let mut prepared = prepare(request, &options)?;
+    let prompt = if prepared.text_tools {
+        RECOVERY_PROMPT_WITH_TOOLS
+    } else {
+        RECOVERY_PROMPT
+    };
+    if let Some(messages) = prepared
+        .body
+        .get_mut("messages")
+        .and_then(Value::as_array_mut)
+    {
+        messages.push(json!({"role": "user", "content": prompt}));
+    }
+    Ok(prepared)
+}
+
 /// A request ready to send plus what is needed to interpret the reply.
 pub(crate) struct Prepared {
     pub body: Value,
     pub tools: convert::ChatTools,
     /// Tool calls arrive as text and are parsed when the reply completes.
     pub text_tools: bool,
+    /// Set when the history shows the turn should end without asking the model.
+    pub stop_reply: Option<String>,
 }
 
 /// Builds the provider request body.
@@ -197,7 +297,10 @@ pub(crate) fn prepare(
 ) -> Result<Prepared, ApiError> {
     let input = serde_json::to_value(&request.input)
         .map_err(|e| ApiError::Stream(format!("failed to encode chat history: {e}")))?;
-    let input = input.as_array().cloned().unwrap_or_default();
+    let mut input = input.as_array().cloned().unwrap_or_default();
+    guards::collapse_duplicate_results(&mut input);
+    let reminder = guards::goal_reminder(&input);
+    let stop_reply = guards::repeated_failure(&input);
 
     let mut tool_values: Vec<Value> = request
         .tools
@@ -213,7 +316,10 @@ pub(crate) fn prepare(
             tool_values.extend(extra.iter().cloned());
         }
     }
-    let tools = convert::convert_tools(Some(&Value::Array(tool_values)));
+    let mut tools = convert::convert_tools(Some(&Value::Array(tool_values)));
+    if options.lean_tools {
+        tools.retain(|name| !is_heavy_tool(name));
+    }
     let text_format = options.text_tools.filter(|_| !tools.is_empty());
     let native_tools = options.native_tools && text_format.is_none();
 
@@ -231,6 +337,9 @@ pub(crate) fn prepare(
             &mut messages,
             &text_tools::protocol_instructions(&tools, format),
         );
+    }
+    if let Some(reminder) = reminder {
+        messages.push(json!({"role": "user", "content": reminder}));
     }
 
     let images_present = has_images(&messages);
@@ -318,7 +427,15 @@ pub(crate) fn prepare(
         body: Value::Object(body),
         tools,
         text_tools: text_format.is_some(),
+        stop_reply,
     })
+}
+
+/// Sub-agent and goal tools: about 3k tokens of definitions that a 16k local
+/// context cannot spare, for workflows small models do not manage well.
+pub fn is_heavy_tool(flat_name: &str) -> bool {
+    flat_name.starts_with("multi_agent")
+        || matches!(flat_name, "get_goal" | "create_goal" | "update_goal")
 }
 
 /// Appends a paragraph to the leading system message, creating one if needed.
@@ -355,16 +472,16 @@ fn has_images(messages: &[Value]) -> bool {
     })
 }
 
-async fn pump(
-    mut bytes: nez_client::ByteStream,
+async fn pump<T: HttpTransport + 'static>(
+    bytes: nez_client::ByteStream,
     tx: mpsc::Sender<Result<ResponseEvent, ApiError>>,
-    prepared: Prepared,
+    mut prepared: Prepared,
     dialect: ChatDialect,
     idle_timeout: Duration,
+    mut recovery: Option<Recovery<T>>,
 ) {
     let response_id = next_response_id();
     let mut acc = stream::Accumulator::new(response_id.clone());
-    let mut splitter = stream::LineSplitter::default();
     if tx
         .send(Ok(ResponseEvent::Created {
             response_id: Some(response_id.clone()),
@@ -375,7 +492,57 @@ async fn pump(
         return;
     }
 
-    'read: loop {
+    let mut bytes = bytes;
+    loop {
+        if read_reply(bytes, &tx, &mut acc, &prepared, dialect, idle_timeout)
+            .await
+            .is_err()
+        {
+            return;
+        }
+        if acc.has_output() {
+            break;
+        }
+        let Some(retry) = recovery.take() else {
+            acc.text = EMPTY_REPLY_TEXT.to_string();
+            break;
+        };
+        tracing::info!("model returned an empty reply; retrying once with the JSON tool protocol");
+        match send(&retry.session, dialect, &retry.prepared.body, retry.headers).await {
+            Ok(response) => {
+                acc.restart();
+                prepared = retry.prepared;
+                bytes = response.bytes;
+            }
+            Err(err) => {
+                tracing::warn!("empty-reply retry failed: {err}");
+                acc.text = EMPTY_REPLY_TEXT.to_string();
+                break;
+            }
+        }
+    }
+
+    // The fallback note is plain prose; never parse it as tool calls.
+    let text_tools = prepared.text_tools && acc.text != EMPTY_REPLY_TEXT;
+    for event in finish(&mut acc, &prepared.tools, text_tools) {
+        if tx.send(Ok(event)).await.is_err() {
+            return;
+        }
+    }
+}
+
+/// Streams one reply into `acc`. `Err` means the stream failed (the error was
+/// already sent) or the receiver went away.
+async fn read_reply(
+    mut bytes: nez_client::ByteStream,
+    tx: &mpsc::Sender<Result<ResponseEvent, ApiError>>,
+    acc: &mut stream::Accumulator,
+    prepared: &Prepared,
+    dialect: ChatDialect,
+    idle_timeout: Duration,
+) -> Result<(), ()> {
+    let mut splitter = stream::LineSplitter::default();
+    loop {
         let next = match tokio::time::timeout(idle_timeout, bytes.next()).await {
             Ok(next) => next,
             Err(_) => {
@@ -384,14 +551,14 @@ async fn pump(
                         "model server stopped responding".to_string(),
                     )))
                     .await;
-                return;
+                return Err(());
             }
         };
         let (lines, ended) = match next {
             Some(Ok(chunk)) => (splitter.push(&chunk), false),
             Some(Err(err)) => {
                 let _ = tx.send(Err(ApiError::Transport(err))).await;
-                return;
+                return Err(());
             }
             None => (splitter.finish().into_iter().collect::<Vec<_>>(), true),
         };
@@ -402,28 +569,22 @@ async fn pump(
                     // them would show raw tool blocks to the user.
                     for event in acc.push(chunk, !prepared.text_tools) {
                         if tx.send(Ok(event)).await.is_err() {
-                            return;
+                            return Err(());
                         }
                     }
                     if acc.done {
-                        break 'read;
+                        return Ok(());
                     }
                 }
                 Ok(None) => {}
                 Err(err) => {
                     let _ = tx.send(Err(err)).await;
-                    return;
+                    return Err(());
                 }
             }
         }
         if ended {
-            break;
-        }
-    }
-
-    for event in finish(&mut acc, &prepared.tools, prepared.text_tools) {
-        if tx.send(Ok(event)).await.is_err() {
-            return;
+            return Ok(());
         }
     }
 }

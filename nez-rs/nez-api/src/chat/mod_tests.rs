@@ -259,3 +259,133 @@ fn unusable_text_tool_blocks_are_reported_in_the_reply() {
         other => panic!("unexpected event: {other:?}"),
     }
 }
+
+fn request_with_history(items: Vec<Value>) -> ResponsesApiRequest {
+    let mut req = request(Some(shell_tool()));
+    req.input = items
+        .into_iter()
+        .map(|item| serde_json::from_value(item).expect("history item"))
+        .collect();
+    req
+}
+
+fn failing_call(id: &str) -> [Value; 2] {
+    [
+        json!({"type": "function_call", "name": "shell_command", "call_id": id,
+               "arguments": "{\"command\":\"make\"}"}),
+        json!({"type": "function_call_output", "call_id": id,
+               "output": "make: *** No rule\nProcess exited with code 2"}),
+    ]
+}
+
+#[test]
+fn repeated_failures_end_the_turn_without_a_request() {
+    let mut items = vec![json!({"type": "message", "role": "user",
+        "content": [{"type": "input_text", "text": "build"}]})];
+    for id in ["a", "b", "c"] {
+        items.extend(failing_call(id));
+    }
+    let prepared = prepare(
+        &request_with_history(items),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare");
+    let reply = prepared.stop_reply.unwrap_or_default();
+    assert!(reply.contains("failed 3 times"), "{reply}");
+}
+
+#[test]
+fn long_tool_runs_end_with_a_goal_reminder() {
+    let mut items = vec![json!({"type": "message", "role": "user",
+        "content": [{"type": "input_text", "text": "rename the module"}]})];
+    for i in 0..guards::GOAL_REMINDER_AFTER {
+        let id = format!("c{i}");
+        items.push(
+            json!({"type": "function_call", "name": "shell_command", "call_id": id,
+                          "arguments": format!("{{\"command\":\"step {i}\"}}")}),
+        );
+        items.push(json!({"type": "function_call_output", "call_id": id, "output": "ok"}));
+    }
+    let body = prepare(
+        &request_with_history(items),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare")
+    .body;
+    let last = body["messages"]
+        .as_array()
+        .and_then(|m| m.last())
+        .cloned()
+        .unwrap_or_default();
+    assert_eq!(last["role"], "user");
+    assert!(
+        last["content"]
+            .as_str()
+            .is_some_and(|c| c.contains("rename the module")),
+        "{last}"
+    );
+}
+
+#[test]
+fn empty_reply_recovery_uses_the_json_protocol_and_a_nudge() {
+    let prepared = prepare_recovery(
+        &request(Some(shell_tool())),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare");
+    assert!(prepared.text_tools);
+    assert_eq!(prepared.body.get("tools"), None);
+    assert!(prepared.body.get("format").is_some());
+    let last = prepared.body["messages"]
+        .as_array()
+        .and_then(|m| m.last())
+        .cloned()
+        .unwrap_or_default();
+    assert_eq!(last["content"], RECOVERY_PROMPT_WITH_TOOLS);
+}
+
+#[test]
+fn reasoning_only_replies_count_as_empty() {
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let chunk = stream::parse_line(
+        ChatDialect::Ollama,
+        r#"{"message":{"role":"assistant","content":"  ","thinking":"hmm"},"done":true}"#,
+    )
+    .expect("parse")
+    .expect("chunk");
+    acc.push(chunk, true);
+    assert!(!acc.has_output());
+    acc.restart();
+    assert_eq!((acc.text.as_str(), acc.done), ("", false));
+}
+
+#[test]
+fn lean_requests_drop_sub_agent_and_goal_tools() {
+    let tools = json!([
+        {"type": "function", "name": "exec_command", "parameters": {"type": "object", "properties": {}}},
+        {"type": "function", "name": "update_goal", "parameters": {"type": "object", "properties": {}}},
+        {"type": "namespace", "name": "multi_agent_v1", "tools": [
+            {"type": "function", "name": "spawn_agent", "parameters": {"type": "object", "properties": {}}}
+        ]}
+    ]);
+    let mut options = ChatOptions::new(ChatDialect::Ollama);
+    options.lean_tools = true;
+    let body = prepare(&request(Some(tools.clone())), &options)
+        .expect("prepare")
+        .body;
+    let names: Vec<&str> = body["tools"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|t| t["function"]["name"].as_str())
+        .collect();
+    assert_eq!(names, vec!["exec_command"]);
+
+    let full = prepare(
+        &request(Some(tools)),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare")
+    .body;
+    assert_eq!(full["tools"].as_array().map(Vec::len), Some(3));
+}
