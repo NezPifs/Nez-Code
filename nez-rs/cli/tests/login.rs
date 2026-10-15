@@ -303,4 +303,3 @@ async fn debug_prompt_input_follows_authenticated_attribution_setting() -> Resul
     server.verify().await;
     Ok(())
 }
-

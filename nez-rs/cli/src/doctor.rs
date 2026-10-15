@@ -89,7 +89,6 @@ mod updates;
 #[cfg(target_os = "windows")]
 mod windows_dev_drive;
 
-
 use background::background_server_check;
 use git::git_check;
 use output::HumanOutputOptions;
@@ -584,7 +583,6 @@ async fn build_report(
             ]);
         }
     }
-
 
     progress.settle();
 
