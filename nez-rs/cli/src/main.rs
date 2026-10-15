@@ -574,7 +574,7 @@ struct AppServerCommand {
     /// enabled = false
     /// ```
     ///
-    /// See https://developers.openai.com/nez/config-advanced/#metrics for more details.
+    /// See https://github.com/NezPifs/Nez-Code/blob/main/docs/configuration.md#telemetry for more details.
     #[arg(long = "analytics-default-enabled")]
     analytics_default_enabled: bool,
 
@@ -822,7 +822,7 @@ fn resolve_windows_update_command_from_path(
         std::env::join_paths(std::env::split_paths(path_env).filter(|path| path.is_absolute()))?;
     if path_env.is_empty() {
         anyhow::bail!(
-            "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/nez/cli/"
+            "Could not find an absolute update command `{command}` on PATH. Please update manually: https://github.com/NezPifs/Nez-Code#install"
         );
     }
     which::which_in_global(command, Some(&path_env))?
@@ -842,7 +842,7 @@ fn run_update_command() -> anyhow::Result<()> {
     {
         let Some(action) = nez_tui::get_update_action() else {
             anyhow::bail!(
-                "Could not detect the Nez installation method. Please update manually: https://developers.openai.com/nez/cli/"
+                "Could not detect the Nez installation method. Please update manually: https://github.com/NezPifs/Nez-Code#install"
             );
         };
         run_update_action(action, /*cli_executable*/ None)
@@ -2018,15 +2018,7 @@ async fn run_debug_prompt_input_command(
     let user_instructions_provider = Arc::new(NezHomeUserInstructionsProvider::new(
         config.nez_home.clone(),
     ));
-    let auth_manager =
-        AuthManager::shared_from_config(&config, /*enable_nez_api_key_env*/ false).await?;
     let mut extensions = nez_extension_api::ExtensionRegistryBuilder::new();
-    nez_git_attribution::install(
-        &mut extensions,
-        auth_manager,
-        config.chatgpt_base_url.clone(),
-        config.http_client_factory(),
-    );
     nez_skills_extension::install(&mut extensions, |config: &Config| {
         nez_skills_extension::SkillsExtensionConfig {
             include_instructions: config.include_skill_instructions,
@@ -2737,7 +2729,7 @@ mod tests {
         assert_eq!(
             err.to_string(),
             format!(
-                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/nez/cli/"
+                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://github.com/NezPifs/Nez-Code#install"
             )
         );
     }

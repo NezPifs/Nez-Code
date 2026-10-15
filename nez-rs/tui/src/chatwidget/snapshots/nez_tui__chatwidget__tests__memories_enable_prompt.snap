@@ -10,5 +10,6 @@ expression: "render_bottom_popup(&chat, 80)"
                       this thread
       2. Not now      Keep memories disabled
 
-      Learn more: https://developers.openai.com/nez/memories
+      Learn more: https://github.com/NezPifs/Nez-Code/blob/main/docs/
+      configuration.md#memories
       enter select · esc back

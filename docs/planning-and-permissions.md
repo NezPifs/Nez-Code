@@ -41,6 +41,23 @@ sandbox_mode = "workspace-write"
   `never` returns failures to the model instead of asking.
 - `/permissions` changes both for the current session.
 
+### Linux sandbox
+
+On Linux the sandbox uses [bubblewrap](https://github.com/containers/bubblewrap).
+Install it with your package manager (`apt install bubblewrap`,
+`dnf install bubblewrap`). Some distributions restrict unprivileged user
+namespaces; on Ubuntu 24.04 and later run
+`sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` or add an
+AppArmor profile for `bwrap`.
+
+### Windows sandbox
+
+On Windows, commands run under a restricted token with write access limited
+to the project. The first time it is needed Nez-Code asks to set it up; the
+elevated setup creates a dedicated local user so commands cannot reach your
+other files. Without it, choose read-only mode or approve commands
+individually.
+
 Shell commands that change something carry a short description, shown in the
 approval prompt. Commands and patches that touch Nez-Code's own session
 files under `NEZ_HOME` are always refused.

@@ -3,7 +3,7 @@ source: tui/src/chatwidget/tests/permissions.rs
 expression: popup
 ---
   Set up the Nez agent sandbox to protect your files and control network access. Learn more
-  <https://developers.openai.com/nez/windows>
+  <https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#windows-sandbox>
 
 
 › 1. Set up default sandbox (requires Administrator permissions)

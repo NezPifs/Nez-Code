@@ -22,7 +22,7 @@ const MISSING_BWRAP_WARNING: &str = concat!(
     "Nez could not find bubblewrap on PATH. ",
     "Install bubblewrap with your OS package manager. ",
     "See the sandbox prerequisites: ",
-    "https://developers.openai.com/nez/concepts/sandboxing#prerequisites. ",
+    "https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#linux-sandbox. ",
     "Nez will use the bundled bubblewrap in the meantime.",
 );
 const USER_NAMESPACE_WARNING: &str =
