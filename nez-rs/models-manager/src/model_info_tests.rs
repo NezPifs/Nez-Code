@@ -229,11 +229,26 @@ fn explicit_empty_base_instructions_stay_empty_with_personality_none() {
 }
 
 #[test]
-fn unknown_model_uses_builtin_instruction_template() {
+fn unknown_model_uses_the_local_instruction_template() {
     let model = model_info_from_slug("unknown-model");
 
-    assert_eq!(render_model_instructions(&model), BASE_INSTRUCTIONS);
+    assert_eq!(render_model_instructions(&model), LOCAL_INSTRUCTIONS);
     assert!(model.used_fallback_model_metadata);
+}
+
+#[test]
+fn hosted_openai_models_keep_the_full_instructions() {
+    for slug in ["qwen3.5:9b", "deepseek-chat"] {
+        assert_eq!(
+            render_model_instructions(&model_info_from_slug(slug)),
+            LOCAL_INSTRUCTIONS,
+            "{slug}"
+        );
+    }
+    assert_eq!(
+        render_model_instructions(&model_info_from_slug("gpt-5.4-custom")),
+        BASE_INSTRUCTIONS
+    );
 }
 
 #[test]

@@ -1,5 +1,6 @@
 ---
 source: tui/src/managed_worktree_model_tests.rs
+assertion_line: 249
 expression: "context_snapshot::format_context_snapshot(\"Model request history for creating, polling and listing a task-attached checkout through MCP, without a separate creation confirmation. Separate assertions verify retained cwd/environment roots, not sandbox enforcement.\",\n&entries,\n&ContextSnapshotOptions::default().rewrite_known_segments().include_request_settings(),)"
 ---
 Scenario: Model request history for creating, polling and listing a task-attached checkout through MCP, without a separate creation confirmation. Separate assertions verify retained cwd/environment roots, not sandbox enforcement.
@@ -21,22 +22,22 @@ Settings:
       - function/list_worktrees
 -- request 1 (request) --
 00:message/developer:
-    You are a coding agent running in Nez-Code, a terminal-based coding assistant. You are expected to be precise, safe, and helpful.
+    You are Nez, a coding agent running on the user's computer. You work in their project through the tools ...thing risky, so act instead of asking for permission. [hash=51a31a915ab45ba9]
 
-    Your capabilities:
+    # How to work
 
-    - Receive user prompts and other context provided by the harness, such as files in the workspace.
-    - Communicate with the user by streaming thinking & responses, and by making & updating plans.
-    - Emit function calls to run terminal commands and apply patches. Depending on how this specific run is ... More on this in the "Sandbox and approvals" section. [hash=31cf026fa7b25d6d]
+    - When asked to create, change, fix, improve or extend something, do it with the tools. Do not describe what you would do; do it.
+    - Read a file before you edit it. Edit with `apply_patch`; do not rewrite whole files through the shell.
+    - After a change, verify it: run the tests, the build, or the program, and read the output.
+    - Keep going until the task is done. If you say you will do something, the tool call belongs in the same reply.
+    <OMITTED 30 LINES; ~368 TOKENS; hash=2100eb6aaae9dbc3>
+    # Plans
 
-    <OMITTED 179 LINES; ~3954 TOKENS; hash=2bb87a128bdbe64f>
-    ## Shell commands
+    For tasks with several steps, call `update_plan` with a short list of steps, mark one `in_progress` at a...ted` as you finish it. Skip the plan for quick tasks. [hash=b41c00a29f28aabc]
 
-    When using the shell, you must adhere to the following guidelines:
+    # Final answer
 
-    - When searching for text or files, prefer using `rg` or `rg --files` respectively because `rg` is much ...he `rg` command is not found, then use alternatives.) [hash=67af3ff3b546e946]
-    - Do not use python scripts to attempt to output larger chunks of a file.
-
+    When the task is done, reply briefly: what you changed, how you verified it, and anything the user shoul...ference files by path. Do not paste whole files back. [hash=2e4c33ec4e0bfc8a]
 
 01:message/developer[2]:
     [01] <SKILLS_INSTRUCTIONS>
