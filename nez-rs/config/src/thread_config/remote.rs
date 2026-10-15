@@ -160,6 +160,8 @@ fn model_provider_from_proto(
     let id = provider.id;
     let wire_api = match proto::WireApi::try_from(provider.wire_api) {
         Ok(proto::WireApi::Responses) => WireApi::Responses,
+        Ok(proto::WireApi::Chat) => WireApi::Chat,
+        Ok(proto::WireApi::Ollama) => WireApi::Ollama,
         Ok(proto::WireApi::Unspecified) => {
             return Err(parse_error("remote thread config omitted wire_api"));
         }
@@ -314,6 +316,8 @@ fn proto_string_map(values: HashMap<String, RedactedString>) -> proto::StringMap
 fn proto_wire_api(wire_api: WireApi) -> proto::WireApi {
     match wire_api {
         WireApi::Responses => proto::WireApi::Responses,
+        WireApi::Chat => proto::WireApi::Chat,
+        WireApi::Ollama => proto::WireApi::Ollama,
     }
 }
 
@@ -453,6 +457,18 @@ mod tests {
 
         assert_eq!(id, "local");
         assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn chat_and_ollama_wire_apis_roundtrip() {
+        for wire_api in [WireApi::Chat, WireApi::Ollama] {
+            let mut expected = expected_provider();
+            expected.auth = None;
+            expected.wire_api = wire_api;
+            let proto = model_provider_to_proto("local", expected.clone());
+            let (_, actual) = model_provider_from_proto(proto).expect("model provider from proto");
+            assert_eq!(actual, expected);
+        }
     }
 
     #[test]

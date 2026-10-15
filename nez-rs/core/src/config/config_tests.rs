@@ -6693,7 +6693,11 @@ model = "gpt-project-local"
         .build()
         .await?;
 
-    assert_eq!(config.model, None);
+    // The project profile is ignored, so the provider default applies.
+    assert_eq!(
+        config.model.as_deref(),
+        Some(nez_model_profiles::DEFAULT_LOCAL_MODEL)
+    );
     assert!(
         config.startup_warnings.iter().any(|warning| {
             warning.contains("profile")
@@ -6803,6 +6807,7 @@ async fn responses_websocket_features_do_not_change_wire_api() -> std::io::Resul
         entries.insert(feature_key.to_string(), true);
         let cfg = ConfigToml {
             features: Some(FeaturesToml::from(entries)),
+            model_provider: Some(nez_model_provider_info::OPENAI_PROVIDER_ID.to_string()),
             ..Default::default()
         };
 

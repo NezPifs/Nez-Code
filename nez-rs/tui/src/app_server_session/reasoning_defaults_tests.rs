@@ -94,7 +94,11 @@ stream_max_retries = 0
         let config = if mode == ThreadParamsMode::Remote {
             std::fs::write(
                 client_home.path().join("config.toml"),
-                "model_reasoning_summary = 'concise'\nmodel_verbosity = 'low'\nweb_search = 'disabled'",
+                format!(
+                    "model_reasoning_summary = 'concise'\nmodel_verbosity = 'low'\nweb_search = 'disabled'\n\
+                     model_provider = 'reasoning-test'\n\
+                     [model_providers.reasoning-test]\nname = 'OpenAI'\nbase_url = '{base_url}/v1'\nwire_api = 'responses'\n"
+                ),
             )?;
             ConfigBuilder::default()
                 .nez_home(client_home.path().to_path_buf())

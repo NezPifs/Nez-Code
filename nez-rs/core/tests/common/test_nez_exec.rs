@@ -16,7 +16,10 @@ impl TestNezExecBuilder {
         cmd.current_dir(self.cwd.path())
             .env("NEZ_HOME", self.home.path())
             .env("NEZ_SQLITE_HOME", self.home.path())
-            .env(NEZ_API_KEY_ENV_VAR, "dummy");
+            .env(NEZ_API_KEY_ENV_VAR, "dummy")
+            // Mock servers speak the Responses API; Nez-Code defaults to Ollama.
+            .arg("-c")
+            .arg("model_provider=\"openai\"");
         cmd
     }
     pub fn cmd_with_server(&self, server: &MockServer) -> assert_cmd::Command {

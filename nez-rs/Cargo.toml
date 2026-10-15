@@ -81,6 +81,7 @@ members = [
     "memories/read",
     "memories/write",
     "mermaid",
+    "model-profiles",
     "model-provider-info",
     "mxc-sandbox",
     "models-manager",
@@ -241,6 +242,7 @@ nez-memories-read = { path = "memories/read" }
 nez-memories-write = { path = "memories/write" }
 nez-mcp = { path = "nez-mcp" }
 nez-mcp-extension = { path = "ext/mcp" }
+nez-model-profiles = { path = "model-profiles" }
 nez-model-provider-info = { path = "model-provider-info" }
 nez-models-manager = { path = "models-manager" }
 nez-mxc-sandbox = { path = "mxc-sandbox" }

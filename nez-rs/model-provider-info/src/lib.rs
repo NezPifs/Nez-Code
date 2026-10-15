@@ -97,23 +97,30 @@ pub const AMAZON_BEDROCK_DEFAULT_BASE_URL: &str =
     "https://bedrock-mantle.us-east-1.api.aws/openai/v1";
 const AMAZON_BEDROCK_MANTLE_CLIENT_AGENT_HEADER: &str = "x-amzn-mantle-client-agent";
 const AMAZON_BEDROCK_MANTLE_CLIENT_AGENT_VALUE: &str = "nez";
-const CHAT_WIRE_API_REMOVED_ERROR: &str = "`wire_api = \"chat\"` is no longer supported.\nHow to fix: set `wire_api = \"responses\"` in your provider config.\nMore info: https://github.com/NezPifs/Nez-Code/discussions/7782";
 pub const LEGACY_OLLAMA_CHAT_PROVIDER_ID: &str = "ollama-chat";
-pub const OLLAMA_CHAT_PROVIDER_REMOVED_ERROR: &str = "`ollama-chat` is no longer supported.\nHow to fix: replace `ollama-chat` with `ollama` in `model_provider`, `oss_provider`, or `--local-provider`.\nMore info: https://github.com/NezPifs/Nez-Code/discussions/7782";
+pub const OLLAMA_CHAT_PROVIDER_REMOVED_ERROR: &str = "`ollama-chat` is no longer supported.\nHow to fix: replace `ollama-chat` with `ollama` in `model_provider`, `oss_provider`, or `--local-provider`.";
 
 /// Wire protocol that the provider speaks.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum WireApi {
-    /// The Responses API exposed by OpenAI at `/v1/responses`.
+    /// The Responses API at `/v1/responses`.
     #[default]
     Responses,
+    /// OpenAI-compatible chat completions at `/v1/chat/completions`, used by
+    /// DeepSeek and most hosted or self-hosted OpenAI-compatible servers.
+    Chat,
+    /// Ollama's native `/api/chat` endpoint, which accepts a context length,
+    /// thinking control and JSON-schema output formats.
+    Ollama,
 }
 
 impl fmt::Display for WireApi {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let value = match self {
             Self::Responses => "responses",
+            Self::Chat => "chat",
+            Self::Ollama => "ollama",
         };
         f.write_str(value)
     }
@@ -127,8 +134,12 @@ impl<'de> Deserialize<'de> for WireApi {
         let value = String::deserialize(deserializer)?;
         match value.as_str() {
             "responses" => Ok(Self::Responses),
-            "chat" => Err(serde::de::Error::custom(CHAT_WIRE_API_REMOVED_ERROR)),
-            _ => Err(serde::de::Error::unknown_variant(&value, &["responses"])),
+            "chat" => Ok(Self::Chat),
+            "ollama" => Ok(Self::Ollama),
+            _ => Err(serde::de::Error::unknown_variant(
+                &value,
+                &["responses", "chat", "ollama"],
+            )),
         }
     }
 }
@@ -654,6 +665,11 @@ pub const DEFAULT_OLLAMA_PORT: u16 = 11434;
 
 pub const LMSTUDIO_OSS_PROVIDER_ID: &str = "lmstudio";
 pub const OLLAMA_OSS_PROVIDER_ID: &str = "ollama";
+pub const DEEPSEEK_PROVIDER_ID: &str = "deepseek";
+pub const DEEPSEEK_BASE_URL: &str = "https://api.deepseek.com/v1";
+pub const DEEPSEEK_API_KEY_ENV: &str = "DEEPSEEK_API_KEY";
+/// Provider used when the configuration does not name one.
+pub const DEFAULT_MODEL_PROVIDER_ID: &str = OLLAMA_OSS_PROVIDER_ID;
 
 /// Built-in default provider list.
 pub fn built_in_model_providers(
@@ -665,10 +681,8 @@ pub fn built_in_model_providers(
     let amazon_bedrock_runtime_provider =
         P::create_amazon_bedrock_runtime_provider(/*aws*/ None);
 
-    // We do not want to be in the business of adjucating which third-party
-    // providers are bundled with Nez-Code, so we only include the OpenAI and
-    // open source ("oss") providers by default. Users are encouraged to add to
-    // `model_providers` in config.toml to add their own providers.
+    // Local Ollama is the default. DeepSeek is bundled because first-run setup
+    // offers it; anything else goes in `model_providers` in config.toml.
     [
         (OPENAI_PROVIDER_ID, openai_provider),
         (AMAZON_BEDROCK_PROVIDER_ID, amazon_bedrock_provider),
@@ -676,14 +690,12 @@ pub fn built_in_model_providers(
             AMAZON_BEDROCK_RUNTIME_PROVIDER_ID,
             amazon_bedrock_runtime_provider,
         ),
-        (
-            OLLAMA_OSS_PROVIDER_ID,
-            create_oss_provider(DEFAULT_OLLAMA_PORT, WireApi::Responses),
-        ),
+        (OLLAMA_OSS_PROVIDER_ID, create_ollama_provider()),
         (
             LMSTUDIO_OSS_PROVIDER_ID,
-            create_oss_provider(DEFAULT_LMSTUDIO_PORT, WireApi::Responses),
+            create_oss_provider(DEFAULT_LMSTUDIO_PORT, WireApi::Chat),
         ),
+        (DEEPSEEK_PROVIDER_ID, create_deepseek_provider()),
     ]
     .into_iter()
     .map(|(k, v)| (k.to_string(), v))
@@ -751,9 +763,69 @@ pub fn create_oss_provider(default_provider_port: u16, wire_api: WireApi) -> Mod
     create_oss_provider_with_base_url(&nez_oss_base_url, wire_api)
 }
 
+/// The local Ollama provider. `NEZ_OSS_BASE_URL` wins, then Ollama's own
+/// `OLLAMA_HOST`, then `localhost:11434`.
+pub fn create_ollama_provider() -> ModelProviderInfo {
+    let base_url = std::env::var("NEZ_OSS_BASE_URL")
+        .ok()
+        .filter(|v| !v.trim().is_empty())
+        .or_else(|| {
+            std::env::var("OLLAMA_HOST")
+                .ok()
+                .and_then(|host| ollama_host_base_url(&host))
+        });
+    let mut provider = match base_url {
+        Some(base_url) => create_oss_provider_with_base_url(&base_url, WireApi::Ollama),
+        None => create_oss_provider(DEFAULT_OLLAMA_PORT, WireApi::Ollama),
+    };
+    provider.name = "Ollama".into();
+    provider
+}
+
+/// Converts an `OLLAMA_HOST` value (`0.0.0.0:11434`, `host`, `http://host:port`)
+/// into a base URL.
+pub fn ollama_host_base_url(host: &str) -> Option<String> {
+    let host = host.trim().trim_end_matches('/');
+    if host.is_empty() {
+        return None;
+    }
+    let with_scheme = if host.starts_with("http://") || host.starts_with("https://") {
+        host.to_string()
+    } else {
+        format!("http://{host}")
+    };
+    // `0.0.0.0` is a bind address; connect to the loopback interface instead.
+    let with_scheme = with_scheme.replace("://0.0.0.0", "://127.0.0.1");
+    let after_scheme = with_scheme.split_once("://").map_or("", |(_, rest)| rest);
+    let has_port = after_scheme
+        .rsplit_once(':')
+        .is_some_and(|(_, port)| !port.is_empty() && port.chars().all(|c| c.is_ascii_digit()));
+    let base = if has_port {
+        with_scheme
+    } else {
+        format!("{with_scheme}:{DEFAULT_OLLAMA_PORT}")
+    };
+    Some(format!("{base}/v1"))
+}
+
+/// DeepSeek's hosted API. The key comes from `DEEPSEEK_API_KEY` or the
+/// credential stored by `nez login --provider deepseek`.
+pub fn create_deepseek_provider() -> ModelProviderInfo {
+    ModelProviderInfo {
+        name: "DeepSeek".into(),
+        base_url: Some(DEEPSEEK_BASE_URL.into()),
+        env_key: Some(DEEPSEEK_API_KEY_ENV.into()),
+        env_key_instructions: Some(
+            "Run `nez login --provider deepseek` or set DEEPSEEK_API_KEY.".into(),
+        ),
+        wire_api: WireApi::Chat,
+        ..create_oss_provider_with_base_url(DEEPSEEK_BASE_URL, WireApi::Chat)
+    }
+}
+
 pub fn create_oss_provider_with_base_url(base_url: &str, wire_api: WireApi) -> ModelProviderInfo {
     ModelProviderInfo {
-        name: "gpt-oss".into(),
+        name: "Local model server".into(),
         base_url: Some(base_url.into()),
         model_catalog_url: None,
         env_key: None,

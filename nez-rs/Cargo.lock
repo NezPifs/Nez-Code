@@ -6639,6 +6639,7 @@ dependencies = [
  "http 1.4.0",
  "nez-client",
  "nez-http-client",
+ "nez-model-profiles",
  "nez-protocol",
  "nez-utils-rustls-provider",
  "nez-websocket-client",
@@ -7473,6 +7474,7 @@ dependencies = [
  "nez-mcp",
  "nez-mcp-extension",
  "nez-memories-read",
+ "nez-model-profiles",
  "nez-model-provider",
  "nez-model-provider-info",
  "nez-models-manager",
@@ -8546,6 +8548,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "nez-model-profiles"
+version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
 name = "nez-model-provider"
 version = "0.0.0"
 dependencies = [
@@ -8604,6 +8614,7 @@ dependencies = [
  "chrono",
  "nez-http-client",
  "nez-login",
+ "nez-model-profiles",
  "nez-otel",
  "nez-prompts",
  "nez-protocol",
@@ -8698,6 +8709,7 @@ dependencies = [
  "memchr",
  "nez-core",
  "nez-http-client",
+ "nez-model-profiles",
  "nez-model-provider-info",
  "pretty_assertions",
  "semver",

@@ -312,6 +312,8 @@ pub(crate) async fn test_config() -> Config {
     Config::load_from_base_config_with_overrides(
         ConfigToml {
             model: Some("gpt-5.5".to_string()),
+            // Unit tests exercise the Responses API path with a mock catalog.
+            model_provider: Some(nez_model_provider_info::OPENAI_PROVIDER_ID.to_string()),
             ..Default::default()
         },
         ConfigOverrides::default(),
@@ -3932,7 +3934,7 @@ impl Config {
         let model_provider_id = config_layer_stack.required_model_provider().map(str::to_string)
             .or(model_provider)
             .or(cfg.model_provider)
-            .unwrap_or_else(|| "openai".to_string());
+            .unwrap_or_else(|| nez_model_provider_info::DEFAULT_MODEL_PROVIDER_ID.to_string());
         let model_provider = model_providers
             .get(&model_provider_id)
             .ok_or_else(|| {
@@ -4076,7 +4078,9 @@ impl Config {
 
         let forced_login_method = cfg.forced_login_method;
 
-        let model = model.or(cfg.model);
+        let model = model
+            .or(cfg.model)
+            .or_else(|| default_model_for_provider(&model_provider_id).map(str::to_string));
         let notices = cfg.notice.unwrap_or_default();
         let service_tier = match service_tier_override {
             Some(Some(service_tier)) => Some(service_tier),
@@ -5125,6 +5129,20 @@ pub fn log_dir(cfg: &Config) -> std::io::Result<PathBuf> {
 #[cfg(test)]
 #[path = "config_tests.rs"]
 mod tests;
+
+/// Model used when neither the command line nor config.toml names one.
+///
+/// Local providers get the built-in local default; hosted providers are left
+/// to their own default handling.
+pub(crate) fn default_model_for_provider(provider_id: &str) -> Option<&'static str> {
+    match provider_id {
+        nez_model_provider_info::OLLAMA_OSS_PROVIDER_ID => {
+            Some(nez_model_profiles::DEFAULT_LOCAL_MODEL)
+        }
+        nez_model_provider_info::DEEPSEEK_PROVIDER_ID => Some("deepseek-chat"),
+        _ => None,
+    }
+}
 
 #[cfg(test)]
 #[path = "config_loader_tests.rs"]

@@ -1,4 +1,5 @@
 mod client;
+pub mod hardware;
 mod line_buffer;
 mod parser;
 mod pull;
@@ -12,60 +13,73 @@ pub use pull::PullProgressReporter;
 pub use pull::TuiProgressReporter;
 use semver::Version;
 
-/// Default OSS model to use when `--oss` is passed without an explicit `-m`.
-pub const DEFAULT_OSS_MODEL: &str = "gpt-oss:20b";
+/// Built-in local model; the only model Nez-Code downloads on its own.
+pub const DEFAULT_OSS_MODEL: &str = nez_model_profiles::DEFAULT_LOCAL_MODEL;
 
-/// Prepare the local OSS environment when `--oss` is selected.
+/// Prepare the local Ollama environment before a session starts.
 ///
-/// - Ensures a local Ollama server is reachable.
-/// - Checks if the model exists locally and pulls it if missing.
+/// - Ensures a local Ollama server is reachable (done by the client).
+/// - Pulls the built-in default model when it is missing. Other models are
+///   never downloaded implicitly; a clear error explains how to install them.
 pub async fn ensure_oss_ready(config: &Config, client: &OllamaClient) -> std::io::Result<()> {
-    // Only download when the requested model is the default OSS model (or when -m is not provided).
-    let model = match config.model.as_ref() {
-        Some(model) => model,
-        None => DEFAULT_OSS_MODEL,
-    };
-
-    // If the model is not present locally, pull it.
-    match client.fetch_models().await {
-        Ok(models) => {
-            if !models.iter().any(|m| m == model) {
-                let mut reporter = crate::CliProgressReporter::new();
-                client.pull_with_reporter(model, &mut reporter).await?;
-            }
-        }
+    let model = config.model.as_deref().unwrap_or(DEFAULT_OSS_MODEL);
+    let models = match client.fetch_models().await {
+        Ok(models) => models,
         Err(err) => {
-            // Not fatal; higher layers may still proceed and surface errors later.
-            tracing::warn!("Failed to query local models from Ollama: {}.", err);
+            // Not fatal; the first request reports a precise error.
+            tracing::warn!("Failed to query local models from Ollama: {err}.");
+            return Ok(());
         }
+    };
+    if is_installed(&models, model) {
+        return Ok(());
     }
-
-    Ok(())
+    if model == DEFAULT_OSS_MODEL {
+        let mut reporter = crate::CliProgressReporter::new();
+        return client.pull_with_reporter(model, &mut reporter).await;
+    }
+    Err(std::io::Error::new(
+        std::io::ErrorKind::NotFound,
+        format!(
+            "Model `{model}` is not installed in Ollama. Install it with `ollama pull {model}`, or pick an installed model with `/model`."
+        ),
+    ))
 }
 
-fn min_responses_version() -> Version {
-    Version::new(0, 13, 4)
+/// Ollama lists `name:latest` for models pulled without a tag.
+fn is_installed(models: &[String], model: &str) -> bool {
+    models.iter().any(|installed| {
+        installed == model
+            || (!model.contains(':') && installed == &format!("{model}:latest"))
+            || installed.strip_suffix(":latest") == Some(model)
+    })
 }
 
-fn supports_responses(version: &Version) -> bool {
-    *version == Version::new(0, 0, 0) || *version >= min_responses_version()
+fn min_supported_version() -> Version {
+    // `think` and streamed tool calls on /api/chat.
+    Version::new(0, 9, 0)
 }
 
-/// Ensure the running Ollama server is new enough to support the Responses API.
+fn is_supported(version: &Version) -> bool {
+    *version == Version::new(0, 0, 0) || *version >= min_supported_version()
+}
+
+/// Ensure the running Ollama server supports the native chat features
+/// Nez-Code relies on.
 ///
 /// Returns `Ok(())` when the version endpoint is missing or unparsable.
-pub async fn ensure_responses_supported(client: &OllamaClient) -> std::io::Result<()> {
+pub async fn ensure_server_supported(client: &OllamaClient) -> std::io::Result<()> {
     let Some(version) = client.fetch_version().await? else {
         return Ok(());
     };
 
-    if supports_responses(&version) {
+    if is_supported(&version) {
         return Ok(());
     }
 
-    let min = min_responses_version();
+    let min = min_supported_version();
     Err(std::io::Error::other(format!(
-        "Ollama {version} is too old. Nez requires Ollama {min} or newer."
+        "Ollama {version} is too old. Nez-Code requires Ollama {min} or newer; update it from https://ollama.com/download."
     )))
 }
 
@@ -93,7 +107,7 @@ mod tests {
             .and(wiremock::matchers::path("/api/tags"))
             .respond_with(
                 wiremock::ResponseTemplate::new(200)
-                    .set_body_json(serde_json::json!({"models": [{"name": "gpt-oss:20b"}]})),
+                    .set_body_json(serde_json::json!({"models": [{"name": "qwen3.5:9b"}]})),
             )
             .expect(2)
             .mount(&server)
@@ -116,30 +130,35 @@ mod tests {
         .await
         .expect("create Ollama client");
 
-        ensure_responses_supported(&client)
+        ensure_server_supported(&client)
             .await
             .expect("version check should reuse the existing client");
         assert_eq!(
             client.fetch_models().await.expect("fetch models"),
-            vec!["gpt-oss:20b"]
+            vec!["qwen3.5:9b"]
         );
 
         server.verify().await;
     }
 
     #[test]
-    fn supports_responses_for_dev_zero() {
-        assert!(supports_responses(&Version::new(0, 0, 0)));
+    fn dev_builds_are_supported() {
+        assert!(is_supported(&Version::new(0, 0, 0)));
     }
 
     #[test]
-    fn does_not_support_responses_before_cutoff() {
-        assert!(!supports_responses(&Version::new(0, 13, 3)));
+    fn versions_before_native_thinking_are_rejected() {
+        assert!(!is_supported(&Version::new(0, 8, 9)));
+        assert!(is_supported(&Version::new(0, 9, 0)));
+        assert!(is_supported(&Version::new(0, 14, 0)));
     }
 
     #[test]
-    fn supports_responses_at_or_after_cutoff() {
-        assert!(supports_responses(&Version::new(0, 13, 4)));
-        assert!(supports_responses(&Version::new(0, 14, 0)));
+    fn untagged_models_match_latest() {
+        let installed = vec!["qwen3.5:9b".to_string(), "llama3.1:latest".to_string()];
+        assert!(is_installed(&installed, "qwen3.5:9b"));
+        assert!(is_installed(&installed, "llama3.1"));
+        assert!(is_installed(&installed, "llama3.1:latest"));
+        assert!(!is_installed(&installed, "qwen3.5:27b"));
     }
 }

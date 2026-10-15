@@ -1,0 +1,17 @@
+[package]
+name = "nez-model-profiles"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+doctest = false
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

@@ -1945,6 +1945,116 @@ impl ResponsesHttpExecutor<'_> {
     }
 }
 
+impl ResponsesHttpExecutor<'_> {
+    /// Streams a turn through a chat-completions or Ollama provider.
+    ///
+    /// The request is built exactly like a Responses request and translated
+    /// by `nez_api::chat`, so history handling, tool specs and output items
+    /// stay identical across wire protocols.
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn stream_chat_http(
+        &self,
+        dialect: nez_api::chat::ChatDialect,
+        prompt: &Prompt,
+        model_info: &ModelInfo,
+        session_telemetry: &SessionTelemetry,
+        effort: Option<ReasoningEffortConfig>,
+        summary: ReasoningSummaryConfig,
+        service_tier: Option<String>,
+        responses_metadata: &NezResponsesMetadata,
+        inference_trace: &InferenceTraceContext,
+    ) -> Result<ResponseStream> {
+        let client_setup = self
+            .client
+            .current_client_setup(ClientRouting::Workspace)
+            .await?;
+        let mut request = self.client.build_responses_request(
+            prompt,
+            model_info,
+            effort,
+            summary,
+            service_tier,
+            responses_metadata,
+            /*include_internal*/ false,
+        )?;
+        self.client
+            .prepare_response_items_for_request(&mut request.input);
+        // Chat providers bill and validate these fields differently; they are
+        // meaningless outside the Responses API.
+        request.service_tier = None;
+        request.client_metadata = None;
+
+        let profile = nez_model_profiles::profile_for_model(&model_info.slug);
+        let capabilities = match dialect {
+            nez_api::chat::ChatDialect::Ollama => {
+                let show_transport = self.client.build_api_transport(
+                    &client_setup.api_provider,
+                    "/api/show",
+                    client_setup.redirect_policy,
+                )?;
+                nez_api::chat::ollama_capabilities(
+                    show_transport,
+                    &client_setup.api_provider,
+                    client_setup.api_auth.clone(),
+                    &model_info.slug,
+                )
+                .await
+            }
+            nez_api::chat::ChatDialect::OpenAi => nez_api::chat::ModelCapabilities::default(),
+        };
+        let options = crate::chat_wire::chat_options(&crate::chat_wire::ChatRequestContext {
+            dialect,
+            model_info,
+            profile: &profile,
+            capabilities: &capabilities,
+            reasoning_disabled: request
+                .reasoning
+                .as_ref()
+                .is_some_and(|reasoning| reasoning.effort == Some(ReasoningEffortConfig::None)),
+        });
+
+        let path = match dialect {
+            nez_api::chat::ChatDialect::OpenAi => "/chat/completions",
+            nez_api::chat::ChatDialect::Ollama => "/api/chat",
+        };
+        tracing::Span::current().record("api.path", path);
+        let transport = self.client.build_api_transport(
+            &client_setup.api_provider,
+            path,
+            client_setup.redirect_policy,
+        )?;
+        let request_session_telemetry = session_telemetry_for_request(session_telemetry, &request);
+        let inference_trace_attempt = inference_trace.start_attempt();
+        inference_trace_attempt.record_started(&request);
+        let client = nez_api::chat::ChatClient::new(
+            transport,
+            client_setup.api_provider,
+            client_setup.api_auth,
+            dialect,
+        );
+        match client
+            .stream_request(&request, options, ApiHeaderMap::new())
+            .await
+        {
+            Ok(stream) => {
+                let (stream, _) = map_response_stream(
+                    stream,
+                    request_session_telemetry,
+                    inference_trace_attempt,
+                    Arc::clone(&self.client.state.provider),
+                    Vec::new(),
+                );
+                Ok(stream)
+            }
+            Err(err) => {
+                let err = self.client.state.provider.map_api_error(err);
+                inference_trace_attempt.record_failed(&err, None, /*output_items*/ &[]);
+                Err(err)
+            }
+        }
+    }
+}
+
 impl ModelClientSession {
     /// Streams a turn via the Responses API over WebSocket transport.
     #[allow(clippy::too_many_arguments)]
@@ -2371,7 +2481,23 @@ impl ModelClientSession {
         inference_trace: &InferenceTraceContext,
     ) -> Result<ResponseStream> {
         let wire_api = self.client.state.provider.info().wire_api;
+        if let Some(dialect) = crate::chat_wire::chat_dialect(wire_api) {
+            return ResponsesHttpExecutor::new(&self.client)
+                .stream_chat_http(
+                    dialect,
+                    prompt,
+                    model_info,
+                    session_telemetry,
+                    effort,
+                    summary,
+                    service_tier,
+                    responses_metadata,
+                    inference_trace,
+                )
+                .await;
+        }
         match wire_api {
+            WireApi::Chat | WireApi::Ollama => unreachable!("chat wire APIs are handled above"),
             WireApi::Responses => {
                 if self.client.responses_websocket_enabled() {
                     let request_trace = current_span_w3c_trace_context();

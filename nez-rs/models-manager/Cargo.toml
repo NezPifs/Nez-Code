@@ -16,6 +16,7 @@ workspace = true
 chrono = { workspace = true, features = ["serde"] }
 nez-http-client = { workspace = true }
 nez-login = { workspace = true }
+nez-model-profiles = { workspace = true }
 nez-otel = { workspace = true }
 nez-protocol = { workspace = true }
 nez-prompts = { workspace = true }

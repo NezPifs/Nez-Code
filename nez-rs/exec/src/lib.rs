@@ -896,21 +896,26 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
             last_message_file.clone(),
         )),
     };
-    if oss {
-        // We're in the oss section, so provider_id should be Some
-        // Let's handle None case gracefully though just in case
-        let provider_id = match model_provider.as_ref() {
-            Some(id) => id,
+    // Local providers are checked up front so a missing server or model fails
+    // with an actionable message instead of a stream error mid-turn.
+    let local_provider = if oss {
+        match model_provider.as_ref() {
+            Some(id) => Some(id.clone()),
             None => {
                 error!("OSS provider unexpectedly not set when oss flag is used");
                 return Err(anyhow::anyhow!(
                     "OSS provider not set but oss flag was used"
                 ));
             }
-        };
-        ensure_oss_provider_ready(provider_id, &config)
+        }
+    } else {
+        (config.model_provider_id == OLLAMA_OSS_PROVIDER_ID)
+            .then(|| config.model_provider_id.clone())
+    };
+    if let Some(provider_id) = local_provider {
+        ensure_oss_provider_ready(&provider_id, &config)
             .await
-            .map_err(|e| anyhow::anyhow!("OSS setup failed: {e}"))?;
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
     }
 
     let default_cwd = config.cwd.to_path_buf();

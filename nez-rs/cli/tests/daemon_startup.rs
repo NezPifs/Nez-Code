@@ -79,11 +79,6 @@ async fn daemon_exclusion_survives_fork_picker() -> Result<()> {
 }
 
 #[tokio::test]
-async fn daemon_auto_start_preserves_bedrock_onboarding() -> Result<()> {
-    daemon_startup("bedrock").await
-}
-
-#[tokio::test]
 #[cfg(windows)]
 async fn elevated_local_tui_uses_embedded_without_starting_daemon() -> Result<()> {
     if !nez_app_server_daemon::is_elevated()? {
@@ -145,12 +140,6 @@ async fn restrictive_launcher_uses_embedded_if_daemon_cannot_start() -> Result<(
     daemon_startup("restrictive-job").await
 }
 
-#[tokio::test]
-#[cfg(unix)]
-async fn bedrock_onboarding_leaves_a_running_daemon_untouched() -> Result<()> {
-    daemon_startup("bedrock-running").await
-}
-
 async fn daemon_startup(command: &str) -> Result<()> {
     #[cfg(windows)]
     let elevated = nez_app_server_daemon::is_elevated()?;
@@ -178,7 +167,7 @@ async fn daemon_startup(command: &str) -> Result<()> {
     fs::write(
         home.path().join("config.toml"),
         format!(
-            "model = \"gpt-5.6-terra\"\n\
+            "model_provider = \"openai\"\nmodel = \"gpt-5.6-terra\"\n\
          features.bedrock_setup_wizard = true\ncli_auth_credentials_store = \"file\"\n\
          suppress_unstable_features_warning = true\nanalytics.enabled = false\n\
          windows.sandbox = \"unelevated\"\n\

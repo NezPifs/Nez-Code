@@ -335,6 +335,7 @@ async fn transcript_preview_for_history_mode(
     )
     .expect("write mock config");
     let config = ConfigBuilder::default()
+        .cli_overrides(crate::test_support::openai_provider_overrides())
         .nez_home(nez_home.path().to_path_buf())
         .fallback_cwd(Some(nez_home.path().to_path_buf()))
         .build()

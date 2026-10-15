@@ -43,6 +43,7 @@ nez-file-system = { workspace = true }
 nez-login = { workspace = true }
 nez-memories-read = { workspace = true }
 nez-mcp = { workspace = true }
+nez-model-profiles = { workspace = true }
 nez-model-provider-info = { workspace = true }
 nez-models-manager = { workspace = true }
 nez-shell-command = { workspace = true }

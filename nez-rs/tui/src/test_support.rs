@@ -70,3 +70,14 @@ macro_rules! boxed_future {
     };
 }
 pub(crate) use boxed_future;
+
+/// Config overrides that select the OpenAI provider.
+///
+/// Tests that exercise hosted Responses flows (accounts, rate limits, model
+/// catalogs) pin it because the product default is local Ollama.
+pub(crate) fn openai_provider_overrides() -> Vec<(String, toml::Value)> {
+    vec![(
+        "model_provider".to_string(),
+        toml::Value::String("openai".to_string()),
+    )]
+}
