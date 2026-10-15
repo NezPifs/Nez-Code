@@ -2019,6 +2019,10 @@ impl ResponsesHttpExecutor<'_> {
             force_text_tools: crate::chat_wire::native_tools_disabled_by_env(),
             vision,
             enable_thinking: crate::chat_wire::thinking_enabled_by_env(),
+            reasoning_disabled: request
+                .reasoning
+                .as_ref()
+                .is_some_and(|reasoning| reasoning.effort == Some(ReasoningEffortConfig::None)),
         });
 
         let path = match dialect {

@@ -37,6 +37,8 @@ pub(crate) struct ChatRequestContext<'a> {
     /// Let thinking models think. Off by default for agent turns: small local
     /// models can spend the whole output budget reasoning and never act.
     pub enable_thinking: bool,
+    /// The user set the reasoning effort to `none`.
+    pub reasoning_disabled: bool,
 }
 
 /// `NEZ_VISION`: whether images are sent to the model.
@@ -137,6 +139,11 @@ pub(crate) fn chat_options(ctx: &ChatRequestContext<'_>) -> ChatOptions {
         if !ctx.enable_thinking {
             options.think = Some(false);
         }
+    }
+    if ctx.reasoning_disabled {
+        options.think = Some(false);
+        // An explicit choice, so forward it to OpenAI-compatible servers too.
+        options.send_reasoning_effort = true;
     }
     match ctx
         .profile
