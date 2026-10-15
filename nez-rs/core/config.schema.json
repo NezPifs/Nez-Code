@@ -6767,7 +6767,8 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
-          "default": false,
+          "default": true,
+          "description": "The task list is on by default; set to false to hide it.",
           "type": "boolean"
         }
       },
