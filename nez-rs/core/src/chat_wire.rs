@@ -9,6 +9,7 @@ use nez_api::chat::ChatDialect;
 use nez_api::chat::ChatOptions;
 use nez_api::chat::ModelCapabilities;
 use nez_model_profiles::ModelProfile;
+use nez_model_profiles::ToolMode;
 use nez_model_provider_info::WireApi;
 use nez_protocol::openai_models::ModelInfo;
 
@@ -28,6 +29,15 @@ pub(crate) struct ChatRequestContext<'a> {
     pub model_info: &'a ModelInfo,
     pub profile: &'a ModelProfile,
     pub capabilities: &'a ModelCapabilities,
+    /// Use the text tool protocol even for models with native tool support.
+    pub force_text_tools: bool,
+}
+
+/// `NEZ_DISABLE_NATIVE_TOOLS=1` switches every model to the text protocol,
+/// for models whose native tool template misbehaves.
+pub(crate) fn native_tools_disabled_by_env() -> bool {
+    std::env::var("NEZ_DISABLE_NATIVE_TOOLS")
+        .is_ok_and(|value| matches!(value.trim(), "1" | "true" | "TRUE" | "yes"))
 }
 
 pub(crate) fn chat_options(ctx: &ChatRequestContext<'_>) -> ChatOptions {
@@ -36,6 +46,17 @@ pub(crate) fn chat_options(ctx: &ChatRequestContext<'_>) -> ChatOptions {
     options.top_p = Some(ctx.profile.sampling.top_p);
     if ctx.dialect == ChatDialect::Ollama {
         options.num_ctx = Some(effective_context_tokens(ctx));
+    }
+    match ctx
+        .profile
+        .resolve_tool_calling(ctx.capabilities.tools, ctx.force_text_tools)
+    {
+        ToolMode::Native => {}
+        ToolMode::Text(format) => {
+            options.native_tools = false;
+            options.text_tools = Some(format);
+            options.structured_output = ctx.profile.structured_output;
+        }
     }
     options
 }

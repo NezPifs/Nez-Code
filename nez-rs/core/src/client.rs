@@ -2007,6 +2007,7 @@ impl ResponsesHttpExecutor<'_> {
             model_info,
             profile: &profile,
             capabilities: &capabilities,
+            force_text_tools: crate::chat_wire::native_tools_disabled_by_env(),
         });
 
         let path = match dialect {

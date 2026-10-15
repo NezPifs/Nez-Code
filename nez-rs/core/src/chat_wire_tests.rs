@@ -14,6 +14,7 @@ fn ctx_options(model: &str, caps: ModelCapabilities, window: Option<i64>) -> Cha
         model_info: &info,
         profile: &profile,
         capabilities: &caps,
+        force_text_tools: false,
     })
 }
 
@@ -62,6 +63,7 @@ fn hosted_chat_requests_do_not_send_num_ctx() {
         model_info: &info,
         profile: &profile,
         capabilities: &ModelCapabilities::default(),
+        force_text_tools: false,
     });
     assert_eq!(options.num_ctx, None);
     assert_eq!(options.temperature, Some(0.2));
@@ -71,4 +73,56 @@ fn hosted_chat_requests_do_not_send_num_ctx() {
 fn unknown_local_models_use_a_modest_context() {
     let options = ctx_options("some-new-model", ModelCapabilities::default(), None);
     assert_eq!(options.num_ctx, Some(8_192));
+}
+
+#[test]
+fn small_models_use_the_text_protocol_with_structured_output() {
+    let options = ctx_options(
+        "qwen2.5-coder:7b-instruct",
+        ModelCapabilities::default(),
+        None,
+    );
+    assert_eq!(
+        (
+            options.native_tools,
+            options.text_tools,
+            options.structured_output
+        ),
+        (false, Some(nez_model_profiles::TextToolFormat::Json), true)
+    );
+}
+
+#[test]
+fn native_models_keep_native_tools_unless_forced() {
+    let options = ctx_options("qwen3.5:9b", ModelCapabilities::default(), None);
+    assert_eq!((options.native_tools, options.text_tools), (true, None));
+
+    let info = model_info_from_slug("qwen3.5:9b");
+    let profile = profile_for_model("qwen3.5:9b");
+    let forced = chat_options(&ChatRequestContext {
+        dialect: ChatDialect::Ollama,
+        model_info: &info,
+        profile: &profile,
+        capabilities: &ModelCapabilities::default(),
+        force_text_tools: true,
+    });
+    assert_eq!(forced.native_tools, false);
+    assert!(forced.text_tools.is_some());
+}
+
+#[test]
+fn auto_profiles_follow_the_server_tool_capability() {
+    let with_tools = ModelCapabilities {
+        tools: Some(true),
+        ..Default::default()
+    };
+    assert_eq!(
+        ctx_options("llama3.1:8b", with_tools, None).text_tools,
+        None
+    );
+    assert!(
+        ctx_options("llama3.1:8b", ModelCapabilities::default(), None)
+            .text_tools
+            .is_some()
+    );
 }
