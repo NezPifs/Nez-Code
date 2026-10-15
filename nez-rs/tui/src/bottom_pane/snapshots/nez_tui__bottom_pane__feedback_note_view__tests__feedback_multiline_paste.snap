@@ -4,7 +4,8 @@ expression: "render(&view, 60)"
 ---
 ▌ Tell us more (bug)
 ▌
-▌ Your feedback can be used to improve ChatGPT. Learn more.
+▌ Feedback is sent only to the server set in
+▌ NEZ_FEEDBACK_DSN. Without one, open an issue instead.
 ▌
 ▌ foo
 ▌ bar

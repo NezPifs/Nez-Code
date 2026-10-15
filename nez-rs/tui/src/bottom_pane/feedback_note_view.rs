@@ -36,7 +36,7 @@ use super::popup_consts::accept_cancel_hint_line;
 use super::textarea::TextArea;
 use super::textarea::TextAreaState;
 
-const FEEDBACK_POLICY_URL: &str = "https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance";
+const FEEDBACK_POLICY_URL: &str = "https://github.com/NezPifs/Nez-Code/issues";
 const EMPLOYEE_FEEDBACK_FAQ_URL: &str = "https://go/nez-employee-feedback-faq";
 
 enum IntroContent {
@@ -393,9 +393,11 @@ impl FeedbackNoteView {
                 ]));
             }
             FeedbackAudience::External => lines.push(Line::from(vec![
-                "Your feedback can be used to improve ChatGPT. ".dim(),
-                "Learn more".fg(crate::style::accent_color()).underlined(),
-                ".".dim(),
+                "Feedback is sent only to the server set in NEZ_FEEDBACK_DSN. Without one, ".dim(),
+                "open an issue"
+                    .fg(crate::style::accent_color())
+                    .underlined(),
+                " instead.".dim(),
             ])),
         }
         word_wrap_lines(
