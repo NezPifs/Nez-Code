@@ -147,14 +147,23 @@ fn compact_parameters(schema: &Value) -> String {
         .flatten()
         .filter_map(Value::as_str)
         .collect();
-    props
+    // Required parameters first, then by name: the map's own order depends
+    // on serde_json features enabled elsewhere in the build.
+    let mut params: Vec<(bool, &String, &str)> = props
         .iter()
         .map(|(name, prop)| {
             let ty = prop.get("type").and_then(Value::as_str).unwrap_or("any");
-            if required.contains(&name.as_str()) {
-                format!("{name}: {ty}")
-            } else {
+            (!required.contains(&name.as_str()), name, ty)
+        })
+        .collect();
+    params.sort();
+    params
+        .into_iter()
+        .map(|(optional, name, ty)| {
+            if optional {
                 format!("{name}?: {ty}")
+            } else {
+                format!("{name}: {ty}")
             }
         })
         .collect::<Vec<_>>()
