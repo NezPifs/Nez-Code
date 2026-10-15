@@ -75,6 +75,65 @@ model.
 
 See [tool calling](tool-calling.md) for how the text protocol works.
 
+## Picking a model
+
+`/model` lists the models installed on the Ollama server (from `/api/tags`),
+with their size and quantization. Embedding models are left out. When the
+server cannot be reached, the built-in default is offered.
+
+## Prompt and tools
+
+Local models get a short, action-oriented system prompt instead of the full
+one written for hosted frontier models: read before editing, verify after
+changing, keep going until the task is done, prefer acting over asking.
+Sub-agent and goal tools are left out of local requests; their definitions
+alone would take a fifth of a 16k context.
+
+## Images
+
+Images you attach (`--image`, paste, or drag and drop) and images returned by
+tools are sent to models that can read them. Nez-Code asks Ollama's
+`/api/show` whether the model has the `vision` capability and caches the
+answer for five minutes.
+
+- If the model is text-only and your new message has an image, the turn stops
+  with an error naming the model, so you can switch to a vision model such as
+  `qwen2.5vl:7b`.
+- Images from earlier in the session are replaced with a short note for
+  text-only models, so one screenshot does not break the rest of the session.
+- Servers that report no capabilities get the images.
+
+`NEZ_VISION` overrides the check: `on` always sends images, `off` never does,
+`auto` (the default) follows the server.
+
+## Thinking
+
+Thinking models such as Qwen 3 can spend their whole output budget reasoning
+and never call a tool. Nez-Code sends `think: false` on local agent turns.
+Set `NEZ_ENABLE_THINKING=1` to let the model think.
+
+## Staying on task
+
+A few checks keep small models from stalling or looping:
+
+- **Empty replies.** If the model returns nothing (or only thinking), the
+  request is retried once using the JSON tool protocol and an explicit
+  reminder. If that is empty too, the turn ends with a note saying the task
+  may be unfinished.
+- **Repeated failures.** When the same tool call fails three times in a row,
+  the turn stops and shows the last error instead of retrying forever.
+- **Goal reminder.** After six tool calls without a new message from you, the
+  request ends with a reminder of what you asked for.
+- **Duplicate output.** When the same call returns the same long output more
+  than once, earlier copies are shortened to save context.
+- **Internal state.** Shell commands and patches that touch Nez-Code's own
+  session files, credentials or databases under `NEZ_HOME` are refused.
+  `config.toml`, `AGENTS.md`, skills and rules stay editable.
+
+Every shell command that changes something should carry a short
+`description`; it is shown in the approval prompt. On Windows the shell is
+PowerShell.
+
 ## Pointing at another Ollama server
 
 ```sh
