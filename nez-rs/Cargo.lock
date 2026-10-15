@@ -6702,7 +6702,6 @@ dependencies = [
  "nez-feedback",
  "nez-file-search",
  "nez-file-watcher",
- "nez-git-attribution",
  "nez-git-utils",
  "nez-goal-extension",
  "nez-guardian-v2",
@@ -7109,7 +7108,6 @@ dependencies = [
  "nez-execpolicy",
  "nez-extension-api",
  "nez-features",
- "nez-git-attribution",
  "nez-git-utils",
  "nez-history",
  "nez-home",
@@ -7986,19 +7984,6 @@ dependencies = [
  "tempfile",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "nez-git-attribution"
-version = "0.0.0"
-dependencies = [
- "nez-backend-client",
- "nez-extension-api",
- "nez-http-client",
- "nez-login",
- "serde_json",
- "tokio",
- "wiremock",
 ]
 
 [[package]]

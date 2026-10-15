@@ -53,7 +53,6 @@ nez-exec-server = { workspace = true }
 nez-execpolicy = { workspace = true }
 nez-extension-api = { workspace = true }
 nez-features = { workspace = true }
-nez-git-attribution = { workspace = true }
 nez-git-utils = { workspace = true }
 nez-install-context = { workspace = true }
 nez-login = { workspace = true }
