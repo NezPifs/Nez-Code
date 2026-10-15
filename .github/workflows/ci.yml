@@ -65,6 +65,10 @@ jobs:
           workspaces: nez-rs
           shared-key: test
       - name: Run tests
+        # Linking the TUI and core test binaries in parallel exhausts the
+        # runner's memory; two jobs keeps peak usage in bounds.
+        env:
+          CARGO_BUILD_JOBS: "2"
         run: ../scripts/ci-test.sh
 
   windows:
