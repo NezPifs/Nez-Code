@@ -155,6 +155,11 @@ async fn test_config_with_cli_overrides(
         "model".to_string(),
         TomlValue::String("gpt-5.5".to_string()),
     ));
+    // Reasoning defaults come from the hosted catalog.
+    cli_overrides.push((
+        "model_provider".to_string(),
+        TomlValue::String("openai".to_string()),
+    ));
     let config = ConfigBuilder::without_managed_config_for_tests()
         .nez_home(home.path().to_path_buf())
         .cli_overrides(cli_overrides)
