@@ -28,6 +28,8 @@ pub(crate) struct ChatRequestContext<'a> {
     pub model_info: &'a ModelInfo,
     pub profile: &'a ModelProfile,
     pub capabilities: &'a ModelCapabilities,
+    /// The user set the reasoning effort to `none`.
+    pub reasoning_disabled: bool,
 }
 
 pub(crate) fn chat_options(ctx: &ChatRequestContext<'_>) -> ChatOptions {
@@ -36,6 +38,11 @@ pub(crate) fn chat_options(ctx: &ChatRequestContext<'_>) -> ChatOptions {
     options.top_p = Some(ctx.profile.sampling.top_p);
     if ctx.dialect == ChatDialect::Ollama {
         options.num_ctx = Some(effective_context_tokens(ctx));
+    }
+    if ctx.reasoning_disabled {
+        options.think = Some(false);
+        // An explicit choice, so forward it to OpenAI-compatible servers too.
+        options.send_reasoning_effort = true;
     }
     options
 }

@@ -2007,6 +2007,10 @@ impl ResponsesHttpExecutor<'_> {
             model_info,
             profile: &profile,
             capabilities: &capabilities,
+            reasoning_disabled: request
+                .reasoning
+                .as_ref()
+                .is_some_and(|reasoning| reasoning.effort == Some(ReasoningEffortConfig::None)),
         });
 
         let path = match dialect {
