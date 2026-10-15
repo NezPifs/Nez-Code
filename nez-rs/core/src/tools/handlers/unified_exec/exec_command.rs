@@ -22,6 +22,7 @@ use crate::tools::handlers::resolve_tool_environment;
 use crate::tools::handlers::rewrite_function_string_argument;
 use crate::tools::handlers::updated_hook_command;
 use crate::tools::hook_names::HookToolName;
+use crate::tools::internal_state;
 use crate::tools::registry::CoreToolRuntime;
 use crate::tools::registry::PostToolUsePayload;
 use crate::tools::registry::PreToolUsePayload;
@@ -244,6 +245,23 @@ impl ExecCommandHandler {
                 "TTY execution is disabled by config; omit `tty` or set it to false.".to_string(),
             ));
         }
+        if !environment.is_remote() {
+            let nez_home = turn.config.nez_home.as_path();
+            let location = internal_state::find_internal_state_reference(&args.cmd, nez_home)
+                .or_else(|| {
+                    native_cwd
+                        .as_ref()
+                        .filter(|cwd| {
+                            internal_state::is_internal_state_path(cwd.as_path(), nez_home)
+                        })
+                        .map(|cwd| cwd.display().to_string())
+                });
+            if let Some(location) = location {
+                return Err(FunctionCallError::RespondToModel(
+                    internal_state::refusal_message(&location),
+                ));
+            }
+        }
         let sandbox_permissions =
             resolve_sandbox_permissions(args.sandbox_permissions, args.justification.as_deref())?;
         let hook_command = args.cmd.clone();
@@ -294,6 +312,7 @@ impl ExecCommandHandler {
             sandbox_permissions: _,
             additional_permissions,
             justification,
+            description,
             prefix_rule,
             ..
         } = args;
@@ -419,7 +438,9 @@ impl ExecCommandHandler {
             additional_permissions: normalized_additional_permissions,
             additional_permissions_preapproved: effective_additional_permissions
                 .permissions_preapproved,
-            justification,
+            // The model's description of the command doubles as the approval
+            // reason when it did not ask for escalation.
+            justification: justification.or(description),
             prefix_rule,
         };
         let result = match completion_timeout {
