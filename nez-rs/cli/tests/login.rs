@@ -1,7 +1,4 @@
 use std::path::Path;
-use std::sync::Arc;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
 
 use anyhow::Result;
 use app_test_support::ChatGptAuthFixture;
@@ -21,7 +18,6 @@ use tempfile::TempDir;
 use wiremock::Mock;
 use wiremock::MockServer;
 use wiremock::ResponseTemplate;
-use wiremock::matchers::header;
 use wiremock::matchers::method;
 use wiremock::matchers::path;
 
@@ -256,18 +252,14 @@ async fn logout_survives_enterprise_cleanup_failure_with_xaa_disabled() -> Resul
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn debug_prompt_input_follows_authenticated_attribution_setting() -> Result<()> {
+async fn debug_prompt_input_never_adds_commit_attribution() -> Result<()> {
     let server = MockServer::start().await;
-    let request_count = Arc::new(AtomicUsize::new(0));
+    // Even a workspace that asks for attribution gets none.
     Mock::given(method("GET"))
         .and(path("/backend-api/wham/settings/user"))
-        .and(header("chatgpt-account-id", "workspace-123"))
-        .respond_with(move |_request: &wiremock::Request| {
-            ResponseTemplate::new(200).set_body_json(json!({
-                "commit_attribution_enabled": request_count.fetch_add(1, Ordering::SeqCst) == 0,
-            }))
-        })
-        .expect(2)
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(json!({ "commit_attribution_enabled": true })),
+        )
         .mount(&server)
         .await;
     let nez_home = TempDir::new()?;
@@ -285,23 +277,17 @@ async fn debug_prompt_input_follows_authenticated_attribution_setting() -> Resul
             .plan_type("enterprise"),
         AuthCredentialsStoreMode::File,
     )?;
-    for enabled in [true, false] {
-        let output = nez_command(nez_home.path())?
-            .env("NO_PROXY", "127.0.0.1,localhost")
-            .env("no_proxy", "127.0.0.1,localhost")
-            .env_remove("NEZ_ACCESS_TOKEN")
-            .env_remove("OPENAI_API_KEY")
-            .args(["debug", "prompt-input"])
-            .output()?;
-        assert!(output.status.success());
-        let prompt = String::from_utf8(output.stdout)?;
-        assert_eq!(
-            prompt.contains("Co-authored-by: Nez <noreply@openai.com>"),
-            enabled
-        );
-        assert!(!prompt.contains("attribution is disabled for the current workspace"));
-    }
-    server.verify().await;
+    let output = nez_command(nez_home.path())?
+        .env("NO_PROXY", "127.0.0.1,localhost")
+        .env("no_proxy", "127.0.0.1,localhost")
+        .env_remove("NEZ_ACCESS_TOKEN")
+        .env_remove("OPENAI_API_KEY")
+        .args(["debug", "prompt-input"])
+        .output()?;
+    assert!(output.status.success());
+    let prompt = String::from_utf8(output.stdout)?;
+    assert!(!prompt.contains("Co-authored-by"));
+    assert!(!prompt.contains("attribution"));
     Ok(())
 }
 
