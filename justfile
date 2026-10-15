@@ -33,7 +33,7 @@ test *args:
 
 # Run the tests CI runs
 test-ci:
-    ../scripts/ci-test.sh
+    ../scripts/ci-test.sh all
 
 # Run the CLI tool sandbox against a debug build
 sandbox:

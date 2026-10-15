@@ -65,11 +65,31 @@ jobs:
           workspaces: nez-rs
           shared-key: test
       - name: Run tests
-        # Linking the TUI and core test binaries in parallel exhausts the
-        # runner's memory; two jobs keeps peak usage in bounds.
+        run: ../scripts/ci-test.sh crates
+
+  unit:
+    name: engine and TUI unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/free-disk-space
+      - run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config bubblewrap
+      - name: Allow unprivileged user namespaces for the bubblewrap sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: nez-rs
+          shared-key: unit
+      - name: Report resources while building
+        run: |
+          (while true; do date +%T; df -h / | tail -1; free -m | sed -n 2p; sleep 120; done) &
+      - name: Run unit tests
+        # The TUI test binary is large; two jobs keeps peak memory in bounds.
         env:
           CARGO_BUILD_JOBS: "2"
-        run: ../scripts/ci-test.sh
+        run: ../scripts/ci-test.sh unit
 
   windows:
     name: windows build
