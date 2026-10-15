@@ -1,6 +1,7 @@
 pub(crate) mod debug_sandbox;
 mod exit_status;
 pub(crate) mod login;
+pub mod setup;
 
 use clap::Args;
 use clap::Parser;
@@ -16,6 +17,8 @@ pub use login::read_api_key_from_stdin;
 pub use login::run_login_status;
 pub use login::run_login_with_api_key;
 pub use login::run_logout;
+pub use login::run_provider_login;
+pub use login::run_provider_logout;
 
 #[derive(Debug, Default, Args)]
 pub struct SandboxStateArgs {

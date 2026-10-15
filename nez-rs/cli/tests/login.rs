@@ -34,7 +34,8 @@ fn nez_command(nez_home: &Path) -> Result<assert_cmd::Command> {
 fn write_file_auth_config(nez_home: &Path) -> Result<()> {
     std::fs::write(
         nez_home.join("config.toml"),
-        "cli_auth_credentials_store = \"file\"\n",
+        // These tests cover OpenAI credential storage; the default provider is local.
+        "model_provider = \"openai\"\ncli_auth_credentials_store = \"file\"\n",
     )?;
     Ok(())
 }
@@ -301,5 +302,48 @@ async fn debug_prompt_input_follows_authenticated_attribution_setting() -> Resul
         assert!(!prompt.contains("attribution is disabled for the current workspace"));
     }
     server.verify().await;
+    Ok(())
+}
+
+#[test]
+fn login_status_describes_the_active_chat_provider() -> Result<()> {
+    let nez_home = TempDir::new()?;
+
+    nez_command(nez_home.path())?
+        .args(["login", "status"])
+        .assert()
+        .success()
+        .stderr(contains("no API key needed"));
+
+    nez_command(nez_home.path())?
+        .env("DEEPSEEK_API_KEY", "sk-from-env")
+        .args(["-c", "model_provider=\"deepseek\"", "login", "status"])
+        .assert()
+        .success()
+        .stderr(contains("DEEPSEEK_API_KEY from the environment"));
+
+    Ok(())
+}
+
+#[test]
+fn provider_login_rejects_unknown_and_keyless_providers() -> Result<()> {
+    let nez_home = TempDir::new()?;
+
+    nez_command(nez_home.path())?
+        .args(["login", "--provider", "nope", "--with-api-key"])
+        .write_stdin("sk-test\n")
+        .assert()
+        .failure()
+        .stderr(contains("Unknown provider `nope`"));
+
+    nez_command(nez_home.path())?
+        .args(["login", "--provider", "ollama", "--with-api-key"])
+        .write_stdin("sk-test\n")
+        .assert()
+        .failure()
+        .stderr(contains("`ollama` does not use an API key"));
+
+    // Nothing is written to the config or auth files.
+    assert!(!nez_home.path().join("auth.json").exists());
     Ok(())
 }

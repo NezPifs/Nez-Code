@@ -14,6 +14,8 @@ use nez_cli::read_api_key_from_stdin;
 use nez_cli::run_login_status;
 use nez_cli::run_login_with_api_key;
 use nez_cli::run_logout;
+use nez_cli::run_provider_login;
+use nez_cli::run_provider_logout;
 use nez_exec::Cli as ExecCli;
 use nez_exec::Command as ExecCommand;
 use nez_exec::ReviewArgs;
@@ -153,6 +155,9 @@ enum Subcommand {
 
     /// Remove stored authentication credentials.
     Logout(LogoutCommand),
+
+    /// Choose where model requests go: local Ollama or the DeepSeek API.
+    Setup(SetupCommand),
 
     /// Manage external MCP servers for Nez.
     Mcp(McpCli),
@@ -476,9 +481,14 @@ struct LoginCommand {
 
     #[arg(
         long = "with-api-key",
-        help = "Read the API key from stdin (e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`)"
+        help = "Read the API key from stdin (e.g. `printenv DEEPSEEK_API_KEY | nez login --provider deepseek --with-api-key`)"
     )]
     with_api_key: bool,
+
+    /// Provider the key belongs to (for example `deepseek`). Keys for providers
+    /// other than `openai` are kept in the system credential store.
+    #[arg(long = "provider", value_name = "ID")]
+    provider: Option<String>,
 
     #[arg(
         long = "api-key",
@@ -502,6 +512,16 @@ enum LoginSubcommand {
 
 #[derive(Debug, Parser)]
 struct LogoutCommand {
+    #[clap(skip)]
+    config_overrides: CliConfigOverrides,
+
+    /// Remove the stored key for this provider instead of the OpenAI login.
+    #[arg(long = "provider", value_name = "ID")]
+    provider: Option<String>,
+}
+
+#[derive(Debug, Parser)]
+struct SetupCommand {
     #[clap(skip)]
     config_overrides: CliConfigOverrides,
 }
@@ -1028,6 +1048,13 @@ async fn cli_main(
                 &mut interactive.config_overrides,
                 root_config_overrides.clone(),
             );
+            if !open_agents_overview
+                && root_remote.is_none()
+                && !interactive.oss
+                && interactive.oss_provider.is_none()
+            {
+                maybe_run_first_run_setup(&interactive.config_overrides).await;
+            }
             if open_agents_overview {
                 if interactive.prompt.is_some() || !interactive.images.is_empty() {
                     anyhow::bail!("`nez agents` does not accept an initial prompt or images");
@@ -1544,7 +1571,15 @@ async fn cli_main(
                         std::process::exit(1);
                     } else if login_cli.with_api_key {
                         let api_key = read_api_key_from_stdin();
-                        run_login_with_api_key(login_cli.config_overrides, api_key).await;
+                        match login_cli.provider {
+                            Some(provider) => {
+                                run_provider_login(login_cli.config_overrides, provider, api_key)
+                                    .await;
+                            }
+                            None => {
+                                run_login_with_api_key(login_cli.config_overrides, api_key).await;
+                            }
+                        }
                     } else {
                         eprintln!(
                             "Pipe an API key to store it, e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`.\nLocal Ollama models need no login."
@@ -1564,7 +1599,23 @@ async fn cli_main(
                 &mut logout_cli.config_overrides,
                 root_config_overrides.clone(),
             );
-            run_logout(logout_cli.config_overrides).await;
+            match logout_cli.provider {
+                Some(provider) => run_provider_logout(logout_cli.config_overrides, provider).await,
+                None => run_logout(logout_cli.config_overrides).await,
+            }
+        }
+        Some(Subcommand::Setup(mut setup_cli)) => {
+            reject_remote_mode_for_subcommand(
+                root_remote.as_deref(),
+                root_remote_auth_token_env.as_deref(),
+                "setup",
+            )?;
+            prepend_config_flags(
+                &mut setup_cli.config_overrides,
+                root_config_overrides.clone(),
+            );
+            let config = load_setup_config(&setup_cli.config_overrides).await?;
+            nez_cli::setup::run_interactive(&config).await?;
         }
         Some(Subcommand::Completion(completion_cli)) => {
             reject_remote_mode_for_subcommand(
@@ -2184,6 +2235,7 @@ fn unsupported_subcommand_name_for_strict_config(
         Some(Subcommand::MigrateRollouts(_)) => Some("migrate-rollouts"),
         Some(Subcommand::Login(_)) => Some("login"),
         Some(Subcommand::Logout(_)) => Some("logout"),
+        Some(Subcommand::Setup(_)) => Some("setup"),
         Some(Subcommand::Completion(_)) => Some("completion"),
         Some(Subcommand::Update) => Some("update"),
         Some(Subcommand::Sandbox(_)) => Some("sandbox"),
@@ -4880,3 +4932,39 @@ enabled = true
 #[cfg(all(test, unix))]
 #[path = "daemon_update_tests.rs"]
 mod daemon_update_tests;
+
+async fn load_setup_config(
+    overrides: &CliConfigOverrides,
+) -> anyhow::Result<nez_core::config::Config> {
+    let overrides = overrides.parse_overrides().map_err(anyhow::Error::msg)?;
+    Ok(nez_core::config::Config::load_with_cli_overrides(overrides).await?)
+}
+
+/// Offers provider setup on the first interactive launch. Failures are
+/// reported and the session starts with the defaults.
+async fn maybe_run_first_run_setup(overrides: &CliConfigOverrides) {
+    use std::io::IsTerminal as _;
+    if !std::io::stdin().is_terminal() || !std::io::stdout().is_terminal() {
+        return;
+    }
+    let explicit_provider = overrides
+        .parse_overrides()
+        .is_ok_and(|parsed| parsed.iter().any(|(key, _)| key == "model_provider"));
+    if explicit_provider {
+        return;
+    }
+    let Ok(nez_home) = nez_core::config::find_nez_home() else {
+        return;
+    };
+    if !nez_cli::setup::needs_first_run_setup(nez_home.as_path()) {
+        return;
+    }
+    let result = async {
+        let config = load_setup_config(overrides).await?;
+        nez_cli::setup::run_interactive(&config).await
+    }
+    .await;
+    if let Err(err) = result {
+        eprintln!("Setup did not finish: {err}. Run `nez setup` to try again.");
+    }
+}

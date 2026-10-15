@@ -60,7 +60,10 @@ nez-login = { workspace = true }
 nez-memories-write = { workspace = true }
 nez-mcp = { workspace = true }
 nez-model-provider = { workspace = true }
+nez-model-profiles = { workspace = true }
+nez-model-provider-info = { workspace = true }
 nez-models-manager = { workspace = true }
+nez-ollama = { workspace = true }
 nez-plugin = { workspace = true }
 nez-protocol = { workspace = true }
 nez-tcp-tunnel = { workspace = true }
@@ -101,6 +104,7 @@ tokio = { workspace = true, features = [
     "time",
 ] }
 toml = { workspace = true }
+toml_edit = { workspace = true }
 tracing = { workspace = true }
 tracing-appender = { workspace = true }
 tracing-subscriber = { workspace = true }
