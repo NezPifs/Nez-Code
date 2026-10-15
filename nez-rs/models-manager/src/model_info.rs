@@ -1,5 +1,6 @@
 use nez_protocol::config_types::Personality;
 use nez_protocol::config_types::ReasoningSummary;
+use nez_protocol::openai_models::ApplyPatchToolType;
 use nez_protocol::openai_models::ConfigShellToolType;
 use nez_protocol::openai_models::ModelInfo;
 use nez_protocol::openai_models::ModelMessages;
@@ -11,9 +12,11 @@ use nez_protocol::openai_models::default_input_modalities;
 
 use crate::config::ModelsManagerConfig;
 use nez_utils_output_truncation::approx_bytes_for_tokens;
-use tracing::warn;
+use tracing::debug;
 
 pub const BASE_INSTRUCTIONS: &str = include_str!("../prompt.md");
+/// Context window assumed for models that match no profile.
+pub const FALLBACK_CONTEXT_WINDOW: i64 = 272_000;
 const PERSONALITY_SECTION_HEADER: &str = "# Personality";
 
 pub fn with_config_overrides(mut model: ModelInfo, config: &ModelsManagerConfig) -> ModelInfo {
@@ -94,9 +97,20 @@ fn is_h1_heading(line: &str) -> bool {
     rest.is_empty() || rest.starts_with(' ') || rest.starts_with('\t')
 }
 
-/// Build a minimal fallback model descriptor for missing/unknown slugs.
+/// Build a model descriptor for slugs that are not in the catalog.
+///
+/// Local and hosted chat models land here. The model profile supplies the
+/// context window; the server-reported maximum is applied per request.
 pub fn model_info_from_slug(slug: &str) -> ModelInfo {
-    warn!("Unknown model {slug} is used. This will use fallback model metadata.");
+    debug!("model {slug} is not in the catalog; using its model profile");
+    let profile = nez_model_profiles::profile_for_model(slug);
+    // Unrecognized families keep a large window: they may be hosted models.
+    // Local servers size their context per request instead.
+    let context_window = if profile.id == "generic" {
+        FALLBACK_CONTEXT_WINDOW
+    } else {
+        i64::from(profile.context_tokens)
+    };
     ModelInfo {
         slug: slug.to_string(),
         display_name: slug.to_string(),
@@ -121,18 +135,20 @@ pub fn model_info_from_slug(slug: &str) -> ModelInfo {
         default_reasoning_summary: ReasoningSummary::Auto,
         support_verbosity: false,
         default_verbosity: None,
-        apply_patch_tool_type: None,
+        apply_patch_tool_type: Some(ApplyPatchToolType::Freeform),
         web_search_tool_type: WebSearchToolType::Text,
         truncation_policy: TruncationPolicyConfig::bytes(/*limit*/ 10_000),
         supports_image_detail_original: false,
-        context_window: Some(272_000),
-        max_context_window: Some(272_000),
+        context_window: Some(context_window),
+        max_context_window: None,
         auto_compact_token_limit: None,
         comp_hash: None,
         effective_context_window_percent: 95,
         experimental_supported_tools: Vec::new(),
         input_modalities: default_input_modalities(),
-        used_fallback_model_metadata: true, // this is the fallback model metadata
+        // Models matched by a profile are expected here; only unknown families
+        // warrant the generic-settings warning.
+        used_fallback_model_metadata: matches!(profile.id, "generic" | "openai-hosted"),
         supports_search_tool: false,
         supports_experimental_context: false,
         use_responses_lite: false,

@@ -1403,7 +1403,7 @@ impl Session {
                 tc,
                 EventMsg::Warning(WarningEvent {
                     message: format!(
-                        "Model metadata for `{}` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.",
+                        "No model profile matches `{}`; using generic settings. Set `model_context_window` in config.toml if the context size is wrong.",
                         tc.model_info().slug
                     ),
                 }),
