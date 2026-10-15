@@ -187,16 +187,54 @@ supports_standalone_web_search = true
 }
 
 #[test]
-fn test_deserialize_chat_wire_api_shows_helpful_error() {
+fn test_deserialize_chat_and_ollama_wire_apis() {
     let provider_toml = r#"
-name = "OpenAI using Chat Completions"
-base_url = "https://api.openai.com/v1"
-env_key = "OPENAI_API_KEY"
+name = "Self-hosted"
+base_url = "http://gpu-box:8000/v1"
 wire_api = "chat"
         "#;
+    let provider: ModelProviderInfo = toml::from_str(provider_toml).unwrap();
+    assert_eq!(provider.wire_api, WireApi::Chat);
 
-    let err = toml::from_str::<ModelProviderInfo>(provider_toml).unwrap_err();
-    assert!(err.to_string().contains(CHAT_WIRE_API_REMOVED_ERROR));
+    let provider: ModelProviderInfo =
+        toml::from_str("name = \"Ollama\"\nwire_api = \"ollama\"").unwrap();
+    assert_eq!(provider.wire_api, WireApi::Ollama);
+
+    let err = toml::from_str::<ModelProviderInfo>("name = \"x\"\nwire_api = \"soap\"").unwrap_err();
+    assert!(
+        err.to_string().contains("responses, chat, ollama") || err.to_string().contains("`chat`")
+    );
+}
+
+#[test]
+fn built_in_providers_default_to_local_ollama() {
+    let providers = built_in_model_providers(/*openai_base_url*/ None);
+    let ollama = &providers[OLLAMA_OSS_PROVIDER_ID];
+    assert_eq!(ollama.wire_api, WireApi::Ollama);
+    assert_eq!(ollama.name, "Ollama");
+    let deepseek = &providers[DEEPSEEK_PROVIDER_ID];
+    assert_eq!(deepseek.wire_api, WireApi::Chat);
+    assert_eq!(deepseek.base_url.as_deref(), Some(DEEPSEEK_BASE_URL));
+    assert_eq!(deepseek.env_key.as_deref(), Some(DEEPSEEK_API_KEY_ENV));
+    assert!(!deepseek.requires_openai_auth);
+    assert_eq!(DEFAULT_MODEL_PROVIDER_ID, OLLAMA_OSS_PROVIDER_ID);
+}
+
+#[test]
+fn ollama_host_values_become_base_urls() {
+    assert_eq!(
+        ollama_host_base_url("0.0.0.0:11434").as_deref(),
+        Some("http://127.0.0.1:11434/v1")
+    );
+    assert_eq!(
+        ollama_host_base_url("gpu-box").as_deref(),
+        Some("http://gpu-box:11434/v1")
+    );
+    assert_eq!(
+        ollama_host_base_url("https://ollama.example.com:443/").as_deref(),
+        Some("https://ollama.example.com:443/v1")
+    );
+    assert_eq!(ollama_host_base_url("  "), None);
 }
 
 #[test]

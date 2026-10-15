@@ -6880,9 +6880,23 @@
       "description": "Wire protocol that the provider speaks.",
       "oneOf": [
         {
-          "description": "The Responses API exposed by OpenAI at `/v1/responses`.",
+          "description": "The Responses API at `/v1/responses`.",
           "enum": [
             "responses"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "OpenAI-compatible chat completions at `/v1/chat/completions`, used by DeepSeek and most hosted or self-hosted OpenAI-compatible servers.",
+          "enum": [
+            "chat"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Ollama's native `/api/chat` endpoint, which accepts a context length, thinking control and JSON-schema output formats.",
+          "enum": [
+            "ollama"
           ],
           "type": "string"
         }
