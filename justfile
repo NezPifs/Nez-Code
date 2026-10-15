@@ -29,7 +29,7 @@ clippy *args:
 
 # Run tests; pass crate selectors such as `-p nez-api` to narrow the run
 test *args:
-    cargo test "$@"
+    RUST_MIN_STACK=8388608 cargo test "$@"
 
 # Run the tests CI runs
 test-ci:

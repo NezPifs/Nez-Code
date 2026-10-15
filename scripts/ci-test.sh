@@ -25,3 +25,9 @@ for crate in "${crates[@]}"; do
 done
 
 cargo test --locked --no-fail-fast "${args[@]}" "$@"
+
+# Unit tests only for the engine and terminal UI; their integration suites
+# cover hosted-service flows Nez-Code does not ship. Code mode tests spawn
+# the standalone host binary, so build it first.
+cargo build --locked -p nez-code-mode-host
+cargo test --locked --no-fail-fast -p nez-core -p nez-tui --lib "$@"
