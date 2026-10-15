@@ -1,73 +1,18 @@
-#[cfg(any(not(debug_assertions), test))]
-use nez_install_context::InstallContext;
-#[cfg(any(not(debug_assertions), test))]
-use nez_install_context::InstallMethod;
-#[cfg(any(not(debug_assertions), test))]
-use nez_install_context::StandalonePlatform;
-
 /// Update action the CLI should perform after the TUI exits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpdateAction {
     /// Replace the local daemon after restoring the terminal.
     Daemon(DaemonUpdateSource),
-    /// Update via `npm install -g @openai/nez@latest`.
-    NpmGlobalLatest,
-    /// Update via `bun install -g @openai/nez@latest`.
-    BunGlobalLatest,
-    /// Update via `vp install -g @openai/nez@latest`.
-    VitePlusGlobalLatest,
-    /// Update via `pnpm add -g @openai/nez@latest`.
-    PnpmGlobalLatest,
-    /// Update via `brew upgrade nez`.
-    BrewUpgrade,
-    /// Update via `curl -fsSL https://chatgpt.com/nez/install.sh | NEZ_NON_INTERACTIVE=1 sh`.
-    StandaloneUnix,
-    /// Update via `$env:NEZ_NON_INTERACTIVE=1; irm https://chatgpt.com/nez/install.ps1 | iex`.
-    StandaloneWindows,
+    /// Replace this binary with the latest GitHub release (`nez update --yes`).
+    SelfUpdate,
 }
 
 impl UpdateAction {
-    #[cfg(any(not(debug_assertions), test))]
-    pub(crate) fn from_install_context(context: &InstallContext) -> Option<Self> {
-        match &context.method {
-            InstallMethod::Npm => Some(UpdateAction::NpmGlobalLatest),
-            InstallMethod::Bun => Some(UpdateAction::BunGlobalLatest),
-            InstallMethod::VitePlus => Some(UpdateAction::VitePlusGlobalLatest),
-            InstallMethod::Pnpm => Some(UpdateAction::PnpmGlobalLatest),
-            InstallMethod::Brew => Some(UpdateAction::BrewUpgrade),
-            InstallMethod::Standalone { platform, .. } => Some(match platform {
-                StandalonePlatform::Unix => UpdateAction::StandaloneUnix,
-                StandalonePlatform::Windows => UpdateAction::StandaloneWindows,
-            }),
-            InstallMethod::Other => None,
-        }
-    }
-
     /// Returns the list of command-line arguments for invoking the update.
     pub fn command_args(self) -> (&'static str, &'static [&'static str]) {
         match self {
             UpdateAction::Daemon(source) => ("nez", source.command_args()),
-            UpdateAction::NpmGlobalLatest => ("npm", &["install", "-g", "@openai/nez"]),
-            UpdateAction::BunGlobalLatest => ("bun", &["install", "-g", "@openai/nez"]),
-            UpdateAction::VitePlusGlobalLatest => ("vp", &["install", "-g", "@openai/nez"]),
-            UpdateAction::PnpmGlobalLatest => ("pnpm", &["add", "-g", "@openai/nez"]),
-            UpdateAction::BrewUpgrade => ("brew", &["upgrade", "--cask", "nez"]),
-            UpdateAction::StandaloneUnix => (
-                "sh",
-                &[
-                    "-c",
-                    "curl -fsSL https://chatgpt.com/nez/install.sh | NEZ_NON_INTERACTIVE=1 sh",
-                ],
-            ),
-            UpdateAction::StandaloneWindows => (
-                "powershell",
-                &[
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-c",
-                    "$env:NEZ_NON_INTERACTIVE=1; irm https://chatgpt.com/nez/install.ps1 | iex",
-                ],
-            ),
+            UpdateAction::SelfUpdate => ("nez", &["update", "--yes"]),
         }
     }
 
@@ -79,105 +24,24 @@ impl UpdateAction {
     }
 }
 
+/// Release builds always update themselves from GitHub releases; the
+/// installers put `nez` somewhere the current user can write.
 #[cfg(not(debug_assertions))]
 pub fn get_update_action() -> Option<UpdateAction> {
-    UpdateAction::from_install_context(InstallContext::current())
+    Some(UpdateAction::SelfUpdate)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nez_utils_absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn maps_install_context_to_update_action() {
-        let native_release_dir =
-            AbsolutePathBuf::from_absolute_path(std::env::temp_dir().join("native-release"))
-                .expect("temp dir path should be absolute");
-
+    fn self_update_reruns_this_binary() {
+        assert_eq!(UpdateAction::SelfUpdate.command_str(), "nez update --yes");
         assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Other,
-                package_layout: None,
-            }),
-            None
-        );
-        assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Npm,
-                package_layout: None,
-            }),
-            Some(UpdateAction::NpmGlobalLatest)
-        );
-        assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Bun,
-                package_layout: None,
-            }),
-            Some(UpdateAction::BunGlobalLatest)
-        );
-        assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Pnpm,
-                package_layout: None,
-            }),
-            Some(UpdateAction::PnpmGlobalLatest)
-        );
-        assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Brew,
-                package_layout: None,
-            }),
-            Some(UpdateAction::BrewUpgrade)
-        );
-        assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Standalone {
-                    platform: StandalonePlatform::Unix,
-                    release_dir: native_release_dir.clone(),
-                    resources_dir: Some(native_release_dir.join("nez-resources")),
-                },
-                package_layout: None,
-            }),
-            Some(UpdateAction::StandaloneUnix)
-        );
-        assert_eq!(
-            UpdateAction::from_install_context(&InstallContext {
-                method: InstallMethod::Standalone {
-                    platform: StandalonePlatform::Windows,
-                    release_dir: native_release_dir.clone(),
-                    resources_dir: Some(native_release_dir.join("nez-resources")),
-                },
-                package_layout: None,
-            }),
-            Some(UpdateAction::StandaloneWindows)
-        );
-    }
-
-    #[test]
-    fn standalone_update_commands_rerun_latest_installer() {
-        assert_eq!(
-            UpdateAction::StandaloneUnix.command_args(),
-            (
-                "sh",
-                &[
-                    "-c",
-                    "curl -fsSL https://chatgpt.com/nez/install.sh | NEZ_NON_INTERACTIVE=1 sh"
-                ][..],
-            )
-        );
-        assert_eq!(
-            UpdateAction::StandaloneWindows.command_args(),
-            (
-                "powershell",
-                &[
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-c",
-                    "$env:NEZ_NON_INTERACTIVE=1; irm https://chatgpt.com/nez/install.ps1 | iex"
-                ][..],
-            )
+            UpdateAction::Daemon(DaemonUpdateSource::ThisCli).command_str(),
+            "nez app-server daemon update --from-cli --yes"
         );
     }
 }
