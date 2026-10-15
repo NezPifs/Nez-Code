@@ -26,10 +26,8 @@ pub async fn ensure_oss_provider_ready(
         }
         OLLAMA_OSS_PROVIDER_ID => {
             let client = nez_ollama::OllamaClient::try_from_oss_provider(config).await?;
-            nez_ollama::ensure_responses_supported(&client).await?;
-            nez_ollama::ensure_oss_ready(config, &client)
-                .await
-                .map_err(|e| std::io::Error::other(format!("OSS setup failed: {e}")))?;
+            nez_ollama::ensure_server_supported(&client).await?;
+            nez_ollama::ensure_oss_ready(config, &client).await?;
         }
         _ => {
             // Unknown provider, skip setup

@@ -26,7 +26,7 @@ use nez_model_provider_info::WireApi;
 #[cfg(test)]
 use nez_model_provider_info::create_oss_provider_with_base_url;
 
-const OLLAMA_CONNECTION_ERROR: &str = "No running Ollama server detected. Start it with: `ollama serve` (after installing). Install instructions: https://github.com/ollama/ollama?tab=readme-ov-file#ollama";
+const OLLAMA_CONNECTION_ERROR: &str = "No running Ollama server detected. Start it with `ollama serve`, or install it from https://ollama.com/download. Set OLLAMA_HOST if it runs on another machine.";
 const OLLAMA_CONNECTION_TIMEOUT: Duration = Duration::from_secs(5);
 
 /// Client for interacting with a local Ollama instance.
@@ -94,38 +94,43 @@ impl OllamaClient {
         Ok(client)
     }
 
-    /// Probe whether the server is reachable by hitting the appropriate health endpoint.
+    /// Probe whether the server is reachable. Nez-Code talks to Ollama's native
+    /// API, so `/api/tags` is tried first; servers that only expose the
+    /// OpenAI-compatible surface are accepted through `/v1/models`.
     async fn probe_server(&self) -> io::Result<()> {
-        let url = if self.uses_openai_compat {
-            format!("{}/v1/models", self.host_root.trim_end_matches('/'))
-        } else {
-            format!("{}/api/tags", self.host_root.trim_end_matches('/'))
-        };
-        let resp = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .map_err(|error| match error {
-                RouteAwareRequestError::Route(error) => {
-                    tracing::warn!(error = %error, "Failed to initialize Ollama HTTP transport");
-                    io::Error::other(error)
-                }
-                error => {
-                    tracing::warn!(error = ?error, "Failed to connect to Ollama server");
-                    io::Error::other(OLLAMA_CONNECTION_ERROR)
-                }
-            })?;
-        if resp.status().is_success() {
-            Ok(())
-        } else {
-            tracing::warn!(
-                "Failed to probe server at {}: HTTP {}",
-                self.host_root,
-                resp.status()
-            );
-            Err(io::Error::other(OLLAMA_CONNECTION_ERROR))
+        let root = self.host_root.trim_end_matches('/');
+        let mut urls = vec![format!("{root}/api/tags")];
+        if self.uses_openai_compat {
+            urls.push(format!("{root}/v1/models"));
         }
+        let mut last_status = None;
+        for url in urls {
+            let resp = self
+                .client
+                .get(url)
+                .send()
+                .await
+                .map_err(|error| match error {
+                    RouteAwareRequestError::Route(error) => {
+                        tracing::warn!(error = %error, "Failed to initialize Ollama HTTP transport");
+                        io::Error::other(error)
+                    }
+                    error => {
+                        tracing::warn!(error = ?error, "Failed to connect to Ollama server");
+                        io::Error::other(OLLAMA_CONNECTION_ERROR)
+                    }
+                })?;
+            if resp.status().is_success() {
+                return Ok(());
+            }
+            last_status = Some(resp.status());
+        }
+        tracing::warn!(
+            "Failed to probe server at {}: HTTP {:?}",
+            self.host_root,
+            last_status
+        );
+        Err(io::Error::other(OLLAMA_CONNECTION_ERROR))
     }
 
     /// Return the list of model names known to the local Ollama instance.

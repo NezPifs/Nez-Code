@@ -17,6 +17,7 @@ async-stream = { workspace = true }
 bytes = { workspace = true }
 nez-core = { workspace = true }
 nez-http-client = { workspace = true }
+nez-model-profiles = { workspace = true }
 nez-model-provider-info = { workspace = true }
 futures = { workspace = true }
 memchr = { workspace = true }
