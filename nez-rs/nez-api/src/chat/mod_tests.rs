@@ -143,7 +143,7 @@ fn finish_emits_reasoning_message_calls_then_completion() {
             acc.push(chunk, true);
         }
     }
-    let events = finish(&mut acc, &tools);
+    let events = finish(&mut acc, &tools, /*text_tools*/ false);
     let kinds: Vec<&str> = events
         .iter()
         .map(|event| match event {
@@ -166,6 +166,163 @@ fn finish_emits_reasoning_message_calls_then_completion() {
         }
         other => panic!("expected completion, got {other:?}"),
     }
+}
+
+fn text_options() -> ChatOptions {
+    let mut options = ChatOptions::new(ChatDialect::Ollama);
+    options.native_tools = false;
+    options.text_tools = Some(TextToolFormat::Json);
+    options.structured_output = true;
+    options
+}
+
+#[test]
+fn text_protocol_requests_describe_tools_instead_of_sending_them() {
+    let prepared = prepare(&request(Some(shell_tool())), &text_options()).expect("prepare");
+    let body = prepared.body;
+    assert!(prepared.text_tools);
+    assert_eq!(body.get("tools"), None);
+    let system = body["messages"][0].clone();
+    assert_eq!(system["role"], "system");
+    let content = system["content"].as_str().unwrap_or_default();
+    assert!(
+        content.contains("shell_command(command?: string)"),
+        "{content}"
+    );
+    assert_eq!(
+        body["format"]["properties"]["tool_calls"]["items"]["properties"]["tool"]["enum"],
+        json!(["shell_command"])
+    );
+}
+
+#[test]
+fn text_protocol_without_tools_is_a_plain_request() {
+    let prepared = prepare(&request(None), &text_options()).expect("prepare");
+    assert!(!prepared.text_tools);
+    assert_eq!(prepared.body.get("format"), None);
+    assert_eq!(prepared.body["messages"][0]["role"], "user");
+}
+
+#[test]
+fn finish_turns_text_tool_blocks_into_calls() {
+    let tools = convert::convert_tools(Some(&shell_tool()));
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let line = r#"{"message":{"role":"assistant","content":"Listing.\n{\"tool\": \"shell_command\", \"input\": {\"command\": \"ls\"}}"},"done":true}"#;
+    let chunk = stream::parse_line(ChatDialect::Ollama, line)
+        .expect("parse")
+        .expect("chunk");
+    assert!(acc.push(chunk, /*stream_text*/ false).is_empty());
+    let events = finish(&mut acc, &tools, /*text_tools*/ true);
+    let items: Vec<&ResponseItem> = events
+        .iter()
+        .filter_map(|event| match event {
+            ResponseEvent::OutputItemDone(item) => Some(item),
+            _ => None,
+        })
+        .collect();
+    match items.as_slice() {
+        [
+            ResponseItem::Message { content, .. },
+            ResponseItem::FunctionCall {
+                name,
+                arguments,
+                call_id,
+                ..
+            },
+        ] => {
+            assert!(
+                matches!(content.as_slice(), [ContentItem::OutputText { text, .. }] if text == "Listing.")
+            );
+            assert_eq!(name, "shell_command");
+            assert_eq!(arguments, r#"{"command":"ls"}"#);
+            assert_eq!(call_id, "resp_text_call_0");
+        }
+        other => panic!("unexpected items: {other:?}"),
+    }
+}
+
+#[test]
+fn unusable_text_tool_blocks_are_reported_in_the_reply() {
+    let tools = convert::convert_tools(Some(&shell_tool()));
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let line = r#"{"message":{"role":"assistant","content":"<write_file path=\"a.txt\">x</write_file>"},"done":true}"#;
+    let chunk = stream::parse_line(ChatDialect::Ollama, line)
+        .expect("parse")
+        .expect("chunk");
+    acc.push(chunk, false);
+    let events = finish(&mut acc, &tools, true);
+    match &events[0] {
+        ResponseEvent::OutputItemDone(ResponseItem::Message { content, .. }) => assert!(
+            matches!(content.as_slice(), [ContentItem::OutputText { text, .. }]
+                if text == "Tool call not run: File edits are not available in this session.")
+        ),
+        other => panic!("unexpected event: {other:?}"),
+    }
+    // The turn continues so the model can correct the call.
+    assert!(matches!(
+        events.last(),
+        Some(ResponseEvent::Completed {
+            end_turn: Some(false),
+            ..
+        })
+    ));
+}
+
+fn malformed_reply() -> ResponseItem {
+    serde_json::from_value(json!({
+        "type": "message",
+        "role": "assistant",
+        "content": [{"type": "output_text", "text": "Tool call not run: `ReadFile` needs a `path`."}],
+    }))
+    .expect("assistant message")
+}
+
+#[test]
+fn malformed_tool_replies_are_retried_a_bounded_number_of_times() {
+    let mut req = request(Some(shell_tool()));
+    req.input.push(malformed_reply());
+    let prepared = prepare(&req, &text_options()).expect("prepare");
+    assert!(prepared.retry_malformed_calls);
+    let messages = prepared.body["messages"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
+    let last = messages.last().cloned().unwrap_or_default();
+    assert_eq!(last["role"], "user");
+    assert!(
+        last["content"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("could not be run")
+    );
+
+    req.input.push(malformed_reply());
+    let prepared = prepare(&req, &text_options()).expect("prepare");
+    assert!(!prepared.retry_malformed_calls);
+}
+
+#[test]
+fn output_schema_does_not_replace_the_text_tool_envelope() {
+    let schema = json!({"type": "object", "properties": {"ok": {"type": "boolean"}},
+                        "additionalProperties": false});
+    let mut req = request(Some(shell_tool()));
+    req.text = Some(TextControls {
+        verbosity: None,
+        format: Some(TextFormat {
+            r#type: TextFormatType::JsonSchema,
+            strict: true,
+            schema,
+            name: "x".to_string(),
+        }),
+    });
+    let body = prepare(&req, &text_options()).expect("prepare").body;
+    assert!(body["format"]["properties"].get("tool_calls").is_some());
+    let system = body["messages"][0]["content"].as_str().unwrap_or_default();
+    assert!(system.contains("final answer"), "{system}");
+    assert!(
+        system.contains("\"additionalProperties\":false"),
+        "{system}"
+    );
 }
 
 async fn pump_lines(
