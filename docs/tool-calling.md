@@ -50,6 +50,9 @@ tool-call tokens are recognized as well.
 
 A call to a tool that does not exist is still dispatched, so the model gets a
 normal "unsupported call" result and can correct itself instead of stalling.
+A reply whose only tool blocks cannot be run (a missing argument, or a file
+edit when edits are unavailable) is sent back with the reason, and the model
+gets two more tries before the turn ends.
 
 ### Structured output
 
@@ -61,7 +64,9 @@ When the server supports it, text-protocol requests also carry a JSON schema
 ```
 
 This removes most malformed calls from small models. It is turned off for
-requests that include images.
+requests that include images. When the caller asks for a structured final
+answer (`nez exec --output-schema`), that schema is described in the prompt
+rather than enforced, so the model can still call tools on the way there.
 
 ### Forcing the text protocol
 

@@ -17,6 +17,7 @@ fn ctx_options(model: &str, caps: ModelCapabilities, window: Option<i64>) -> Cha
         force_text_tools: false,
         vision: VisionMode::Auto,
         enable_thinking: false,
+        reasoning_disabled: false,
     })
 }
 
@@ -68,9 +69,31 @@ fn hosted_chat_requests_do_not_send_num_ctx() {
         force_text_tools: false,
         vision: VisionMode::Auto,
         enable_thinking: false,
+        reasoning_disabled: false,
     });
     assert_eq!(options.num_ctx, None);
     assert_eq!(options.temperature, Some(0.2));
+    assert_eq!(options.think, None);
+}
+
+#[test]
+fn reasoning_effort_none_disables_thinking_on_both_dialects() {
+    let info = model_info_from_slug("deepseek-chat");
+    let profile = profile_for_model("deepseek-chat");
+    for dialect in [ChatDialect::OpenAi, ChatDialect::Ollama] {
+        let options = chat_options(&ChatRequestContext {
+            dialect,
+            model_info: &info,
+            profile: &profile,
+            capabilities: &ModelCapabilities::default(),
+            force_text_tools: false,
+            vision: VisionMode::Auto,
+            enable_thinking: false,
+            reasoning_disabled: true,
+        });
+        assert_eq!(options.think, Some(false));
+        assert!(options.send_reasoning_effort);
+    }
 }
 
 #[test]
@@ -111,6 +134,7 @@ fn native_models_keep_native_tools_unless_forced() {
         force_text_tools: true,
         vision: VisionMode::Auto,
         enable_thinking: false,
+        reasoning_disabled: false,
     });
     assert_eq!(forced.native_tools, false);
     assert!(forced.text_tools.is_some());
@@ -228,6 +252,7 @@ fn thinking_is_disabled_for_ollama_turns_unless_enabled() {
         force_text_tools: false,
         vision: VisionMode::Auto,
         enable_thinking: true,
+        reasoning_disabled: false,
     });
     assert_eq!(enabled.think, None);
 }
