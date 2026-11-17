@@ -59,7 +59,6 @@ members = [
     "ext/connectors",
     "ext/extension-api",
     "ext/goal",
-    "ext/git-attribution",
     "ext/guardian-reviewer",
     "ext/guardian-v2",
     "ext/history-notes",
@@ -214,7 +213,6 @@ nez-execpolicy = { path = "execpolicy" }
 nez-extension-api = { path = "ext/extension-api" }
 nez-extension-items = { path = "ext/items" }
 nez-goal-extension = { path = "ext/goal" }
-nez-git-attribution = { path = "ext/git-attribution" }
 nez-guardian-reviewer = { path = "ext/guardian-reviewer" }
 nez-guardian-v2 = { path = "ext/guardian-v2" }
 nez-history-notes-extension = { path = "ext/history-notes" }

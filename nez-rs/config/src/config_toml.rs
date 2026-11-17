@@ -719,7 +719,8 @@ pub struct ExperimentalRequestUserInput {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct UpdatePlanToolConfig {
-    #[serde(default)]
+    /// The task list is on by default; set to false to hide it.
+    #[serde(default = "default_true")]
     pub enabled: bool,
 }
 

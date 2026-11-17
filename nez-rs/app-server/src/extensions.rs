@@ -18,7 +18,6 @@ use nez_extension_api::ExtensionWarning;
 use nez_extension_api::TurnStartAdmission;
 use nez_goal_extension::GoalExtensionConfig;
 use nez_goal_extension::GoalService;
-use nez_http_client::HttpClientFactory;
 use nez_login::AuthManager;
 use nez_protocol::ThreadId;
 use nez_protocol::protocol::Event;
@@ -40,8 +39,6 @@ pub(crate) struct ThreadExtensionDependencies {
     pub(crate) goal_service: Arc<GoalService>,
     pub(crate) environment_manager: Arc<EnvironmentManager>,
     pub(crate) executor_skill_provider: Arc<dyn nez_skills_extension::SkillProvider>,
-    pub(crate) git_attribution_base_url: String,
-    pub(crate) http_client_factory: HttpClientFactory,
     /// Process-scoped queue shared by idle dispatch and app-server requests.
     pub(crate) queue_service: Option<Arc<QueuedItemService>>,
     pub(crate) turn_start_admission: Option<Arc<dyn TurnStartAdmission>>,
@@ -59,8 +56,6 @@ pub(crate) fn thread_extensions(
         goal_service,
         environment_manager,
         executor_skill_provider,
-        git_attribution_base_url,
-        http_client_factory,
         queue_service,
         turn_start_admission,
     } = dependencies;
@@ -87,12 +82,6 @@ pub(crate) fn thread_extensions(
             },
         );
     }
-    nez_git_attribution::install(
-        &mut builder,
-        auth_manager.clone(),
-        git_attribution_base_url,
-        http_client_factory,
-    );
     nez_guardian_v2::install(&mut builder, auth_manager.clone(), thread_manager);
     nez_memories_extension::install(&mut builder, nez_otel::global());
     nez_mcp_extension::install(&mut builder);

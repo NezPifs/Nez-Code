@@ -14,6 +14,8 @@ use nez_cli::read_api_key_from_stdin;
 use nez_cli::run_login_status;
 use nez_cli::run_login_with_api_key;
 use nez_cli::run_logout;
+use nez_cli::run_provider_login;
+use nez_cli::run_provider_logout;
 use nez_exec::Cli as ExecCli;
 use nez_exec::Command as ExecCommand;
 use nez_exec::ReviewArgs;
@@ -69,8 +71,6 @@ mod sandbox_setup;
 mod sandbox_uninstall;
 mod state_db_recovery;
 #[cfg(not(windows))]
-mod wsl_paths;
-
 use crate::exec_server_command::ExecServerCommand;
 use crate::mcp_cmd::McpCli;
 use crate::plugin_cmd::PluginCli;
@@ -154,6 +154,9 @@ enum Subcommand {
     /// Remove stored authentication credentials.
     Logout(LogoutCommand),
 
+    /// Choose where model requests go: local Ollama or the DeepSeek API.
+    Setup(SetupCommand),
+
     /// Manage external MCP servers for Nez.
     Mcp(McpCli),
 
@@ -169,8 +172,8 @@ enum Subcommand {
     /// Generate shell completion scripts.
     Completion(CompletionCommand),
 
-    /// Update Nez to the latest version.
-    Update,
+    /// Update Nez-Code to the latest release from GitHub.
+    Update(UpdateCommand),
 
     /// Diagnose local Nez installation, config, auth, and runtime health.
     Doctor(DoctorCommand),
@@ -476,9 +479,14 @@ struct LoginCommand {
 
     #[arg(
         long = "with-api-key",
-        help = "Read the API key from stdin (e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`)"
+        help = "Read the API key from stdin (e.g. `printenv DEEPSEEK_API_KEY | nez login --provider deepseek --with-api-key`)"
     )]
     with_api_key: bool,
+
+    /// Provider the key belongs to (for example `deepseek`). Keys for providers
+    /// other than `openai` are kept in the system credential store.
+    #[arg(long = "provider", value_name = "ID")]
+    provider: Option<String>,
 
     #[arg(
         long = "api-key",
@@ -502,6 +510,31 @@ enum LoginSubcommand {
 
 #[derive(Debug, Parser)]
 struct LogoutCommand {
+    #[clap(skip)]
+    config_overrides: CliConfigOverrides,
+
+    /// Remove the stored key for this provider instead of the OpenAI login.
+    #[arg(long = "provider", value_name = "ID")]
+    provider: Option<String>,
+}
+
+#[derive(Debug, Parser)]
+struct UpdateCommand {
+    /// Install without asking for confirmation.
+    #[arg(long, short = 'y')]
+    yes: bool,
+
+    /// Only report whether a newer release is available.
+    #[arg(long, conflicts_with = "rollback")]
+    check: bool,
+
+    /// Restore the version that the last update replaced.
+    #[arg(long)]
+    rollback: bool,
+}
+
+#[derive(Debug, Parser)]
+struct SetupCommand {
     #[clap(skip)]
     config_overrides: CliConfigOverrides,
 }
@@ -554,7 +587,7 @@ struct AppServerCommand {
     /// enabled = false
     /// ```
     ///
-    /// See https://developers.openai.com/nez/config-advanced/#metrics for more details.
+    /// See https://github.com/NezPifs/Nez-Code/blob/main/docs/configuration.md#telemetry for more details.
     #[arg(long = "analytics-default-enabled")]
     analytics_default_enabled: bool,
 
@@ -746,87 +779,25 @@ fn run_update_action(
         return Ok(());
     }
     println!();
-    let cmd_str = action.command_str();
-    println!("Updating Nez via `{cmd_str}`...");
-    let status = {
-        #[cfg(windows)]
-        {
-            let (cmd, args) = action.command_args();
-            let cmd = if action == UpdateAction::StandaloneWindows {
-                // These args contain PowerShell metacharacters, so do not let
-                // PATHEXT select a batch shim for this action.
-                "powershell.exe"
-            } else {
-                cmd
-            };
-            let path_env =
-                std::env::var_os("PATH").ok_or_else(|| anyhow::anyhow!("PATH is not set"))?;
-            let command_path = resolve_windows_update_command_from_path(cmd, &path_env)?;
-            // Do not let a project-local command or package-manager config
-            // influence the updater after the user accepts the update prompt.
-            let update_cwd = tempfile::tempdir()?;
-            // Resolve through PATH without consulting the project cwd. When
-            // this returns a .cmd/.bat shim, std::process::Command routes the
-            // absolute path through the system command processor.
-            std::process::Command::new(command_path)
-                .args(args)
-                .current_dir(update_cwd.path())
-                .status()?
-        }
-        #[cfg(not(windows))]
-        {
-            let (cmd, args) = action.command_args();
-            let command_path = crate::wsl_paths::normalize_for_wsl(cmd);
-            let normalized_args: Vec<String> = args
-                .iter()
-                .map(crate::wsl_paths::normalize_for_wsl)
-                .collect();
-            std::process::Command::new(&command_path)
-                .args(&normalized_args)
-                .status()?
-        }
-    };
+    // The TUI has already exited; run the updater as its own process so the
+    // binary being replaced is not the one doing the replacing mid-call.
+    let executable = std::env::current_exe()?;
+    let (_, args) = action.command_args();
+    let status = std::process::Command::new(executable).args(args).status()?;
     if !status.success() {
-        anyhow::bail!("`{cmd_str}` failed with status {status}");
+        anyhow::bail!("`{}` failed with status {status}", action.command_str());
     }
-    println!("\n🎉 Update ran successfully! Please restart Nez.");
+    println!("Restart Nez-Code to use the new version.");
     Ok(())
 }
 
-#[cfg(windows)]
-fn resolve_windows_update_command_from_path(
-    command: &str,
-    path_env: &std::ffi::OsStr,
-) -> anyhow::Result<PathBuf> {
-    let path_env =
-        std::env::join_paths(std::env::split_paths(path_env).filter(|path| path.is_absolute()))?;
-    if path_env.is_empty() {
-        anyhow::bail!(
-            "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/nez/cli/"
-        );
-    }
-    which::which_in_global(command, Some(&path_env))?
-        .next()
-        .ok_or_else(|| anyhow::anyhow!("could not find update command `{command}` on PATH"))
-}
-
-fn run_update_command() -> anyhow::Result<()> {
-    #[cfg(debug_assertions)]
-    {
-        anyhow::bail!(
-            "`nez update` is not available in debug builds. Install a release build of Nez to use this command."
-        );
-    }
-
-    #[cfg(not(debug_assertions))]
-    {
-        let Some(action) = nez_tui::get_update_action() else {
-            anyhow::bail!(
-                "Could not detect the Nez installation method. Please update manually: https://developers.openai.com/nez/cli/"
-            );
-        };
-        run_update_action(action, /*cli_executable*/ None)
-    }
+async fn run_update_command(cmd: UpdateCommand) -> anyhow::Result<()> {
+    nez_cli::self_update::run(nez_cli::self_update::UpdateOptions {
+        yes: cmd.yes,
+        check: cmd.check,
+        rollback: cmd.rollback,
+    })
+    .await
 }
 
 fn run_execpolicycheck(cmd: ExecPolicyCheckCommand) -> anyhow::Result<()> {
@@ -1028,6 +999,13 @@ async fn cli_main(
                 &mut interactive.config_overrides,
                 root_config_overrides.clone(),
             );
+            if !open_agents_overview
+                && root_remote.is_none()
+                && !interactive.oss
+                && interactive.oss_provider.is_none()
+            {
+                maybe_run_first_run_setup(&interactive.config_overrides).await;
+            }
             if open_agents_overview {
                 if interactive.prompt.is_some() || !interactive.images.is_empty() {
                     anyhow::bail!("`nez agents` does not accept an initial prompt or images");
@@ -1544,7 +1522,15 @@ async fn cli_main(
                         std::process::exit(1);
                     } else if login_cli.with_api_key {
                         let api_key = read_api_key_from_stdin();
-                        run_login_with_api_key(login_cli.config_overrides, api_key).await;
+                        match login_cli.provider {
+                            Some(provider) => {
+                                run_provider_login(login_cli.config_overrides, provider, api_key)
+                                    .await;
+                            }
+                            None => {
+                                run_login_with_api_key(login_cli.config_overrides, api_key).await;
+                            }
+                        }
                     } else {
                         eprintln!(
                             "Pipe an API key to store it, e.g. `printenv DEEPSEEK_API_KEY | nez login --with-api-key`.\nLocal Ollama models need no login."
@@ -1564,7 +1550,23 @@ async fn cli_main(
                 &mut logout_cli.config_overrides,
                 root_config_overrides.clone(),
             );
-            run_logout(logout_cli.config_overrides).await;
+            match logout_cli.provider {
+                Some(provider) => run_provider_logout(logout_cli.config_overrides, provider).await,
+                None => run_logout(logout_cli.config_overrides).await,
+            }
+        }
+        Some(Subcommand::Setup(mut setup_cli)) => {
+            reject_remote_mode_for_subcommand(
+                root_remote.as_deref(),
+                root_remote_auth_token_env.as_deref(),
+                "setup",
+            )?;
+            prepend_config_flags(
+                &mut setup_cli.config_overrides,
+                root_config_overrides.clone(),
+            );
+            let config = load_setup_config(&setup_cli.config_overrides).await?;
+            nez_cli::setup::run_interactive(&config).await?;
         }
         Some(Subcommand::Completion(completion_cli)) => {
             reject_remote_mode_for_subcommand(
@@ -1574,13 +1576,13 @@ async fn cli_main(
             )?;
             print_completion(completion_cli);
         }
-        Some(Subcommand::Update) => {
+        Some(Subcommand::Update(update_cli)) => {
             reject_remote_mode_for_subcommand(
                 root_remote.as_deref(),
                 root_remote_auth_token_env.as_deref(),
                 "update",
             )?;
-            run_update_command()?;
+            run_update_command(update_cli).await?;
         }
         Some(Subcommand::Doctor(doctor_cli)) => {
             reject_remote_mode_for_subcommand(
@@ -1967,15 +1969,7 @@ async fn run_debug_prompt_input_command(
     let user_instructions_provider = Arc::new(NezHomeUserInstructionsProvider::new(
         config.nez_home.clone(),
     ));
-    let auth_manager =
-        AuthManager::shared_from_config(&config, /*enable_nez_api_key_env*/ false).await?;
     let mut extensions = nez_extension_api::ExtensionRegistryBuilder::new();
-    nez_git_attribution::install(
-        &mut extensions,
-        auth_manager,
-        config.chatgpt_base_url.clone(),
-        config.http_client_factory(),
-    );
     nez_skills_extension::install(&mut extensions, |config: &Config| {
         nez_skills_extension::SkillsExtensionConfig {
             include_instructions: config.include_skill_instructions,
@@ -2184,8 +2178,9 @@ fn unsupported_subcommand_name_for_strict_config(
         Some(Subcommand::MigrateRollouts(_)) => Some("migrate-rollouts"),
         Some(Subcommand::Login(_)) => Some("login"),
         Some(Subcommand::Logout(_)) => Some("logout"),
+        Some(Subcommand::Setup(_)) => Some("setup"),
         Some(Subcommand::Completion(_)) => Some("completion"),
-        Some(Subcommand::Update) => Some("update"),
+        Some(Subcommand::Update(_)) => Some("update"),
         Some(Subcommand::Sandbox(_)) => Some("sandbox"),
         Some(Subcommand::Debug(_)) => Some("debug"),
         Some(Subcommand::Execpolicy(_)) => Some("execpolicy"),
@@ -2685,7 +2680,7 @@ mod tests {
         assert_eq!(
             err.to_string(),
             format!(
-                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/nez/cli/"
+                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://github.com/NezPifs/Nez-Code#install"
             )
         );
     }
@@ -3460,7 +3455,17 @@ enabled = true
     #[test]
     fn update_parses_as_update_subcommand() {
         let cli = MultitoolCli::try_parse_from(["nez", "update"]).expect("parse");
-        assert!(matches!(cli.subcommand, Some(Subcommand::Update)));
+        assert!(matches!(cli.subcommand, Some(Subcommand::Update(_))));
+        let cli =
+            MultitoolCli::try_parse_from(["nez", "update", "--yes", "--rollback"]).expect("parse");
+        assert!(matches!(
+            cli.subcommand,
+            Some(Subcommand::Update(UpdateCommand {
+                yes: true,
+                rollback: true,
+                check: false
+            }))
+        ));
     }
 
     #[test]
@@ -4880,3 +4885,39 @@ enabled = true
 #[cfg(all(test, unix))]
 #[path = "daemon_update_tests.rs"]
 mod daemon_update_tests;
+
+async fn load_setup_config(
+    overrides: &CliConfigOverrides,
+) -> anyhow::Result<nez_core::config::Config> {
+    let overrides = overrides.parse_overrides().map_err(anyhow::Error::msg)?;
+    Ok(nez_core::config::Config::load_with_cli_overrides(overrides).await?)
+}
+
+/// Offers provider setup on the first interactive launch. Failures are
+/// reported and the session starts with the defaults.
+async fn maybe_run_first_run_setup(overrides: &CliConfigOverrides) {
+    use std::io::IsTerminal as _;
+    if !std::io::stdin().is_terminal() || !std::io::stdout().is_terminal() {
+        return;
+    }
+    let explicit_provider = overrides
+        .parse_overrides()
+        .is_ok_and(|parsed| parsed.iter().any(|(key, _)| key == "model_provider"));
+    if explicit_provider {
+        return;
+    }
+    let Ok(nez_home) = nez_core::config::find_nez_home() else {
+        return;
+    };
+    if !nez_cli::setup::needs_first_run_setup(nez_home.as_path()) {
+        return;
+    }
+    let result = async {
+        let config = load_setup_config(overrides).await?;
+        nez_cli::setup::run_interactive(&config).await
+    }
+    .await;
+    if let Err(err) = result {
+        eprintln!("Setup did not finish: {err}. Run `nez setup` to try again.");
+    }
+}

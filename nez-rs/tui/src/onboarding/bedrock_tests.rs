@@ -516,7 +516,8 @@ fn credential_entries_share_region_and_keep_aws_secrets_hidden() {
 
       Configure AWS credentials in your environment, then restart Nez.
 
-      Setup guide: https://learn.chatgpt.com/docs/amazon-bedrock
+      Setup guide: https://github.com/NezPifs/Nez-Code/blob/main/docs/
+    providers.md
 
     > 1. Choose another sign-in method
 

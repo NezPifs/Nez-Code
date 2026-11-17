@@ -15,6 +15,8 @@ use nez_login::is_workload_identity_selected;
 use nez_login::login_with_api_key;
 use nez_login::logout_with_revoke;
 use nez_mcp::ema_auth_scope;
+use nez_model_provider_info::OPENAI_PROVIDER_ID;
+use nez_model_provider_info::provider_keys;
 use nez_protocol::auth::AuthMode;
 use nez_protocol::config_types::ForcedLoginMethod;
 use nez_rmcp_client::EnterpriseOAuthCredentialGuard;
@@ -171,6 +173,12 @@ fn read_stdin_secret(terminal_message: &str, reading_message: &str, empty_messag
 
 pub async fn run_login_status(cli_config_overrides: CliConfigOverrides) -> ! {
     let config = load_config_or_exit(cli_config_overrides).await;
+
+    if config.model_provider_id != OPENAI_PROVIDER_ID {
+        let (message, ok) = provider_key_status(&config);
+        eprintln!("{message}");
+        std::process::exit(if ok { 0 } else { 1 });
+    }
 
     if is_workload_identity_selected() {
         match AuthManager::shared_from_config(&config, /*enable_nez_api_key_env*/ false).await {
@@ -349,6 +357,103 @@ fn safe_format_key(key: &str) -> String {
 #[cfg(test)]
 #[path = "login_storage_tests.rs"]
 mod storage_tests;
+
+/// The environment variable a provider reads its API key from.
+fn provider_env_key(config: &Config, provider_id: &str) -> Result<String, String> {
+    let Some(provider) = config.model_providers.get(provider_id) else {
+        let mut known: Vec<&str> = config.model_providers.keys().map(String::as_str).collect();
+        known.sort_unstable();
+        return Err(format!(
+            "Unknown provider `{provider_id}`. Known providers: {}.",
+            known.join(", ")
+        ));
+    };
+    provider
+        .env_key
+        .clone()
+        .ok_or_else(|| format!("`{provider_id}` does not use an API key."))
+}
+
+/// Stores a provider API key in the system credential store.
+pub async fn run_provider_login(
+    cli_config_overrides: CliConfigOverrides,
+    provider_id: String,
+    api_key: String,
+) -> ! {
+    if provider_id == OPENAI_PROVIDER_ID {
+        run_login_with_api_key(cli_config_overrides, api_key).await;
+    }
+    let config = load_config_or_exit(cli_config_overrides).await;
+    let result = provider_env_key(&config, &provider_id)
+        .and_then(|env_key| provider_keys::save_provider_key(&env_key, &api_key));
+    match result {
+        Ok(()) => {
+            eprintln!("Saved the {provider_id} API key to the system credential store.");
+            std::process::exit(0);
+        }
+        Err(err) => {
+            eprintln!("Error: {err}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// Removes a provider API key from the system credential store.
+pub async fn run_provider_logout(
+    cli_config_overrides: CliConfigOverrides,
+    provider_id: String,
+) -> ! {
+    if provider_id == OPENAI_PROVIDER_ID {
+        run_logout(cli_config_overrides).await;
+    }
+    let config = load_config_or_exit(cli_config_overrides).await;
+    let result = provider_env_key(&config, &provider_id)
+        .and_then(|env_key| provider_keys::delete_provider_key(&env_key));
+    match result {
+        Ok(true) => {
+            eprintln!("Removed the stored {provider_id} API key.");
+            std::process::exit(0);
+        }
+        Ok(false) => {
+            eprintln!("No stored {provider_id} API key.");
+            std::process::exit(0);
+        }
+        Err(err) => {
+            eprintln!("Error: {err}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// Describes where the active non-OpenAI provider gets its key.
+fn provider_key_status(config: &Config) -> (String, bool) {
+    let provider_id = &config.model_provider_id;
+    let name = &config.model_provider.name;
+    let Some(env_key) = config.model_provider.env_key.as_deref() else {
+        return (format!("Using {name}; no API key needed."), true);
+    };
+    if std::env::var(env_key).is_ok_and(|v| !v.trim().is_empty()) {
+        return (
+            format!("Using {name} with {env_key} from the environment."),
+            true,
+        );
+    }
+    match provider_keys::load_provider_key(env_key) {
+        Some(key) => (
+            format!(
+                "Using {name} with a key from the system credential store - {}",
+                safe_format_key(&key)
+            ),
+            true,
+        ),
+        None => (
+            format!(
+                "No API key for {name}. Run `nez setup`, or `printenv {env_key} | nez login --provider {provider_id} --with-api-key`."
+            ),
+            false,
+        ),
+    }
+}
 
 #[cfg(test)]
 mod tests {

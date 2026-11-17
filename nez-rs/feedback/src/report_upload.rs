@@ -16,11 +16,11 @@ use sentry::protocol::EnvelopeItem;
 use sentry::types::Dsn;
 use sentry::types::Uuid;
 
+use crate::FEEDBACK_UNAVAILABLE_MESSAGE;
 use crate::FeedbackAttachment;
 use crate::FeedbackSnapshot;
 use crate::MAX_DECODED_UPLOAD_BYTES;
 use crate::MAX_EVENT_BYTES;
-use crate::SENTRY_DSN;
 use crate::upload;
 
 // Background parts must tolerate slow links without inheriting the interactive
@@ -48,15 +48,18 @@ pub struct FeedbackTransport {
 }
 
 impl FeedbackTransport {
+    /// Fails with [`FEEDBACK_UNAVAILABLE_MESSAGE`] unless `NEZ_FEEDBACK_DSN` is set.
     pub fn new(http_client_factory: HttpClientFactory) -> Result<Self> {
+        let dsn = crate::configured_feedback_dsn()
+            .ok_or_else(|| anyhow!(FEEDBACK_UNAVAILABLE_MESSAGE))?;
         Ok(Self {
             client_pool: RouteAwareClientPool::new_without_redirects_or_request_logging(
                 http_client_factory,
                 ClientRouteClass::Other,
             ),
-            dsn: SENTRY_DSN
+            dsn: dsn
                 .parse()
-                .map_err(|_| anyhow!("invalid feedback DSN"))?,
+                .map_err(|_| anyhow!("invalid NEZ_FEEDBACK_DSN"))?,
         })
     }
 

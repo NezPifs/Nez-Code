@@ -53,14 +53,16 @@ nez-exec-server = { workspace = true }
 nez-execpolicy = { workspace = true }
 nez-extension-api = { workspace = true }
 nez-features = { workspace = true }
-nez-git-attribution = { workspace = true }
 nez-git-utils = { workspace = true }
 nez-install-context = { workspace = true }
 nez-login = { workspace = true }
 nez-memories-write = { workspace = true }
 nez-mcp = { workspace = true }
 nez-model-provider = { workspace = true }
+nez-model-profiles = { workspace = true }
+nez-model-provider-info = { workspace = true }
 nez-models-manager = { workspace = true }
+nez-ollama = { workspace = true }
 nez-plugin = { workspace = true }
 nez-protocol = { workspace = true }
 nez-tcp-tunnel = { workspace = true }
@@ -80,15 +82,19 @@ nez-utils-path-uri = { workspace = true }
 nez-utils-redacted-string = { workspace = true }
 nez-websocket-auth = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
+flate2 = { workspace = true }
 futures = { workspace = true }
 http = { workspace = true }
 libc = { workspace = true }
 os_info = { workspace = true }
 owo-colors = { workspace = true }
 regex-lite = { workspace = true }
+semver = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+sha2 = { workspace = true }
 supports-color = { workspace = true }
+tar = { workspace = true }
 sys-locale = { workspace = true }
 tempfile = { workspace = true }
 tokio = { workspace = true, features = [
@@ -101,12 +107,14 @@ tokio = { workspace = true, features = [
     "time",
 ] }
 toml = { workspace = true }
+toml_edit = { workspace = true }
 tracing = { workspace = true }
 tracing-appender = { workspace = true }
 tracing-subscriber = { workspace = true }
 unicode-segmentation = { workspace = true }
 url = { workspace = true }
 which = { workspace = true }
+zip = { workspace = true }
 
 [target.'cfg(all(target_os = "linux", target_env = "musl", any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
 tikv-jemallocator = { workspace = true }
@@ -127,14 +135,11 @@ assert_matches = { workspace = true }
 nez-app-server-client = { workspace = true }
 nez-utils-cargo-bin = { workspace = true }
 nez-utils-pty = { workspace = true }
-flate2 = { workspace = true }
 insta = { workspace = true }
 jsonwebtoken = { workspace = true }
 predicates = { workspace = true }
 pretty_assertions = { workspace = true }
-sha2 = { workspace = true }
 sqlx = { workspace = true }
-tar = { workspace = true }
 tokio-tungstenite = { workspace = true }
 vt100 = { workspace = true }
 wiremock = { workspace = true }

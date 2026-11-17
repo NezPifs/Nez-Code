@@ -5,7 +5,8 @@ expression: "rendered.join(\"\\n\\n\")"
 external (80 columns)
 ▌ Tell us more (bug)
 ▌
-▌ Your feedback can be used to improve ChatGPT. Learn more.
+▌ Feedback is sent only to the server set in NEZ_FEEDBACK_DSN. Without one, open
+▌ an issue instead.
 ▌
 ▌ (optional) Write a short description to help us further
 
@@ -14,8 +15,9 @@ Press enter to submit or esc to cancel
 external (40 columns)
 ▌ Tell us more (bug)
 ▌
-▌ Your feedback can be used to improve
-▌ ChatGPT. Learn more.
+▌ Feedback is sent only to the server
+▌ set in NEZ_FEEDBACK_DSN. Without one,
+▌ open an issue instead.
 ▌
 ▌ (optional) Write a short description t
 
