@@ -70,10 +70,14 @@ const RESTART_RETRY_INTERVAL: Duration = Duration::from_millis(50);
 // envelope, and the worst-case six-byte JSON escape for every captured byte.
 const INSTALLER_STDERR_TAIL_BYTES: usize = 2 * 1024;
 const INSTALLER_STDERR_DRAIN_TIMEOUT: Duration = Duration::from_secs(1);
+// The Nez-Code installers do not implement the managed-package protocol this
+// loop drives and decline when invoked by it; the loop only runs for managed
+// package layouts, which the installers never create.
 #[cfg(unix)]
-const INSTALL_URL: &str = "https://chatgpt.com/nez/install.sh";
+const INSTALL_URL: &str = "https://github.com/NezPifs/Nez-Code/releases/latest/download/install.sh";
 #[cfg(windows)]
-const INSTALL_URL: &str = "https://chatgpt.com/nez/install.ps1";
+const INSTALL_URL: &str =
+    "https://github.com/NezPifs/Nez-Code/releases/latest/download/install.ps1";
 
 pub(crate) async fn run(
     http_client_factory: HttpClientFactory,

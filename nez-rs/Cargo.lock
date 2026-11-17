@@ -7149,6 +7149,7 @@ dependencies = [
  "predicates",
  "pretty_assertions",
  "regex-lite",
+ "semver",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -7171,6 +7172,7 @@ dependencies = [
  "which 8.0.0",
  "windows-sys 0.61.2",
  "wiremock",
+ "zip",
  "zstd",
 ]
 
