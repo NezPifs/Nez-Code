@@ -70,7 +70,6 @@ mod remote_control_cmd;
 mod sandbox_setup;
 mod sandbox_uninstall;
 mod state_db_recovery;
-#[cfg(not(windows))]
 use crate::exec_server_command::ExecServerCommand;
 use crate::mcp_cmd::McpCli;
 use crate::plugin_cmd::PluginCli;
