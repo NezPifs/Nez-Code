@@ -177,6 +177,9 @@ async fn thread_analytics_opt_out_overrides_shared_client() {
     let mut expected_thread_ids = Vec::new();
     let mut opted_out_thread_ids = Vec::new();
 
+    // Expected per setting: Some(false), Some(true), None. A client the host
+    // passes in is used unless the thread opts out; without one, analytics are
+    // opt-in and an unset setting stays off.
     for (name, client_override, expected_enabled) in [
         (
             "enabled_override",
@@ -188,7 +191,7 @@ async fn thread_analytics_opt_out_overrides_shared_client() {
             Some(AnalyticsEventsClient::disabled()),
             [false, false, false],
         ),
-        ("no_override", None, [false, true, true]),
+        ("no_override", None, [false, true, false]),
     ] {
         config.nez_home = temp_dir.path().join(name).abs();
         config.cwd = config.nez_home.abs();
