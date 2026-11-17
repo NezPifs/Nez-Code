@@ -318,7 +318,8 @@ impl AnalyticsEventsClient {
     ) -> Self {
         let destination = AnalyticsEventsDestination::from_base_url(base_url);
         Self {
-            queue: (analytics_enabled != Some(false))
+            // Events go to the upstream ChatGPT backend, so they are opt-in.
+            queue: (analytics_enabled == Some(true))
                 .then(|| AnalyticsEventsQueue::new(Arc::clone(&auth_manager), destination)),
         }
     }

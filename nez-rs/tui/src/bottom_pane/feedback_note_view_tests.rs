@@ -82,7 +82,7 @@ fn feedback_disclosure_matches_audience_at_normal_and_narrow_widths() {
             FeedbackAudience::External,
             "external",
             FEEDBACK_POLICY_URL,
-            "Learnmore",
+            "openanissue",
         ),
         (
             FeedbackAudience::OpenAiEmployee,
@@ -188,7 +188,7 @@ fn feedback_disclosure_keeps_editor_visible_in_four_rows() {
     );
     for (audience, disclosure) in [
         (FeedbackAudience::OpenAiEmployee, "Your data"),
-        (FeedbackAudience::External, "Your feedback"),
+        (FeedbackAudience::External, "Feedback is"),
     ] {
         let mut view = make_view(FeedbackCategory::SafetyCheck);
         view.feedback_audience = audience;

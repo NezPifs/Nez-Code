@@ -901,13 +901,13 @@ mod tests {
     #[test]
     fn canonicalize_git_remote_url_normalizes_github_variants() {
         for remote in [
-            "git@github.com:OpenAI/Nez.git",
+            "git@github.com:NezPifs/Nez-Code.git",
             "ssh://git@github.com/NezPifs/Nez-Code.git",
-            "ssh://git@github.com:22/OpenAI/Nez.git",
+            "ssh://git@github.com:22/NezPifs/Nez-Code.git",
             "https://github.com/NezPifs/Nez-Code.git",
-            "https://github.com:443/openai/nez.git",
+            "https://github.com:443/NezPifs/Nez-Code.git",
             "https://token@github.com/NezPifs/Nez-Code/",
-            "github.com/OpenAI/Nez.git",
+            "github.com/NezPifs/Nez-Code.git",
         ] {
             assert_eq!(
                 canonicalize_git_remote_url(remote),

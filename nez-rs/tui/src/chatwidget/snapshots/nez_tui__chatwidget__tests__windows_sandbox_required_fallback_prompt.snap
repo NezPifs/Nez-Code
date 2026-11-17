@@ -5,7 +5,7 @@ expression: popup
   Couldn't set up your sandbox with Administrator permissions
 
   Your organization requires the default sandbox before Nez can continue.
-  Learn more <https://developers.openai.com/nez/windows>
+  Learn more <https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#windows-sandbox>
 
 
 › 1. Try setting up admin sandbox again

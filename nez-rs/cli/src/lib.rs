@@ -1,6 +1,7 @@
 pub(crate) mod debug_sandbox;
 mod exit_status;
 pub(crate) mod login;
+pub mod self_update;
 pub mod setup;
 
 use clap::Args;

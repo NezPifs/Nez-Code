@@ -14,8 +14,7 @@ use tokio::task;
 
 use crate::operations::run_git_for_status;
 
-const BASELINE_COMMIT_MESSAGE: &str =
-    "Initialize Nez git baseline\n\nCo-authored-by: Nez <noreply@openai.com>";
+const BASELINE_COMMIT_MESSAGE: &str = "Initialize Nez git baseline";
 
 /// File-level change status between a git baseline and the current directory.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -162,7 +161,7 @@ fn write_index_from_head(root: &Path) -> anyhow::Result<()> {
 fn nez_signature() -> gix::actor::Signature {
     gix::actor::Signature {
         name: "Nez".into(),
-        email: "noreply@openai.com".into(),
+        email: "nez@localhost".into(),
         time: gix::date::Time {
             seconds: chrono::Utc::now().timestamp(),
             offset: 0,
