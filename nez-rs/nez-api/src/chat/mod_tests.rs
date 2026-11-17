@@ -143,7 +143,7 @@ fn finish_emits_reasoning_message_calls_then_completion() {
             acc.push(chunk, true);
         }
     }
-    let events = finish(&mut acc, &tools);
+    let events = finish(&mut acc, &tools, /*text_tools*/ false);
     let kinds: Vec<&str> = events
         .iter()
         .map(|event| match event {
@@ -168,6 +168,163 @@ fn finish_emits_reasoning_message_calls_then_completion() {
     }
 }
 
+fn text_options() -> ChatOptions {
+    let mut options = ChatOptions::new(ChatDialect::Ollama);
+    options.native_tools = false;
+    options.text_tools = Some(TextToolFormat::Json);
+    options.structured_output = true;
+    options
+}
+
+#[test]
+fn text_protocol_requests_describe_tools_instead_of_sending_them() {
+    let prepared = prepare(&request(Some(shell_tool())), &text_options()).expect("prepare");
+    let body = prepared.body;
+    assert!(prepared.text_tools);
+    assert_eq!(body.get("tools"), None);
+    let system = body["messages"][0].clone();
+    assert_eq!(system["role"], "system");
+    let content = system["content"].as_str().unwrap_or_default();
+    assert!(
+        content.contains("shell_command(command?: string)"),
+        "{content}"
+    );
+    assert_eq!(
+        body["format"]["properties"]["tool_calls"]["items"]["properties"]["tool"]["enum"],
+        json!(["shell_command"])
+    );
+}
+
+#[test]
+fn text_protocol_without_tools_is_a_plain_request() {
+    let prepared = prepare(&request(None), &text_options()).expect("prepare");
+    assert!(!prepared.text_tools);
+    assert_eq!(prepared.body.get("format"), None);
+    assert_eq!(prepared.body["messages"][0]["role"], "user");
+}
+
+#[test]
+fn finish_turns_text_tool_blocks_into_calls() {
+    let tools = convert::convert_tools(Some(&shell_tool()));
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let line = r#"{"message":{"role":"assistant","content":"Listing.\n{\"tool\": \"shell_command\", \"input\": {\"command\": \"ls\"}}"},"done":true}"#;
+    let chunk = stream::parse_line(ChatDialect::Ollama, line)
+        .expect("parse")
+        .expect("chunk");
+    assert!(acc.push(chunk, /*stream_text*/ false).is_empty());
+    let events = finish(&mut acc, &tools, /*text_tools*/ true);
+    let items: Vec<&ResponseItem> = events
+        .iter()
+        .filter_map(|event| match event {
+            ResponseEvent::OutputItemDone(item) => Some(item),
+            _ => None,
+        })
+        .collect();
+    match items.as_slice() {
+        [
+            ResponseItem::Message { content, .. },
+            ResponseItem::FunctionCall {
+                name,
+                arguments,
+                call_id,
+                ..
+            },
+        ] => {
+            assert!(
+                matches!(content.as_slice(), [ContentItem::OutputText { text, .. }] if text == "Listing.")
+            );
+            assert_eq!(name, "shell_command");
+            assert_eq!(arguments, r#"{"command":"ls"}"#);
+            assert_eq!(call_id, "resp_text_call_0");
+        }
+        other => panic!("unexpected items: {other:?}"),
+    }
+}
+
+#[test]
+fn unusable_text_tool_blocks_are_reported_in_the_reply() {
+    let tools = convert::convert_tools(Some(&shell_tool()));
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let line = r#"{"message":{"role":"assistant","content":"<write_file path=\"a.txt\">x</write_file>"},"done":true}"#;
+    let chunk = stream::parse_line(ChatDialect::Ollama, line)
+        .expect("parse")
+        .expect("chunk");
+    acc.push(chunk, false);
+    let events = finish(&mut acc, &tools, true);
+    match &events[0] {
+        ResponseEvent::OutputItemDone(ResponseItem::Message { content, .. }) => assert!(
+            matches!(content.as_slice(), [ContentItem::OutputText { text, .. }]
+                if text == "Tool call not run: File edits are not available in this session.")
+        ),
+        other => panic!("unexpected event: {other:?}"),
+    }
+    // The turn continues so the model can correct the call.
+    assert!(matches!(
+        events.last(),
+        Some(ResponseEvent::Completed {
+            end_turn: Some(false),
+            ..
+        })
+    ));
+}
+
+fn malformed_reply() -> ResponseItem {
+    serde_json::from_value(json!({
+        "type": "message",
+        "role": "assistant",
+        "content": [{"type": "output_text", "text": "Tool call not run: `ReadFile` needs a `path`."}],
+    }))
+    .expect("assistant message")
+}
+
+#[test]
+fn malformed_tool_replies_are_retried_a_bounded_number_of_times() {
+    let mut req = request(Some(shell_tool()));
+    req.input.push(malformed_reply());
+    let prepared = prepare(&req, &text_options()).expect("prepare");
+    assert!(prepared.retry_malformed_calls);
+    let messages = prepared.body["messages"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default();
+    let last = messages.last().cloned().unwrap_or_default();
+    assert_eq!(last["role"], "user");
+    assert!(
+        last["content"]
+            .as_str()
+            .unwrap_or_default()
+            .contains("could not be run")
+    );
+
+    req.input.push(malformed_reply());
+    let prepared = prepare(&req, &text_options()).expect("prepare");
+    assert!(!prepared.retry_malformed_calls);
+}
+
+#[test]
+fn output_schema_does_not_replace_the_text_tool_envelope() {
+    let schema = json!({"type": "object", "properties": {"ok": {"type": "boolean"}},
+                        "additionalProperties": false});
+    let mut req = request(Some(shell_tool()));
+    req.text = Some(TextControls {
+        verbosity: None,
+        format: Some(TextFormat {
+            r#type: TextFormatType::JsonSchema,
+            strict: true,
+            schema,
+            name: "x".to_string(),
+        }),
+    });
+    let body = prepare(&req, &text_options()).expect("prepare").body;
+    assert!(body["format"]["properties"].get("tool_calls").is_some());
+    let system = body["messages"][0]["content"].as_str().unwrap_or_default();
+    assert!(system.contains("final answer"), "{system}");
+    assert!(
+        system.contains("\"additionalProperties\":false"),
+        "{system}"
+    );
+}
+
 async fn pump_lines(
     dialect: ChatDialect,
     body: &'static str,
@@ -176,7 +333,15 @@ async fn pump_lines(
     let bytes = futures::stream::iter([Ok(bytes::Bytes::from_static(body.as_bytes()))]).boxed();
     let prepared = prepare(&request(None), &ChatOptions::new(dialect)).expect("prepare");
     let (tx, mut rx) = mpsc::channel(16);
-    pump(bytes, tx, prepared, dialect, Duration::from_secs(5)).await;
+    pump(
+        bytes,
+        tx,
+        prepared,
+        dialect,
+        Duration::from_secs(5),
+        None::<Recovery<nez_client::ReqwestTransport>>,
+    )
+    .await;
     let mut events = Vec::new();
     while let Some(event) = rx.recv().await {
         events.push(event);
@@ -217,4 +382,134 @@ async fn a_finish_reason_without_done_still_completes() {
         events.last(),
         Some(Ok(ResponseEvent::Completed { .. }))
     ));
+}
+
+fn request_with_history(items: Vec<Value>) -> ResponsesApiRequest {
+    let mut req = request(Some(shell_tool()));
+    req.input = items
+        .into_iter()
+        .map(|item| serde_json::from_value(item).expect("history item"))
+        .collect();
+    req
+}
+
+fn failing_call(id: &str) -> [Value; 2] {
+    [
+        json!({"type": "function_call", "name": "shell_command", "call_id": id,
+               "arguments": "{\"command\":\"make\"}"}),
+        json!({"type": "function_call_output", "call_id": id,
+               "output": "make: *** No rule\nProcess exited with code 2"}),
+    ]
+}
+
+#[test]
+fn repeated_failures_end_the_turn_without_a_request() {
+    let mut items = vec![json!({"type": "message", "role": "user",
+        "content": [{"type": "input_text", "text": "build"}]})];
+    for id in ["a", "b", "c"] {
+        items.extend(failing_call(id));
+    }
+    let prepared = prepare(
+        &request_with_history(items),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare");
+    let reply = prepared.stop_reply.unwrap_or_default();
+    assert!(reply.contains("failed 3 times"), "{reply}");
+}
+
+#[test]
+fn long_tool_runs_end_with_a_goal_reminder() {
+    let mut items = vec![json!({"type": "message", "role": "user",
+        "content": [{"type": "input_text", "text": "rename the module"}]})];
+    for i in 0..guards::GOAL_REMINDER_AFTER {
+        let id = format!("c{i}");
+        items.push(
+            json!({"type": "function_call", "name": "shell_command", "call_id": id,
+                          "arguments": format!("{{\"command\":\"step {i}\"}}")}),
+        );
+        items.push(json!({"type": "function_call_output", "call_id": id, "output": "ok"}));
+    }
+    let body = prepare(
+        &request_with_history(items),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare")
+    .body;
+    let last = body["messages"]
+        .as_array()
+        .and_then(|m| m.last())
+        .cloned()
+        .unwrap_or_default();
+    assert_eq!(last["role"], "user");
+    assert!(
+        last["content"]
+            .as_str()
+            .is_some_and(|c| c.contains("rename the module")),
+        "{last}"
+    );
+}
+
+#[test]
+fn empty_reply_recovery_uses_the_json_protocol_and_a_nudge() {
+    let prepared = prepare_recovery(
+        &request(Some(shell_tool())),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare");
+    assert!(prepared.text_tools);
+    assert_eq!(prepared.body.get("tools"), None);
+    assert!(prepared.body.get("format").is_some());
+    let last = prepared.body["messages"]
+        .as_array()
+        .and_then(|m| m.last())
+        .cloned()
+        .unwrap_or_default();
+    assert_eq!(last["content"], RECOVERY_PROMPT_WITH_TOOLS);
+}
+
+#[test]
+fn reasoning_only_replies_count_as_empty() {
+    let mut acc = stream::Accumulator::new("resp".to_string());
+    let chunk = stream::parse_line(
+        ChatDialect::Ollama,
+        r#"{"message":{"role":"assistant","content":"  ","thinking":"hmm"},"done":true}"#,
+    )
+    .expect("parse")
+    .expect("chunk");
+    acc.push(chunk, true);
+    assert!(!acc.has_output());
+    acc.restart();
+    assert_eq!((acc.text.as_str(), acc.done), ("", false));
+}
+
+#[test]
+fn lean_requests_drop_sub_agent_and_goal_tools() {
+    let tools = json!([
+        {"type": "function", "name": "exec_command", "parameters": {"type": "object", "properties": {}}},
+        {"type": "function", "name": "update_goal", "parameters": {"type": "object", "properties": {}}},
+        {"type": "namespace", "name": "multi_agent_v1", "tools": [
+            {"type": "function", "name": "spawn_agent", "parameters": {"type": "object", "properties": {}}}
+        ]}
+    ]);
+    let mut options = ChatOptions::new(ChatDialect::Ollama);
+    options.lean_tools = true;
+    let body = prepare(&request(Some(tools.clone())), &options)
+        .expect("prepare")
+        .body;
+    let names: Vec<&str> = body["tools"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|t| t["function"]["name"].as_str())
+        .collect();
+    assert_eq!(names, vec!["exec_command"]);
+
+    let full = prepare(
+        &request(Some(tools)),
+        &ChatOptions::new(ChatDialect::Ollama),
+    )
+    .expect("prepare")
+    .body;
+    assert_eq!(full["tools"].as_array().map(Vec::len), Some(3));
 }

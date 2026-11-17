@@ -41,6 +41,13 @@ fn exec_command_tool_matches_expected_spec() {
                 )),
         ),
         (
+            "description".to_string(),
+            JsonSchema::string(Some(
+                "One short sentence saying what the command does. Required when it changes files, installs software or modifies the system; shown to the user when approval is needed."
+                    .to_string(),
+            )),
+        ),
+        (
             "shell".to_string(),
             JsonSchema::string(Some(
                     "Shell binary to launch. Defaults to the user's default shell.".to_string(),

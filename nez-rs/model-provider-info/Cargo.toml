@@ -14,14 +14,17 @@ workspace = true
 
 [dependencies]
 nez-client = { workspace = true }
+nez-keyring-store = { workspace = true }
 nez-protocol = { workspace = true }
 nez-utils-redacted-string = { workspace = true }
 http = { workspace = true }
 schemars = { workspace = true }
+tracing = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 url = { workspace = true }
 
 [dev-dependencies]
+keyring = { workspace = true }
 nez-utils-absolute-path = { workspace = true }
 maplit = { workspace = true }
 pretty_assertions = { workspace = true }

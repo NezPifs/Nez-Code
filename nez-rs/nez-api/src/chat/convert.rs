@@ -46,6 +46,13 @@ impl ChatTools {
         self.definitions.is_empty()
     }
 
+    /// Keeps only the tools whose flattened name passes `keep`.
+    pub(crate) fn retain(&mut self, keep: impl Fn(&str) -> bool) {
+        self.definitions
+            .retain(|d| d["function"]["name"].as_str().is_some_and(&keep));
+        self.kinds.retain(|name, _| keep(name));
+    }
+
     pub(crate) fn kind(&self, name: &str) -> ToolKind {
         self.kinds
             .get(name)

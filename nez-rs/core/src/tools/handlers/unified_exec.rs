@@ -43,6 +43,9 @@ pub(crate) struct ExecCommandArgs {
     additional_permissions: Option<AdditionalPermissionProfile>,
     #[serde(default)]
     justification: Option<String>,
+    /// What the command does, in the model's words.
+    #[serde(default)]
+    description: Option<String>,
     #[serde(default)]
     prefix_rule: Option<Vec<String>>,
 }

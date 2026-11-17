@@ -237,6 +237,8 @@ async fn command_center_new_reads_server_defaults_for_actual_destination() -> Re
                 },
                 if mode == "local-default-provider" {
                     "model_provider = \"ollama\"\n"
+                } else if mode == "remote-null-fast" {
+                    "model_provider = \"openai\"\n"
                 } else {
                     ""
                 }
@@ -253,6 +255,9 @@ async fn command_center_new_reads_server_defaults_for_actual_destination() -> Re
                 },
                 if mode == "local" || mode == "local-cli-provider" || mode == "local-cli-model" {
                     "model_provider = \"ollama\"\n"
+                } else if mode == "remote-null-fast" {
+                    // The server's default model and fast tier come from the hosted catalog.
+                    "model_provider = \"openai\"\n"
                 } else {
                     ""
                 }

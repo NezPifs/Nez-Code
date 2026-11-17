@@ -492,6 +492,20 @@ async fn execute_verified_patch(
     };
     let environment_id = turn_environment.selection.environment_id.as_str();
     let file_paths = file_paths_for_action(&action);
+    if !turn_environment.environment.is_remote() {
+        let nez_home = tool_ctx.step_context.turn.config.nez_home.as_path();
+        if let Some(path) = file_paths
+            .iter()
+            .filter_map(|path| path.to_abs_path().ok())
+            .find(|path| {
+                crate::tools::internal_state::is_internal_state_path(path.as_path(), nez_home)
+            })
+        {
+            return Err(FunctionCallError::RespondToModel(
+                crate::tools::internal_state::refusal_message(&path.display().to_string()),
+            ));
+        }
+    }
     let granted_permissions = tool_ctx
         .step_context
         .turn

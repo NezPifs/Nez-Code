@@ -623,7 +623,7 @@ impl AuthModeWidget {
             HyperlinkLine::new(Line::from("  Learn about permissions and approvals in the ").dim());
         docs_line.push_span(
             "Nez docs".underlined(),
-            Some("https://developers.openai.com/nez/security"),
+            Some("https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md"),
         );
         let mut preferences_line =
             HyperlinkLine::new(Line::from("  Your plan's rate limits and ").dim());

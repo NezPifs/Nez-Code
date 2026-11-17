@@ -849,7 +849,9 @@ model = "gpt-work"
         "unexpected error message: {message}"
     );
     assert!(
-        message.contains("https://developers.openai.com/nez/config-advanced#profiles"),
+        message.contains(
+            "https://github.com/NezPifs/Nez-Code/blob/main/docs/configuration.md#profiles"
+        ),
         "unexpected error message: {message}"
     );
 }

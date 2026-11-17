@@ -1,8 +1,6 @@
 #![cfg(not(debug_assertions))]
 
 use crate::legacy_core::config::Config;
-use crate::npm_registry;
-use crate::npm_registry::NpmPackageInfo;
 use crate::update_action;
 use crate::update_action::UpdateAction;
 use crate::update_versions::extract_version_from_latest_tag;
@@ -57,18 +55,11 @@ pub fn get_upgrade_version(config: &Config) -> Option<String> {
     })
 }
 
-// We use the latest version from the cask if installation is via homebrew - homebrew does not immediately pick up the latest release and can lag behind.
-const HOMEBREW_CASK_API_URL: &str = "https://formulae.brew.sh/api/cask/nez.json";
-const LATEST_RELEASE_URL: &str = "https://api.github.com/repos/openai/nez/releases/latest";
+const LATEST_RELEASE_URL: &str = "https://api.github.com/repos/NezPifs/Nez-Code/releases/latest";
 
 #[derive(Deserialize, Debug, Clone)]
 struct ReleaseInfo {
     tag_name: String,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-struct HomebrewCaskInfo {
-    version: String,
 }
 
 async fn check_for_update(
@@ -76,44 +67,12 @@ async fn check_for_update(
     action: Option<UpdateAction>,
     http_client_factory: HttpClientFactory,
 ) -> anyhow::Result<()> {
-    let client_pool = RouteAwareClientPool::with_chatgpt_cloudflare_cookies(
-        http_client_factory,
-        ClientRouteClass::Other,
-    )
-    .with_legacy_custom_ca_fallback();
-    let latest_version = match action {
-        Some(UpdateAction::Daemon(_)) => return Ok(()),
-        Some(UpdateAction::BrewUpgrade) => {
-            let HomebrewCaskInfo { version } = client_pool
-                .get(HOMEBREW_CASK_API_URL)
-                .headers(default_headers())
-                .send()
-                .await?
-                .error_for_status()?
-                .json::<HomebrewCaskInfo>()
-                .await?;
-            version
-        }
-        Some(UpdateAction::NpmGlobalLatest)
-        | Some(UpdateAction::BunGlobalLatest)
-        | Some(UpdateAction::VitePlusGlobalLatest)
-        | Some(UpdateAction::PnpmGlobalLatest) => {
-            let latest_version = fetch_latest_github_release_version(&client_pool).await?;
-            let package_info = client_pool
-                .get(npm_registry::PACKAGE_URL)
-                .headers(default_headers())
-                .send()
-                .await?
-                .error_for_status()?
-                .json::<NpmPackageInfo>()
-                .await?;
-            npm_registry::ensure_version_ready(&package_info, &latest_version)?;
-            latest_version
-        }
-        Some(UpdateAction::StandaloneUnix) | Some(UpdateAction::StandaloneWindows) | None => {
-            fetch_latest_github_release_version(&client_pool).await?
-        }
-    };
+    if matches!(action, Some(UpdateAction::Daemon(_))) {
+        return Ok(());
+    }
+    let client_pool = RouteAwareClientPool::new(http_client_factory, ClientRouteClass::Other)
+        .with_legacy_custom_ca_fallback();
+    let latest_version = fetch_latest_github_release_version(&client_pool).await?;
 
     // Preserve any previously dismissed version if present.
     let prev_info = read_version_info(version_file).ok();
@@ -134,11 +93,20 @@ async fn check_for_update(
 async fn fetch_latest_github_release_version(
     client_pool: &RouteAwareClientPool,
 ) -> anyhow::Result<String> {
-    let ReleaseInfo {
-        tag_name: latest_tag_name,
-    } = client_pool
+    let mut request = client_pool
         .get(LATEST_RELEASE_URL)
         .headers(default_headers())
+        .header("Accept", "application/vnd.github+json");
+    // A token is needed while the repository is private, and avoids rate limits.
+    if let Some(token) = ["NEZ_GITHUB_TOKEN", "GITHUB_TOKEN"]
+        .iter()
+        .find_map(|name| std::env::var(name).ok().filter(|v| !v.trim().is_empty()))
+    {
+        request = request.bearer_auth(token);
+    }
+    let ReleaseInfo {
+        tag_name: latest_tag_name,
+    } = request
         .send()
         .await?
         .error_for_status()?

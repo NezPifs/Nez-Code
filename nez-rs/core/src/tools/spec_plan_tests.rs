@@ -918,16 +918,16 @@ async fn request_user_input_tool_respects_experimental_config_gate() {
 
 #[tokio::test]
 async fn update_plan_tool_respects_config_gate() {
-    let disabled = probe(|_| {}).await;
-    disabled.assert_visible_lacks(&["update_plan"]);
-    disabled.assert_registered_lacks(&["update_plan"]);
-
-    let enabled = probe(|turn| {
+    let disabled = probe(|turn| {
         update_config(turn, |config| {
-            config.update_plan_enabled = true;
+            config.update_plan_enabled = false;
         });
     })
     .await;
+    disabled.assert_visible_lacks(&["update_plan"]);
+    disabled.assert_registered_lacks(&["update_plan"]);
+
+    let enabled = probe(|_| {}).await;
     enabled.assert_visible_contains(&["update_plan"]);
     enabled.assert_registered_contains(&["update_plan"]);
 }

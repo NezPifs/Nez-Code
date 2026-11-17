@@ -18,7 +18,7 @@ async fn update_does_not_start_interactive_prompt() -> Result<()> {
         .arg("update")
         .assert()
         .failure()
-        .stderr(contains("`nez update` is not available in debug builds"));
+        .stderr(contains("this is a development build"));
 
     Ok(())
 }

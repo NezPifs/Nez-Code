@@ -6702,7 +6702,6 @@ dependencies = [
  "nez-feedback",
  "nez-file-search",
  "nez-file-watcher",
- "nez-git-attribution",
  "nez-git-utils",
  "nez-goal-extension",
  "nez-guardian-v2",
@@ -7109,7 +7108,6 @@ dependencies = [
  "nez-execpolicy",
  "nez-extension-api",
  "nez-features",
- "nez-git-attribution",
  "nez-git-utils",
  "nez-history",
  "nez-home",
@@ -7118,8 +7116,11 @@ dependencies = [
  "nez-login",
  "nez-mcp",
  "nez-memories-write",
+ "nez-model-profiles",
  "nez-model-provider",
+ "nez-model-provider-info",
  "nez-models-manager",
+ "nez-ollama",
  "nez-plugin",
  "nez-protocol",
  "nez-rmcp-client",
@@ -7148,6 +7149,7 @@ dependencies = [
  "predicates",
  "pretty_assertions",
  "regex-lite",
+ "semver",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -7160,6 +7162,7 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "toml 0.9.11+spec-1.1.0",
+ "toml_edit 0.24.0+spec-1.1.0",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
@@ -7169,6 +7172,7 @@ dependencies = [
  "which 8.0.0",
  "windows-sys 0.61.2",
  "wiremock",
+ "zip",
  "zstd",
 ]
 
@@ -7985,19 +7989,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nez-git-attribution"
-version = "0.0.0"
-dependencies = [
- "nez-backend-client",
- "nez-extension-api",
- "nez-http-client",
- "nez-login",
- "serde_json",
- "tokio",
- "wiremock",
-]
-
-[[package]]
 name = "nez-git-utils"
 version = "0.0.0"
 dependencies = [
@@ -8569,6 +8560,7 @@ dependencies = [
  "nez-http-client",
  "nez-keyring-store",
  "nez-login",
+ "nez-model-profiles",
  "nez-model-provider-info",
  "nez-models-manager",
  "nez-otel",
@@ -8594,8 +8586,10 @@ name = "nez-model-provider-info"
 version = "0.0.0"
 dependencies = [
  "http 1.4.0",
+ "keyring",
  "maplit",
  "nez-client",
+ "nez-keyring-store",
  "nez-protocol",
  "nez-utils-absolute-path",
  "nez-utils-redacted-string",
@@ -8604,6 +8598,7 @@ dependencies = [
  "serde",
  "tempfile",
  "toml 0.9.11+spec-1.1.0",
+ "tracing",
  "url",
 ]
 

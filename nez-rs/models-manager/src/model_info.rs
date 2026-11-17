@@ -15,6 +15,10 @@ use nez_utils_output_truncation::approx_bytes_for_tokens;
 use tracing::debug;
 
 pub const BASE_INSTRUCTIONS: &str = include_str!("../prompt.md");
+/// Shorter, action-oriented instructions for local and other non-OpenAI
+/// models. The full prompt costs about 5k tokens and is written for frontier
+/// models; small models read its restraint literally and stall.
+pub const LOCAL_INSTRUCTIONS: &str = include_str!("../local_prompt.md");
 /// Context window assumed for models that match no profile.
 pub const FALLBACK_CONTEXT_WINDOW: i64 = 272_000;
 const PERSONALITY_SECTION_HEADER: &str = "# Personality";
@@ -127,7 +131,7 @@ pub fn model_info_from_slug(slug: &str) -> ModelInfo {
         available_access_programs: None,
         availability_nux: None,
         upgrade: None,
-        model_messages: Some(local_model_messages()),
+        model_messages: Some(profile_model_messages(profile.id)),
         include_skills_usage_instructions: false,
         include_plugin_usage_instructions: false,
         include_apps_usage_instructions: false,
@@ -164,9 +168,14 @@ pub fn model_info_from_slug(slug: &str) -> ModelInfo {
     }
 }
 
-fn local_model_messages() -> ModelMessages {
+fn profile_model_messages(profile_id: &str) -> ModelMessages {
+    let instructions = if profile_id == "openai-hosted" {
+        BASE_INSTRUCTIONS
+    } else {
+        LOCAL_INSTRUCTIONS
+    };
     ModelMessages {
-        instructions_template: Some(BASE_INSTRUCTIONS.to_string()),
+        instructions_template: Some(instructions.to_string()),
         ..Default::default()
     }
 }

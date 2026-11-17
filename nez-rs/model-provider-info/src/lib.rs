@@ -8,6 +8,8 @@
 //! API provider construction applies the process-wide managed residency policy also
 //! used by default HTTP headers.
 
+pub mod provider_keys;
+
 use http::HeaderMap;
 use http::header::HeaderName;
 use http::header::HeaderValue;
@@ -494,6 +496,7 @@ other non-default provider fields are not supported"
                 let api_key = std::env::var(env_key)
                     .ok()
                     .filter(|v| !v.trim().is_empty())
+                    .or_else(|| provider_keys::load_provider_key(env_key))
                     .ok_or_else(|| {
                         NezErr::EnvVar(EnvVarError {
                             var: env_key.clone(),

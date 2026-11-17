@@ -35,12 +35,12 @@ impl ChatWidget {
         header.push(*Box::new(
             crate::terminal_hyperlinks::HyperlinkText::new(if allow_unelevated {
                 vec![
-                    line!["Set up the Nez agent sandbox to protect your files and control network access. Learn more <https://developers.openai.com/nez/windows>"],
+                    line!["Set up the Nez agent sandbox to protect your files and control network access. Learn more <https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#windows-sandbox>"],
                 ]
             } else {
                 vec![
                     line!["Your organization requires the default Nez agent sandbox to continue. Set it up to protect your files and control network access."],
-                    line!["Learn more <https://developers.openai.com/nez/windows>"],
+                    line!["Learn more <https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#windows-sandbox>"],
                 ]
             }),
         ));
@@ -165,7 +165,7 @@ impl ChatWidget {
             ]);
         }
         lines.push(line![
-            "Learn more <https://developers.openai.com/nez/windows>"
+            "Learn more <https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#windows-sandbox>"
         ]);
 
         let mut header = ColumnRenderable::new();

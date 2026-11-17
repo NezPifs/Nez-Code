@@ -22,6 +22,7 @@ nez-http-client = { workspace = true }
 nez-feedback = { workspace = true }
 nez-login = { workspace = true }
 nez-keyring-store = { workspace = true }
+nez-model-profiles = { workspace = true }
 nez-model-provider-info = { workspace = true }
 nez-models-manager = { workspace = true }
 nez-otel = { workspace = true }

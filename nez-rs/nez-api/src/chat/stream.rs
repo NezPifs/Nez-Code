@@ -378,6 +378,23 @@ impl Accumulator {
     pub(crate) fn message_started(&self) -> bool {
         self.message_started
     }
+
+    /// Whether the reply produced anything the agent loop can act on.
+    /// Reasoning alone does not count: the model thought but never answered.
+    pub(crate) fn has_output(&self) -> bool {
+        !self.text.trim().is_empty() || self.calls.values().any(|call| !call.name.is_empty())
+    }
+
+    /// Clears the reply before a retry. Usage and the started message are
+    /// kept so the UI sees one continuous response.
+    pub(crate) fn restart(&mut self) {
+        self.text.clear();
+        self.reasoning.clear();
+        self.calls.clear();
+        self.next_whole_call = 0;
+        self.finish_reason = None;
+        self.done = false;
+    }
 }
 
 /// Builds the response item for one tool call, restoring namespaces and

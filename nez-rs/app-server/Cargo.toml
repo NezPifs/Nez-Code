@@ -52,7 +52,6 @@ nez-extension-api = { workspace = true }
 nez-external-agent-migration = { workspace = true }
 nez-features = { workspace = true }
 nez-goal-extension = { workspace = true }
-nez-git-attribution = { workspace = true }
 nez-guardian-v2 = { workspace = true }
 nez-git-utils = { workspace = true }
 nez-file-watcher = { workspace = true }

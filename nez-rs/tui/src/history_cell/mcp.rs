@@ -442,7 +442,7 @@ pub(crate) fn empty_mcp_output() -> WebHyperlinkHistoryCell {
     let mut docs_line = HyperlinkLine::new(Line::from("    See the "));
     docs_line.push_span(
         "MCP docs".underlined(),
-        Some("https://developers.openai.com/nez/mcp"),
+        Some("https://github.com/NezPifs/Nez-Code/blob/main/docs/configuration.md#mcp-servers"),
     );
     docs_line.push_span(" to configure them.".into(), /*destination*/ None);
 

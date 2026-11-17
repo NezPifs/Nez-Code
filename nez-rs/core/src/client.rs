@@ -2002,11 +2002,23 @@ impl ResponsesHttpExecutor<'_> {
             }
             nez_api::chat::ChatDialect::OpenAi => nez_api::chat::ModelCapabilities::default(),
         };
+        let vision = crate::chat_wire::VisionMode::from_env();
+        if let Some(message) = crate::chat_wire::text_only_image_error(
+            &model_info.slug,
+            vision,
+            &capabilities,
+            &prompt.input,
+        ) {
+            return Err(NezErr::InvalidRequest(message));
+        }
         let options = crate::chat_wire::chat_options(&crate::chat_wire::ChatRequestContext {
             dialect,
             model_info,
             profile: &profile,
             capabilities: &capabilities,
+            force_text_tools: crate::chat_wire::native_tools_disabled_by_env(),
+            vision,
+            enable_thinking: crate::chat_wire::thinking_enabled_by_env(),
             reasoning_disabled: request
                 .reasoning
                 .as_ref()

@@ -61,8 +61,8 @@ fn take_workspace_headline_request_id(
 async fn token_count_none_resets_context_indicator() {
     let (mut chat, _rx, _ops) = make_chatwidget_manual(/*model_override*/ None).await;
 
-    let context_window = 13_000;
-    let pre_compact_tokens = 12_700;
+    let context_window = 48_000;
+    let pre_compact_tokens = 37_200;
 
     handle_token_count(
         &mut chat,
@@ -116,7 +116,7 @@ async fn resumed_session_hides_unknown_token_usage_until_an_update_arrives() {
     chat.refresh_status_line();
     assert_eq!(
         status_line_text(&chat),
-        Some("Context 30% left · Context 70% used · 0 in · 0 out".to_string())
+        Some("Context 3% left · Context 97% used · 0 in · 0 out".to_string())
     );
 }
 

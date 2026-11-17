@@ -4,7 +4,7 @@ expression: "render_bottom_popup(&chat, 120)"
 ---
   Your organization requires the default Nez agent sandbox to continue. Set it up to protect your files and control
   network access.
-  Learn more <https://developers.openai.com/nez/windows>
+  Learn more <https://github.com/NezPifs/Nez-Code/blob/main/docs/planning-and-permissions.md#windows-sandbox>
 
 
 › 1. Set up default sandbox (requires Administrator permissions)
