@@ -31,11 +31,16 @@ fn empty_keys_are_rejected() {
 #[test]
 fn credential_store_errors_read_as_no_key() {
     let store = MockKeyringStore::default();
-    store.set_error(
-        "provider-api-key:DEEPSEEK_API_KEY",
-        keyring::Error::PlatformFailure("no secret service".into()),
-    );
+    // The mock reports an injected error once, so set it before each call.
+    let fail = || {
+        store.set_error(
+            "provider-api-key:DEEPSEEK_API_KEY",
+            keyring::Error::PlatformFailure("no secret service".into()),
+        );
+    };
+    fail();
     assert_eq!(load_with(&store, "DEEPSEEK_API_KEY"), None);
+    fail();
     let err = save_with(&store, "DEEPSEEK_API_KEY", "sk").unwrap_err();
     assert!(err.contains("Set DEEPSEEK_API_KEY"), "{err}");
 }

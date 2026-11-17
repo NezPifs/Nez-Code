@@ -28,6 +28,10 @@ jobs:
   installers:
     name: installers
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # The installers live in the repository root, not in nez-rs.
+        working-directory: .
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
