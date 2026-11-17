@@ -58,8 +58,18 @@ pub const NEZ_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME: &str = "nez-app-directory
 /// Filename used for the Windows sandbox log feedback attachment.
 pub const WINDOWS_SANDBOX_LOG_ATTACHMENT_FILENAME: &str = "windows-sandbox.log";
 const DEFAULT_MAX_BYTES: usize = 4 * 1024 * 1024; // 4 MiB
-const SENTRY_DSN: &str =
-    "https://ae32ed50620d7a7792c1ce5df38b3e3e@o33249.ingest.us.sentry.io/4510195390611458";
+/// Nez-Code has no hosted feedback service; reports go to the issue tracker
+/// unless `NEZ_FEEDBACK_DSN` names a Sentry project to upload to.
+pub const FEEDBACK_UNAVAILABLE_MESSAGE: &str = "Nez-Code does not upload feedback. Please open an \
+    issue at https://github.com/NezPifs/Nez-Code/issues and attach the log from ~/.nez/log if it helps.";
+const FEEDBACK_DSN_ENV: &str = "NEZ_FEEDBACK_DSN";
+
+/// The self-hosted feedback destination, if one is configured.
+pub(crate) fn configured_feedback_dsn() -> Option<String> {
+    std::env::var(FEEDBACK_DSN_ENV)
+        .ok()
+        .filter(|dsn| !dsn.trim().is_empty())
+}
 const UPLOAD_TIMEOUT: Duration = Duration::from_secs(/*secs*/ 300);
 // Raw collection budgets used by the report API, not the interactive upload.
 pub const MAX_ATTACHMENT_BYTES: usize = 64 * 1024 * 1024;
@@ -615,10 +625,13 @@ impl FeedbackSnapshot {
         options: FeedbackUploadOptions<'_>,
         http_client_factory: &HttpClientFactory,
     ) -> Result<()> {
+        let Some(dsn) = configured_feedback_dsn() else {
+            return Err(anyhow!(FEEDBACK_UNAVAILABLE_MESSAGE));
+        };
         self.upload_feedback_with_dsn(
             options,
             http_client_factory,
-            SENTRY_DSN,
+            &dsn,
             Instant::now() + UPLOAD_TIMEOUT,
         )
         .await

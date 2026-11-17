@@ -4,7 +4,7 @@ expression: rendered
 ---
 ╭─────────────────────────────────────────────────────╮
 │ ✨ Update available! 0.0.0 -> 9.9.9                 │
-│ Run pnpm add -g @openai/nez to update.              │
+│ Run nez update --yes to update.                     │
 │                                                     │
 │ See full release notes:                             │
 │ https://github.com/NezPifs/Nez-Code/releases/latest │

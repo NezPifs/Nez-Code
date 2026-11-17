@@ -1,0 +1,169 @@
+name: Release
+
+# Builds release binaries for every supported platform when a version tag is
+# pushed and publishes them, with checksums and the install scripts, as a
+# GitHub release.
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build (for example v3.0.0)
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  build:
+    name: build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - platform: linux-arm64
+            os: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+          - platform: macos-arm64
+            os: macos-14
+            target: aarch64-apple-darwin
+          - platform: macos-x64
+            os: macos-14
+            target: x86_64-apple-darwin
+          - platform: windows-x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Resolve the version
+        id: version
+        run: |
+          tag="${{ inputs.tag || github.ref_name }}"
+          version="${tag#v}"
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+          echo "version=$version" >>"$GITHUB_OUTPUT"
+
+      - name: Set the workspace version
+        working-directory: nez-rs
+        run: |
+          # The repository keeps 0.0.0 so source builds are recognisable;
+          # releases stamp the tag's version into every workspace crate.
+          perl -0pi -e 's/(\[workspace\.package\][^\[]*?\nversion = )"0\.0\.0"/$1"${{ steps.version.outputs.version }}"/' Cargo.toml
+          grep -A3 '^\[workspace.package\]' Cargo.toml
+          cargo update --workspace --offline
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libcap-dev pkg-config
+
+      - run: rustup target add ${{ matrix.target }}
+
+      - name: Build
+        working-directory: nez-rs
+        run: |
+          bins="--bin nez --bin nez-code-mode-host"
+          case "${{ matrix.platform }}" in
+            linux-*) bins="$bins --bin bwrap" ;;
+            windows-*) bins="$bins --bin nez-command-runner --bin nez-windows-sandbox-setup" ;;
+          esac
+          cargo build --locked --release --target ${{ matrix.target }} $bins
+
+      - name: Package
+        id: package
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          name="nez-code-$version-${{ matrix.platform }}"
+          out="nez-rs/target/${{ matrix.target }}/release"
+          stage="dist/stage"
+          mkdir -p "$stage/nez-resources" dist
+          cp LICENSE NOTICE README.md "$stage/"
+          case "${{ matrix.platform }}" in
+            windows-*)
+              cp "$out/nez.exe" "$out/nez-code-mode-host.exe" "$stage/"
+              cp "$out/nez-command-runner.exe" "$out/nez-windows-sandbox-setup.exe" "$stage/nez-resources/"
+              (cd "$stage" && 7z a -tzip "../$name.zip" . >/dev/null)
+              echo "asset=dist/$name.zip" >>"$GITHUB_OUTPUT"
+              ;;
+            linux-*)
+              cp "$out/nez" "$out/nez-code-mode-host" "$stage/"
+              cp "$out/bwrap" "$stage/nez-resources/"
+              tar -C "$stage" -czf "dist/$name.tar.gz" .
+              echo "asset=dist/$name.tar.gz" >>"$GITHUB_OUTPUT"
+              ;;
+            *)
+              cp "$out/nez" "$out/nez-code-mode-host" "$stage/"
+              rmdir "$stage/nez-resources"
+              tar -C "$stage" -czf "dist/$name.tar.gz" .
+              echo "asset=dist/$name.tar.gz" >>"$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Smoke test
+        # The x64 macOS build is cross-compiled on an arm64 runner.
+        if: matrix.platform != 'macos-x64'
+        run: |
+          case "${{ matrix.platform }}" in
+            windows-*) bin="nez-rs/target/${{ matrix.target }}/release/nez.exe" ;;
+            *) bin="nez-rs/target/${{ matrix.target }}/release/nez" ;;
+          esac
+          "$bin" --version | tee version.txt
+          grep -q "${{ steps.version.outputs.version }}" version.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: ${{ steps.package.outputs.asset }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Add install scripts and checksums
+        run: |
+          cp scripts/install.sh scripts/install.ps1 dist/
+          (cd dist && sha256sum * > SHA256SUMS)
+          cat dist/SHA256SUMS
+      - name: Extract release notes
+        run: |
+          tag="${{ inputs.tag || github.ref_name }}"
+          version="${tag#v}"
+          # The section of CHANGELOG.md for this version, without its heading.
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Nez-Code $version" > notes.md
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ inputs.tag || github.ref_name }}"
+          gh release create "$tag" dist/* --title "Nez-Code ${tag#v}" --notes-file notes.md --verify-tag

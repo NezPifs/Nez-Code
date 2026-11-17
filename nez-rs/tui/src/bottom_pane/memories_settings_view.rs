@@ -33,7 +33,8 @@ use super::popup_consts::MAX_POPUP_ROWS;
 use super::scroll_state::ScrollState;
 use super::selection_popup_common::GenericDisplayRow;
 
-const MEMORIES_DOC_URL: &str = "https://developers.openai.com/nez/memories";
+const MEMORIES_DOC_URL: &str =
+    "https://github.com/NezPifs/Nez-Code/blob/main/docs/configuration.md#memories";
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum MemoriesSetting {

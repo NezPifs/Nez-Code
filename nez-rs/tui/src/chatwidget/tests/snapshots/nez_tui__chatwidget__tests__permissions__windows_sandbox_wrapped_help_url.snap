@@ -6,8 +6,9 @@ expression: visible
   Set up the Nez agent sandbox to       
   protect your files and control        
   network access. Learn more            
-  <https://developers.openai.com/nez/w  
-  indows>                               
+  <https://github.com/NezPifs/Nez-Code  
+  /blob/main/docs/planning-and-permiss  
+  ions.md#windows-sandbox>              
                                         
                                         
 › 1. Set up default sandbox (requires   
@@ -15,7 +16,6 @@ expression: visible
   2. Use non-admin sandbox (higher risk 
      if prompt injected)                
   3. Quit                               
-                                        
                                         
                                         
                                         
