@@ -25,6 +25,30 @@ defaults:
     working-directory: nez-rs
 
 jobs:
+  installers:
+    name: installers
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check install.sh
+        if: runner.os == 'Linux'
+        run: |
+          sh -n scripts/install.sh
+          shellcheck --shell=sh scripts/install.sh scripts/test-install.sh
+          sh scripts/test-install.sh
+      - name: Check install.ps1
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("$PWD/scripts/install.ps1", [ref]$null, [ref]$errors) | Out-Null
+          if ($errors) { $errors | Format-List; exit 1 }
+
   fmt:
     name: rustfmt
     runs-on: ubuntu-latest

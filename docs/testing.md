@@ -45,3 +45,10 @@ With `--live [URL]` the scripted server is replaced by a real Ollama server
 and only the outcome is checked. CI runs that against a small CPU model when
 the **CLI tool sandbox** workflow is started by hand with *live model*
 enabled. Results for every run are uploaded as workflow artifacts.
+
+## Installers
+
+`scripts/test-install.sh` runs `install.sh` against a local stand-in for the
+GitHub releases API and checks a fresh install, a reinstall, a checksum
+mismatch and a refused daemon invocation. CI runs it on Linux and checks
+that `install.ps1` parses on Windows.
